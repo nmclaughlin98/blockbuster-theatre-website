@@ -3069,24 +3069,25 @@ footer {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    gap: 14px;
+    gap: 24px;
 }
 
 footer small {
     color: var(--text-muted);
-    font-size: 0.9rem;
+    font-style: italic;
+    font-size: 0.65rem;
 }
 
 .secondary-nav ul {
     display: flex;
-    gap: clamp(8px, 2vw, 20px);
+    gap: clamp(7px, 2vw, 16px);
     flex-wrap: wrap;
 }
 
 .secondary-nav ul li a {
     color: var(--text-secondary);
     text-transform: uppercase;
-    font-size: clamp(0.8rem, 1.2vw, 1rem);
+    font-size: clamp(0.6rem, 1.2rem, 0.9rem);
     font-family: var(--font-body);
     font-weight: 700;
     transition: color var(--transition);
