@@ -1247,7 +1247,7 @@ section {
     flex-wrap: nowrap;
     overflow-x: auto;
     overflow-y: hidden;
-    width: calc(100% + 32px);
+    width: calc(100% + 48px);
     min-width: 0;
     max-width: none;
     padding: 8px 16px 14px;
