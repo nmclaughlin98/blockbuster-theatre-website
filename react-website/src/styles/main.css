@@ -202,7 +202,7 @@ h3 {
    ========================================================================== */
 
 header {
-    background: rgba(10, 11, 15, 0.85);
+    background: var(--glass-bg);
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
     position: fixed;
     top: 0;
@@ -409,22 +409,21 @@ header {
 }
 
 .ham-overlay {
-    display: none;
     position: fixed;
     inset: 0;
     background: rgba(0, 0, 0, 0.8);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
     z-index: 998;
     opacity: 0;
-    transition: opacity var(--transition);
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0s linear 0.3s;
     pointer-events: none;
 }
 
 .ham-overlay.show {
-    display: block;
     opacity: 1;
+    visibility: visible;
     pointer-events: auto;
+    transition: opacity 0.3s ease, visibility 0s;
 }
 
 carous
