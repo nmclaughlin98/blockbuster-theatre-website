@@ -1611,6 +1611,7 @@ section {
     margin: 0 auto 40px auto;
     padding: 0;
     max-width: 800px;
+    scroll-margin-top: calc(var(--header-height) + 1rem);
 }
 
 #progressbar::before {
@@ -2866,9 +2867,9 @@ select option {
     grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
     gap: var(--layout-gap);
     width: 100%;
-    max-width: var(--content-width-wide);
+    max-width: none;
     padding: clamp(1.5rem, 3vw, 2.5rem) var(--page-gutter);
-    margin: 0 auto;
+    margin: 0;
 }
 
 .movie-page>* {
