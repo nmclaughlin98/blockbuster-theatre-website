@@ -1247,16 +1247,14 @@ section {
     flex-wrap: nowrap;
     overflow-x: auto;
     overflow-y: hidden;
-    width: 100%;
+    width: calc(100% + 32px);
     min-width: 0;
-    max-width: 100%;
+    max-width: none;
     padding: 8px 16px 14px;
     margin: -8px -16px -14px;
     -webkit-overflow-scrolling: touch;
     overscroll-behavior-x: contain;
     scrollbar-width: none;
-    mask-image: linear-gradient(to right, black 85%, transparent 100%);
-    -webkit-mask-image: linear-gradient(to right, black 85%, transparent 100%);
 }
 
 .genre-tabs::-webkit-scrollbar {
