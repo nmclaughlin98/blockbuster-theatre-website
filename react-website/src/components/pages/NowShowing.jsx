@@ -12,15 +12,15 @@ function MovieFilters({ search, sort, genre, onSearch, onSort, onGenre }) {
             <div className="movie-filter-controls">
                 <div className="search-wrapper">
                     <svg className="search-icon" viewBox="0 0 24 24" aria-hidden="true">
-                        <circle cx="11" cy="11" r="5"/>
-                        <path d="m16 16 4 4"/>
+                        <circle cx="11" cy="11" r="5" />
+                        <path d="m16 16 4 4" />
                     </svg>
                     <label htmlFor="movie-search-input">Search by movie title:</label>
                     <input
                         id="movie-search-input"
                         className="search-input"
-                        value={ search }
-                        onChange={ (event) => onSearch(event.target.value) }
+                        value={search}
+                        onChange={(event) => onSearch(event.target.value)}
                         placeholder="Enter a movie title..."
                     />
                 </div>
@@ -29,8 +29,8 @@ function MovieFilters({ search, sort, genre, onSearch, onSort, onGenre }) {
                     <select
                         id="movie-sort-select"
                         className="sort-select"
-                        value={ sort }
-                        onChange={ (event) => onSort(event.target.value) }
+                        value={sort}
+                        onChange={(event) => onSort(event.target.value)}
                     >
                         <option value="title-asc">Alphabetical (A–Z)</option>
                         <option value="title-desc">Alphabetical (Z–A)</option>
@@ -40,15 +40,15 @@ function MovieFilters({ search, sort, genre, onSearch, onSort, onGenre }) {
                 </div>
             </div>
             <div className="genre-tabs">
-                { genres.map((item) => (
+                {genres.map((item) => (
                     <button
-                        className={ `genre-tab ${ genre === item ? 'active' : '' }` }
-                        key={ item }
-                        onClick={ () => onGenre(item) }
+                        className={`genre-chip ${genre === item ? 'active' : ''}`}
+                        key={item}
+                        onClick={() => onGenre(item)}
                     >
-                        { item === 'all' ? 'All Genres' : item === 'science fiction' ? 'Sci-Fi' : item[0].toUpperCase() + item.slice(1) }
+                        {item === 'all' ? 'All Genres' : item === 'science fiction' ? 'Sci-Fi' : item[0].toUpperCase() + item.slice(1)}
                     </button>
-                )) }
+                ))}
             </div>
         </div>
     );
@@ -83,7 +83,7 @@ export function NowShowing() {
     if (loading) {
         return (
             <Layout current="now" loading>
-                <PageLoader label="Loading now showing movies"/>
+                <PageLoader label="Loading now showing movies" />
             </Layout>
         );
     }
@@ -101,16 +101,16 @@ export function NowShowing() {
                     <a className="button btn-glass" href="./timetable.html">View Timetable</a>
                 </div>
                 <MovieFilters
-                    search={ search }
-                    sort={ sort }
-                    genre={ genre }
-                    onSearch={ setSearch }
-                    onSort={ setSort }
-                    onGenre={ setGenre }
+                    search={search}
+                    sort={sort}
+                    genre={genre}
+                    onSearch={setSearch}
+                    onSort={setSort}
+                    onGenre={setGenre}
                 />
-                { error
+                {error
                     ? <p>Movie listings are temporarily unavailable.</p>
-                    : <MovieGrid movies={ filtered }/> }
+                    : <MovieGrid movies={filtered} />}
             </section>
         </Layout>
     );
