@@ -26,10 +26,10 @@ function MovieHero({ movie }) {
     const rating = typeof movie.rating === 'string' ? movie.rating.toUpperCase() : '';
 
     return (
-        <section className="carousel movie">
+        <section className="movie-still">
             <img
                 className="still"
-                src={ movie.still || movie.largeStill || movie.poster || asset('assets/images/logo/png/logo-full.png') }
+                src={ movie.still || movie.largeStill || movie.poster }
                 alt=""
             />
             <div className="movie-detail-caption">

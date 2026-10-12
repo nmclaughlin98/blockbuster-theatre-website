@@ -87,7 +87,10 @@ export function Header({ current }) {
                 <Navigation current={ current } open={ open } onNavigate={ closeMenu }/>
                 <MenuButton open={ open } onClick={ () => setOpen((value) => !value) }/>
             </header>
-            { open && <div className="ham-overlay show" onClick={ closeMenu }/> }
+            <div
+                className={ `ham-overlay ${ open ? 'show' : '' }` }
+                onClick={ closeMenu }
+            />
         </>
     );
 }

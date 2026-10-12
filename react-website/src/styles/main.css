@@ -43,6 +43,13 @@
     --radius-xl: 28px;
     --radius-full: 9999px;
 
+    --header-height: 5rem;
+    --page-gutter: clamp(1rem, 4vw, 3rem);
+    --section-space: clamp(2.25rem, 5vw, 4.375rem);
+    --content-width: 75rem;
+    --content-width-wide: 90rem;
+    --layout-gap: clamp(1rem, 2.5vw, 2.5rem);
+
     --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.3);
     --shadow-md: 0 10px 30px -5px rgba(0, 0, 0, 0.6);
     --shadow-lg: 0 20px 45px -10px rgba(0, 0, 0, 0.8);
@@ -82,12 +89,13 @@ body {
     background-color: var(--bg-main);
     color: var(--text-primary);
     font-family: var(--font-body);
-    font-size: 16px;
+    font-size: clamp(1rem, calc(0.98rem + 0.1vw), 1.0625rem);
     line-height: 1.6;
     -webkit-font-smoothing: antialiased;
     display: flex;
     flex-direction: column;
     min-height: 100vh;
+    min-height: 100svh;
 }
 
 #root {
@@ -95,7 +103,8 @@ body {
     flex: 1;
     flex-direction: column;
     min-height: 100vh;
-    padding-top: 80px;
+    min-height: 100svh;
+    padding-top: var(--header-height);
 }
 
 .app-shell {
@@ -202,21 +211,20 @@ h3 {
    ========================================================================== */
 
 header {
-    background: rgba(10, 11, 15, 0.85);
+    background: var(--glass-bg);
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
-    height: 80px;
-    background: var(--glass-bg);
+    height: var(--header-height);
     backdrop-filter: blur(3px);
     -webkit-backdrop-filter: blur(3px);
     border-bottom: 1px solid var(--border-subtle);
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0 clamp(16px, 4vw, 48px);
+    padding-inline: var(--page-gutter);
     z-index: 1000;
     transition: background-color var(--transition-smooth), box-shadow var(--transition-smooth);
 }
@@ -237,7 +245,7 @@ header {
 }
 
 .logo {
-    height: 60px;
+    height: clamp(2.75rem, 5vw, 3.75rem);
     width: auto;
     object-fit: contain;
     transition: transform var(--transition-smooth), filter var(--transition-smooth);
@@ -256,7 +264,7 @@ header {
     height: 100%;
     font-family: var(--font-display), serif;
     font-weight: 600;
-    font-size: 1.6rem;
+    font-size: clamp(0.8rem, 1.8vw, 1.6rem);
     line-height: 1.1;
     letter-spacing: 0.12em;
     color: var(--text-primary);
@@ -409,26 +417,26 @@ header {
 }
 
 .ham-overlay {
-    display: none;
     position: fixed;
     inset: 0;
     background: rgba(0, 0, 0, 0.8);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
     z-index: 998;
     opacity: 0;
-    transition: opacity var(--transition);
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0s linear 0.3s;
     pointer-events: none;
 }
 
 .ham-overlay.show {
-    display: block;
     opacity: 1;
+    visibility: visible;
     pointer-events: auto;
+    transition: opacity 0.3s ease, visibility 0s;
 }
 
 carous
-    /* ==========================================================================
+
+/* ==========================================================================
        Hero Cinematic Carousel & Spotlight
        ========================================================================== */
 #picturecarousel,
@@ -553,10 +561,10 @@ carous
     position: absolute;
     inset: 0 -100%;
     background: linear-gradient(to bottom,
-    rgba(12, 13, 18, 0.2) 0%,
-    rgba(12, 13, 18, 0.5) 50%,
-    rgba(12, 13, 18, 0.95) 90%,
-    var(--bg-main) 100%);
+            rgba(12, 13, 18, 0.2) 0%,
+            rgba(12, 13, 18, 0.5) 50%,
+            rgba(12, 13, 18, 0.95) 90%,
+            var(--bg-main) 100%);
     pointer-events: none;
 }
 
@@ -573,7 +581,7 @@ carous
     opacity: 0;
     transform: translateY(20px);
     transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.25s,
-    transform 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.25s;
+        transform 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.25s;
 }
 
 .carousel-inner .item.active .hero-caption {
@@ -808,7 +816,7 @@ main {
 }
 
 section {
-    padding: clamp(36px, 6vw, 70px) clamp(16px, 5vw, 50px);
+    padding: var(--section-space) var(--page-gutter);
     position: relative;
 }
 
@@ -825,9 +833,9 @@ section {
 
 .section-header h1,
 .section-header h2,
-.poster-section > h1,
-.offers > h1,
-.genre > h1 {
+.poster-section>h1,
+.offers>h1,
+.genre>h1 {
     font-family: var(--font-display);
     font-size: clamp(2rem, 3.5vw, 2.7rem);
     text-transform: uppercase;
@@ -839,9 +847,9 @@ section {
 }
 
 .section-header h1::before,
-.poster-section > h1::before,
-.offers > h1::before,
-.genre > h1::before {
+.poster-section>h1::before,
+.offers>h1::before,
+.genre>h1::before {
     content: '';
     display: inline-block;
     width: 6px;
@@ -857,10 +865,18 @@ section {
 .poster-section,
 .grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-    gap: 28px;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, clamp(8.125rem, 38vw, 12.5rem)), 1fr));
+    gap: clamp(0.5rem, 1.5vw, 0.875rem);
+    min-width: 0;
     width: 100%;
     margin: 0 auto;
+}
+
+.poster-card-container {
+    position: relative;
+    min-width: 0;
+    max-width: none;
+    justify-self: stretch;
 }
 
 .poster-column {
@@ -874,10 +890,12 @@ section {
     flex-direction: column;
 }
 
-.poster-column:hover {
+.poster-card-container:hover .poster-column,
+.poster-card-container:focus-within .poster-column {
     transform: translateY(-8px);
     box-shadow: var(--shadow-lg), 0 0 30px rgba(255, 51, 75, 0.2);
     border-color: var(--border-accent);
+    color: inherit;
 }
 
 /* Movie Poster Image */
@@ -889,7 +907,8 @@ section {
     touch-action: manipulation;
 }
 
-.poster-column:hover .poster {
+.poster-card-container:hover .poster-column .poster,
+.poster-card-container:focus-within .poster-column .poster {
     transform: scale(1.05);
     filter: brightness(0.65);
 }
@@ -901,27 +920,56 @@ section {
     display: flex;
     flex-direction: column;
     justify-content: flex-end;
-    padding: 20px;
-    background: linear-gradient(to top,
-    rgba(10, 11, 15, 0.95) 0%,
-    rgba(10, 11, 15, 0.6) 35%,
-    transparent 65%);
-    transition: background 0.7s ease;
+    padding: clamp(0.5rem, 2.5vw, 1.25rem);
+    background: none;
     z-index: 2;
     pointer-events: auto;
     touch-action: manipulation;
 }
 
-.poster-column:hover .overlay {
+.poster-column .overlay::before,
+.poster-column .overlay::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    transition: opacity var(--transition-smooth);
+}
+
+.poster-column .overlay::before {
     background: linear-gradient(to top,
-    rgba(10, 11, 15, 0.98) 0%,
-    rgba(10, 11, 15, 0.85) 55%,
-    rgba(10, 11, 15, 0.4) 100%);
+            rgba(10, 11, 15, 0.95) 0%,
+            rgba(10, 11, 15, 0.6) 35%,
+            transparent 65%);
+}
+
+.poster-column .overlay::after {
+    background: linear-gradient(to top,
+            rgba(10, 11, 15, 0.85) 0%,
+            rgba(10, 11, 15, 0.75) 55%,
+            rgba(10, 11, 15, 0.4) 100%);
+    opacity: 0;
+}
+
+.poster-column .overlay>* {
+    position: relative;
+    z-index: 1;
+}
+
+.poster-card-container:hover .poster-column .overlay::before,
+.poster-card-container:focus-within .poster-column .overlay::before {
+    opacity: 0;
+}
+
+.poster-card-container:hover .poster-column .overlay::after,
+.poster-card-container:focus-within .poster-column .overlay::after {
+    opacity: 1;
 }
 
 .overlay-text {
     font-family: var(--font-heading);
-    font-size: clamp(2.2rem, 8vw, 2.1rem);
+    font-size: clamp(1.1rem, 4.8rem, 1.6rem);
     font-weight: 700;
     color: #fff;
     line-height: 1.25;
@@ -934,7 +982,7 @@ section {
 }
 
 .runtime {
-    font-size: 0.95rem;
+    font-size: clamp(0.75rem, 2.2vw, 0.95rem);
     font-weight: 550;
     color: var(--text-secondary);
     display: flex;
@@ -969,58 +1017,11 @@ section {
     margin: 20px 0;
 }
 
-.poster-column:hover .rating {
+.poster-card-container:hover .poster-column .rating,
+.poster-card-container:focus-within .poster-column .rating {
     opacity: 1;
     visibility: visible;
     transform: translateY(0);
-}
-
-/* Movie Poster Buttons: ONLY show up when hovering */
-.poster-column .overlay .button,
-.poster-column .overlay button,
-.poster-column .overlay .btn-secondary {
-    width: 100%;
-    font-size: 1.1rem;
-    letter-spacing: 0.05em;
-    border-radius: var(--radius-sm);
-    opacity: 0;
-    visibility: hidden;
-    transform: translateY(16px);
-    pointer-events: none;
-    max-height: 0;
-    margin: 0;
-    padding: 0 14px;
-    overflow: hidden;
-    border-width: 0;
-    transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1),
-    transform 0.3s cubic-bezier(0.16, 1, 0.3, 1),
-    max-height 0.3s cubic-bezier(0.16, 1, 0.3, 1),
-    margin 0.3s cubic-bezier(0.16, 1, 0.3, 1),
-    padding 0.3s cubic-bezier(0.16, 1, 0.3, 1),
-    border-width 0.3s ease;
-}
-
-.poster-column:hover .overlay .button,
-.poster-column:hover .overlay .btn-secondary {
-    opacity: 1;
-    visibility: visible;
-    transform: translateY(0);
-    pointer-events: auto;
-    max-height: 48px;
-    margin: 4px 0;
-    padding: 10px 16px;
-    border-width: 1px;
-}
-
-.poster-column .overlay .button:nth-of-type(2) {
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid var(--border-subtle);
-    color: var(--text-primary) !important;
-}
-
-.poster-column .overlay .button:nth-of-type(2):hover {
-    background: rgba(255, 255, 255, 0.2);
-    border-color: rgba(255, 255, 255, 0.4);
 }
 
 /* Coming-soon countdown clock */
@@ -1111,15 +1112,14 @@ section {
 
 .offers {
     background: linear-gradient(180deg, var(--bg-main) 0%, var(--bg-surface) 100%);
-    border-top: 1px solid var(--border-subtle);
     border-bottom: 1px solid var(--border-subtle);
 }
 
 .offers-grid,
 .offers .col-container {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 28px;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 18.75rem), 1fr));
+    gap: clamp(1rem, 2vw, 1.75rem);
     margin-top: 32px;
 }
 
@@ -1198,6 +1198,8 @@ section {
     display: flex;
     flex-direction: column;
     gap: 20px;
+    min-width: 0;
+    max-width: 100%;
 }
 
 .movie-filter-controls {
@@ -1205,12 +1207,14 @@ section {
     align-items: flex-end;
     gap: 20px;
     margin-bottom: 20px;
+    min-width: 0;
 }
 
 .search-wrapper {
     position: relative;
     flex: 1;
     width: 100%;
+    min-width: 0;
 }
 
 .search-input {
@@ -1250,10 +1254,26 @@ section {
     display: flex;
     align-items: center;
     gap: 10px;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overflow-y: hidden;
+    width: calc(100% + 32px);
+    min-width: 0;
+    max-width: none;
+    padding: 8px 16px 14px;
+    margin: -8px -16px -14px;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
 }
 
-.genre-tab {
+.genre-tabs::-webkit-scrollbar {
+    display: none;
+}
+
+.genre-chip {
+    flex: 0 0 auto;
+    white-space: nowrap;
     padding: 8px 20px;
     font-family: var(--font-heading);
     font-size: clamp(0.85rem, 1.2vw, 1.1rem);
@@ -1267,8 +1287,8 @@ section {
     touch-action: manipulation;
 }
 
-.genre-tab:hover,
-.genre-tab.active {
+.genre-chip:hover,
+.genre-chip.active {
     color: #fff;
     background: var(--accent-red);
     border-color: var(--accent-red);
@@ -1280,7 +1300,8 @@ section {
    ========================================================================== */
 
 .page-banner {
-    max-width: 1200px;
+    width: 100%;
+    max-width: var(--content-width);
     margin: 0 auto;
     padding: 46px 20px 18px;
     text-align: center;
@@ -1317,7 +1338,8 @@ section {
 }
 
 .timetable-controls {
-    max-width: 1200px;
+    width: 100%;
+    max-width: var(--content-width);
     margin: 0 auto 28px;
     padding: 0 20px;
     display: flex;
@@ -1393,7 +1415,8 @@ section {
 }
 
 .timetable-container {
-    max-width: 1200px;
+    width: 100%;
+    max-width: var(--content-width);
     margin: 0 auto 80px;
     padding: 0 20px 20px;
     display: flex;
@@ -1404,7 +1427,7 @@ section {
 .movie-card {
     display: grid;
     grid-template-columns: minmax(0, 1.2fr) minmax(0, 2.3fr);
-    gap: 24px;
+    gap: var(--layout-gap);
     background: linear-gradient(180deg, rgba(24, 28, 42, 0.92), rgba(17, 19, 28, 0.96));
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-lg);
@@ -1437,6 +1460,7 @@ section {
     gap: 12px;
     position: relative;
     z-index: 1;
+    min-width: 0;
 }
 
 .movie-title {
@@ -1554,7 +1578,8 @@ section {
    ========================================================================== */
 
 .booking-section {
-    max-width: 960px;
+    width: 100%;
+    max-width: 60rem;
     margin: 0 auto;
     padding: 40px 20px 80px 20px;
     touch-action: manipulation;
@@ -1588,6 +1613,7 @@ section {
     margin: 0 auto 40px auto;
     padding: 0;
     max-width: 800px;
+    scroll-margin-top: calc(var(--header-height) + 1rem);
 }
 
 #progressbar::before {
@@ -1894,7 +1920,7 @@ select option {
     gap: 8px;
 }
 
-.subtotal-metric > span {
+.subtotal-metric>span {
     color: var(--text-secondary);
     font-weight: 500;
 }
@@ -1909,7 +1935,7 @@ select option {
 
 .seating-plan {
     margin: 20px auto 30px auto;
-    padding: 20px;
+    padding: clamp(0.75rem, 3vw, 1.25rem);
     background: rgba(10, 12, 18, 0.7);
     border-radius: var(--radius-lg);
     border: 1px solid var(--border-subtle);
@@ -1976,6 +2002,7 @@ select option {
     gap: 8px;
     align-items: center;
     justify-content: center;
+    flex-shrink: 0;
 }
 
 .row-label {
@@ -2325,14 +2352,14 @@ select option {
     height: 40px;
     width: 80%;
     background: repeating-linear-gradient(90deg,
-    #fff 0px,
-    #fff 2px,
-    transparent 2px,
-    transparent 5px,
-    #fff 5px,
-    #fff 8px,
-    transparent 8px,
-    transparent 10px);
+            #fff 0px,
+            #fff 2px,
+            transparent 2px,
+            transparent 5px,
+            #fff 5px,
+            #fff 8px,
+            transparent 8px,
+            transparent 10px);
 }
 
 .ticket-booking-ref {
@@ -2374,10 +2401,10 @@ select option {
     inset: 0;
     z-index: 1;
     background: linear-gradient(to bottom,
-    rgba(12, 13, 18, 0.2) 0%,
-    rgba(12, 13, 18, 0.5) 50%,
-    rgba(12, 13, 18, 0.95) 90%,
-    var(--bg-main) 100%);
+            rgba(12, 13, 18, 0.2) 0%,
+            rgba(12, 13, 18, 0.5) 50%,
+            rgba(12, 13, 18, 0.95) 90%,
+            var(--bg-main) 100%);
     pointer-events: none;
 }
 
@@ -2422,9 +2449,9 @@ select option {
 
 .movie-body-layout {
     display: grid;
-    grid-template-columns: 2fr 1fr;
-    gap: 40px;
-    padding: 40px clamp(16px, 5vw, 60px);
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+    gap: var(--layout-gap);
+    padding: var(--section-space) var(--page-gutter);
 }
 
 .synopsis-box h2 {
@@ -2514,8 +2541,8 @@ select option {
 
 .about-grid-layout {
     display: grid;
-    grid-template-columns: 3fr 2fr;
-    gap: 40px;
+    grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+    gap: var(--layout-gap);
 }
 
 /* Accordion */
@@ -2744,7 +2771,7 @@ select option {
    Movie Detail Pages Class Support & Modern Styling
    ========================================================================== */
 
-.carousel.movie {
+.movie-still {
     position: relative;
     width: 100%;
     min-height: 65vh;
@@ -2755,7 +2782,7 @@ select option {
     isolation: isolate;
 }
 
-.carousel.movie .still {
+.movie-still .still {
     position: absolute;
     inset: 0;
     width: 100%;
@@ -2765,15 +2792,15 @@ select option {
     filter: brightness(0.35);
 }
 
-.carousel.movie::after {
+.movie-still::after {
     content: '';
     position: absolute;
     inset: 0;
     z-index: 1;
     background: linear-gradient(to bottom,
-    rgba(12, 13, 18, 0.2) 0%,
-    rgba(12, 13, 18, 0.7) 60%,
-    var(--bg-main) 100%);
+            rgba(12, 13, 18, 0.2) 0%,
+            rgba(12, 13, 18, 0.7) 60%,
+            var(--bg-main) 100%);
     pointer-events: none;
 }
 
@@ -2789,7 +2816,7 @@ select option {
     transform: none;
 }
 
-.movie-detail-caption p {
+.movie-detail-meta p {
     margin-bottom: 16px;
 }
 
@@ -2806,6 +2833,11 @@ select option {
     margin-bottom: 1.5rem;
 }
 
+.movie-detail-meta {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+}
+
 .rating-movies {
     height: 50px;
     width: auto;
@@ -2814,7 +2846,6 @@ select option {
     margin-right: 14px;
     display: inline-block;
     shape-rendering: geometricPrecision;
-
     filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.6));
 }
 
@@ -2826,22 +2857,24 @@ select option {
     font-weight: 500;
 }
 
-.movie-detail-caption p {
+.movie-detail-meta p {
     color: var(--text-secondary);
-    font-size: clamp(1rem, 1.5vw, 1.15rem);
+    font-size: clamp(1rem, 1.5vw, 1.1rem);
     line-height: 1.5;
-    margin-top: 5px;
+    display: block;
 }
 
 .movie-page {
     display: grid;
-    grid-template-columns: 2fr 1fr;
-    gap: 40px;
-    padding: 30px clamp(16px, 5vw, 50px);
-    margin: 0 auto;
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+    gap: var(--layout-gap);
+    width: 100%;
+    max-width: none;
+    padding: clamp(1.5rem, 3vw, 2.5rem) var(--page-gutter);
+    margin: 0;
 }
 
-.movie-page > * {
+.movie-page>* {
     min-width: 0;
 }
 
@@ -3036,24 +3069,25 @@ footer {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    gap: 14px;
+    gap: 24px;
 }
 
 footer small {
     color: var(--text-muted);
-    font-size: 0.9rem;
+    font-style: italic;
+    font-size: 0.65rem;
 }
 
 .secondary-nav ul {
     display: flex;
-    gap: clamp(8px, 2vw, 20px);
+    gap: clamp(7px, 2vw, 16px);
     flex-wrap: wrap;
 }
 
 .secondary-nav ul li a {
     color: var(--text-secondary);
     text-transform: uppercase;
-    font-size: clamp(0.8rem, 1.2vw, 1rem);
+    font-size: clamp(0.6rem, 1.2rem, 0.9rem);
     font-family: var(--font-body);
     font-weight: 700;
     transition: color var(--transition);
@@ -3109,7 +3143,10 @@ footer small {
 }
 
 .about-content {
-    padding: 40px clamp(16px, 5vw, 60px);
+    width: 100%;
+    max-width: none;
+    margin-inline: 0;
+    padding: var(--section-space) var(--page-gutter);
 }
 
 .about-section-heading {
@@ -3159,8 +3196,8 @@ footer small {
 
 .guest-name-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 20px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--layout-gap);
 }
 
 .seat-cell {
