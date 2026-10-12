@@ -865,8 +865,8 @@ section {
 .poster-section,
 .grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: var(--layout-gap);
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, clamp(8.125rem, 38vw, 12.5rem)), 1fr));
+    gap: clamp(0.5rem, 1.5vw, 0.875rem);
     min-width: 0;
     width: 100%;
     margin: 0 auto;
@@ -875,6 +875,8 @@ section {
 .poster-card-container {
     position: relative;
     min-width: 0;
+    max-width: none;
+    justify-self: stretch;
 }
 
 .poster-column {
@@ -918,7 +920,7 @@ section {
     display: flex;
     flex-direction: column;
     justify-content: flex-end;
-    padding: 20px;
+    padding: clamp(0.5rem, 2.5vw, 1.25rem);
     background: none;
     z-index: 2;
     pointer-events: auto;
@@ -967,7 +969,7 @@ section {
 
 .overlay-text {
     font-family: var(--font-heading);
-    font-size: clamp(2.1rem, 8vw, 2.1rem);
+    font-size: clamp(1.1rem, 4.8rem, 1.6rem);
     font-weight: 700;
     color: #fff;
     line-height: 1.25;
@@ -980,7 +982,7 @@ section {
 }
 
 .runtime {
-    font-size: 0.95rem;
+    font-size: clamp(0.75rem, 2.2vw, 0.95rem);
     font-weight: 550;
     color: var(--text-secondary);
     display: flex;
@@ -1116,8 +1118,8 @@ section {
 .offers-grid,
 .offers .col-container {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 28px;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 18.75rem), 1fr));
+    gap: clamp(1rem, 2vw, 1.75rem);
     margin-top: 32px;
 }
 
@@ -1255,7 +1257,7 @@ section {
     flex-wrap: nowrap;
     overflow-x: auto;
     overflow-y: hidden;
-    width: calc(100% + 48px);
+    width: calc(100% + 32px);
     min-width: 0;
     max-width: none;
     padding: 8px 16px 14px;

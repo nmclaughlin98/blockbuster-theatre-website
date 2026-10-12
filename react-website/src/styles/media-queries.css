@@ -7,8 +7,12 @@
 
     .poster-section,
     .grid {
-        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-        gap: 36px;
+        grid-template-columns: repeat(7, minmax(0, 1fr));
+    }
+
+    .poster-card-container {
+        max-width: none;
+        justify-self: stretch;
     }
 
     .carousel-inner,
@@ -16,9 +20,6 @@
         height: 700px;
     }
 
-    .overlay-text {
-        font-size: 2.1rem;
-    }
 }
 
 @media (max-width: 1400px) {
@@ -160,16 +161,6 @@
         padding: 12px 23px !important;
     }
 
-    .poster-section,
-    .grid {
-        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-        gap: 16px;
-    }
-
-    .overlay-text {
-        font-size: 1.8rem;
-    }
-
     .ticket-row {
         padding: 16px 10px;
     }
@@ -219,16 +210,7 @@
     }
 }
 
-@media (max-width: 860px) {
-
-    .poster-column .overlay {
-        padding: 15px;
-    }
-
-    .overlay-text {
-        font-size: 1.4rem;
-    }
-}
+@media (max-width: 860px) {}
 
 /* Mobile Devices (768px and down) */
 @media (max-width: 768px) {
@@ -391,19 +373,6 @@
         width: 100%;
     }
 
-    .poster-section,
-    .grid {
-        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-        gap: 16px;
-    }
-
-    .poster-column .overlay {
-        padding: 12px;
-    }
-
-    .overlay-text {
-        font-size: 1.4rem;
-    }
 }
 
 
@@ -706,11 +675,6 @@
         box-shadow: 0 0 12px var(--accent-glow);
     }
 
-    .poster-section,
-    .grid {
-        grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-        gap: 16px;
-    }
 }
 
 /* ==========================================================================
