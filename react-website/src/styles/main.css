@@ -865,7 +865,7 @@ section {
 .poster-section,
 .grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(min(100%, clamp(8.125rem, 40vw, 15rem)), 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
     gap: var(--layout-gap);
     min-width: 0;
     width: 100%;
@@ -967,7 +967,7 @@ section {
 
 .overlay-text {
     font-family: var(--font-heading);
-    font-size: clamp(2.2rem, 8vw, 2.1rem);
+    font-size: clamp(2.1rem, 8vw, 2.1rem);
     font-weight: 700;
     color: #fff;
     line-height: 1.25;

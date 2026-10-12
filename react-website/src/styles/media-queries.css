@@ -15,6 +15,10 @@
     .carousel-inner .item {
         height: 700px;
     }
+
+    .overlay-text {
+        font-size: 2.1rem;
+    }
 }
 
 @media (max-width: 1400px) {
@@ -158,8 +162,12 @@
 
     .poster-section,
     .grid {
-        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
         gap: 16px;
+    }
+
+    .overlay-text {
+        font-size: 1.8rem;
     }
 
     .ticket-row {
@@ -729,7 +737,7 @@ header {
     gap: clamp(0.75rem, 2vw, 1.5rem);
 }
 
-.section-header > * {
+.section-header>* {
     min-width: 0;
 }
 
@@ -763,11 +771,11 @@ header {
     padding-inline: var(--page-gutter);
 }
 
-.timetable-toolbar > *,
-.movie-card > *,
-.movie-page > *,
-.movie-body-layout > *,
-.about-grid-layout > * {
+.timetable-toolbar>*,
+.movie-card>*,
+.movie-page>*,
+.movie-body-layout>*,
+.about-grid-layout>* {
     min-width: 0;
 }
 
@@ -819,7 +827,7 @@ header {
     font-size: clamp(1rem, 3vw, 1.4rem);
 }
 
-.booking-subtotal-bar > * {
+.booking-subtotal-bar>* {
     min-width: 0;
 }
 
@@ -947,6 +955,7 @@ header {
 }
 
 @media (min-width: 651px) and (max-width: 965px) {
+
     .date-time-group,
     .guest-name-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -955,6 +964,7 @@ header {
 }
 
 @media (max-width: 650px) {
+
     .date-time-group,
     .guest-name-grid,
     .payment-methods-grid {
@@ -973,9 +983,9 @@ header {
         align-items: flex-start;
     }
 
-    .section-header > .button,
-    .section-header > .btn,
-    .section-header > a {
+    .section-header>.button,
+    .section-header>.btn,
+    .section-header>a {
         max-width: 100%;
     }
 
