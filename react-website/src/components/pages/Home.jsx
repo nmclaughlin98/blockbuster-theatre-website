@@ -23,8 +23,8 @@ export function Home() {
       <HeroCarousel movies={carousel} />
       {error && <p>Movie listings are temporarily unavailable.</p>}
       {!error && <>
-        <MovieSection title="New Releases" movies={[...current].sort((a, b) => new Date(b.releaseDate || 0) - new Date(a.releaseDate || 0)).slice(0, 6)} />
-        <MovieSection title="Top Picks" movies={[...current].sort((a, b) => (b.score ?? 0) - (a.score ?? 0)).slice(0, 6)} />
+        <MovieSection title="What's On" movies={[...current].sort((a, b) => new Date(b.releaseDate || 0) - new Date(a.releaseDate || 0)).slice(0, 7)} />
+        <MovieSection title="Top Picks" movies={[...current].sort((a, b) => (b.score ?? 0) - (a.score ?? 0)).slice(0, 7)} />
       </>}
       <Offers />
     </Layout>

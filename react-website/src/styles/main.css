@@ -3141,8 +3141,8 @@ footer small {
 
 .about-content {
     width: 100%;
-    max-width: var(--content-width-wide);
-    margin-inline: auto;
+    max-width: none;
+    margin-inline: 0;
     padding: var(--section-space) var(--page-gutter);
 }
 
