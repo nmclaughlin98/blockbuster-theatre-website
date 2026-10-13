@@ -1,104 +1,74 @@
 # Blockbuster Theatre Website
 
-This project is a front-end cinema website prototype for a fictional theatre brand, Blockbuster Theatre. It is a static website built with HTML, CSS, and JavaScript and uses local JSON data to populate movie listings and detail content.
+Blockbuster Theatre is a responsive cinema website prototype built with React and Vite. Its dark, cinematic interface uses bold red accents, movie artwork, and reusable layouts to showcase films and theatre information across desktop and mobile screens.
 
-> Important: This project is a placeholder/demo website. The current functionality is intended for UI and front-end demonstration purposes only, not for a live production cinema booking system.
+> **Demo project:** Movie listings are loaded from a configurable API, but booking, payment, seat reservations, and contact submissions are front-end demonstrations only. No real orders or messages are sent.
 
-## Project Overview
+## Features
 
-The site presents a modern cinema experience with:
+- Home page with a featured-film carousel, “What’s On” and “Top Picks” sections, and special offers
+- Now Showing catalogue with title search, genre filters, and sorting
+- Coming Soon listings with release countdowns
+- Movie detail pages with film information and showtimes
+- Weekly timetable with day tabs, title search, and PDF download
+- Multi-step booking experience for tickets, seats, guest details, payment, and ticket preview
+- About page with theatre information, FAQs, and a demo contact form
+- Responsive navigation and layouts for desktop and mobile
 
-- A home page with hero carousel and featured movies
-- A now-showing page with movie cards and genre filtering
-- A coming-soon page with countdown-style release timers
-- An about page with theatre information and branding
-- A booking page with a multi-step ticket selection flow
-- Movie detail views for individual titles
-- Responsive navigation for desktop and mobile layouts
+## Design
 
-## Current Functionality
-
-The website currently includes the following interactive elements:
-
-- Hero banner carousel on the homepage and other pages
-- Movie poster grids populated from local JSON data
-- Genre-based filtering on the now-showing page
-- Countdown timers for upcoming releases
-- Booking form with ticket quantity selection, movie choice, showtime selection, and seat/guest flow mockups
-- Trailer modal/button interactions
-- Mobile hamburger navigation and scroll behaviours
-
-## Placeholder Status
-
-This website is not connected to a real backend or payment system. Several sections are intentionally demo-only, including:
-
-- Booking and payment flow are front-end placeholders
-- Displayed movie information is sample/demo data
-- Ticketing and seat reservation are not live or persisted
-- No authentication, database, or real commerce integration is implemented
-- Content reflects a concept site rather than an actual commercial theatre platform
+The React site has a modern, cinema-inspired visual design: near-black backgrounds, layered dark surfaces, vivid red highlights, high-contrast typography, and image-led film cards and hero sections. The layout and controls adapt for smaller screens, including a mobile navigation menu.
 
 ## Tech Stack
 
-- HTML5
-- CSS3
-- Vanilla JavaScript
-- JSON data files for content
-- Static assets such as posters, stills, icons, and branding images
+- React 19 and JavaScript
+- Vite for local development and production builds
+- CSS for shared styling and responsive layouts
+- jsPDF for timetable downloads
+- Movie data from the configured movies API
+
+## Run Locally
+
+From the repository root:
+
+```bash
+cd react-website
+npm install
+```
+
+The API endpoint can be set with `VITE_MOVIES_API_URL`. The project includes an `.env.example`; copy it to `.env.local` and change the value if needed. Use the full endpoint ending in `/movies`, with no trailing slash. Restart the Vite server after changing the setting.
+
+Start the development server:
+
+```bash
+npm run dev
+```
+
+Vite prints the local URL to open in your browser. To create a production build or run the linter:
+
+```bash
+npm run build
+npm run lint
+```
 
 ## Project Structure
 
 ```text
-nml-applications-website/
+blockbuster-theatre-website/
 ├── README.md
 ├── qodana.yaml
-└── website/
-    ├── about.html
-    ├── bookNow.html
-    ├── comingSoon.html
+└── react-website/
+    ├── .env.example
+    ├── package.json
     ├── index.html
-    ├── nowShowing.html
-    ├── timetable.html
-    ├── assets/
-    │   ├── bootstrap/
-    │   ├── data/
-    │   ├── Images/
-    │   ├── js/
-    │   └── stylesheets/
-    └── templates/
-        └── movie-detail.html
+    ├── public/
+    │   └── assets/             
+    └── src/
+        ├── App.jsx
+        ├── router.js
+        ├── components/
+        │   ├── movies/         
+        │   ├── pages/          
+        │   └── shared/         
+        └── styles/            
 ```
-
-## How to Run
-
-Because this is a static website, you can open the HTML files directly in a browser, or serve the project locally using a simple web server.
-
-<<<<<<< Updated upstream
-The movie API URL is supplied to GitHub Pages at deployment time. Set `MOVIES_API_URL` in GitHub Actions as a repository variable (or repository secret). The deploy workflow prefers the variable and falls back to the secret. Use the full API endpoint ending in `/movies` with no trailing slash. This value is included in the public site, so it must not contain credentials or other secrets. To run locally, create the ignored `website/assets/js/runtime-config.js` with `window.APP_CONFIG = Object.freeze({ moviesApiUrl: "YOUR_API_URL/movies" });`.
-=======
-The movie API URL is supplied to GitHub Pages at deployment time. Add a GitHub Actions repository variable named `MOVIES_API_URL` with the full API endpoint ending in `/movies` and no trailing slash. This value is included in the public site, so it must not contain credentials or other secrets. To run locally, create the ignored `website/assets/js/runtime-config.js` with `window.APP_CONFIG = Object.freeze({ moviesApiUrl: "YOUR_API_URL/movies" });`.
->>>>>>> Stashed changes
-
-Example:
-
-```bash
-cd website
-python3 -m http.server 8000
-```
-
-Then visit:
-
-```text
-http://localhost:8000/
-```
-
-## Notes for Development
-
-- Movie data is stored in local JSON files under the assets/data folder.
-- JavaScript files in assets/js control page interactions and rendering.
-- Styling is managed in assets/stylesheets.
-- The current implementation is suitable for coursework, mockups, or front-end practice rather than production deployment.
-
-## License
-
-This project is intended for educational/demo usage and may be adapted for coursework or portfolio purposes.
