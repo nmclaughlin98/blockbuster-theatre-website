@@ -9,7 +9,7 @@ export function useMovies() {
 
     async function loadMovies() {
       try {
-        const response = await fetch(MOVIES_API_URL, { signal: controller.signal });
+        const response = await fetch(`${MOVIES_API_URL}/movies`, { signal: controller.signal });
         if (!response.ok) throw new Error('Unable to load movie data');
 
         const data = await response.json();
