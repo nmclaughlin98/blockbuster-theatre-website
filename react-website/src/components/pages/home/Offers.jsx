@@ -1,23 +1,59 @@
-import { asset } from '../../shared';
-
-const offers = [
-  ['minions-and-monsters-poster.jpg', 'Kids Club', 'Every Tuesday • Morning & Matinee', 'Featuring: Minions & Monsters', '£2.50 per child — Adults go free!', 'Minions %26 Monsters'],
-  ['spider-man-brand-new-day-poster.jpg', 'Student Night', 'Every Wednesday • Evening Screenings', 'Featuring: Spider-Man: Brand New Day', '£2.50 with valid Student ID', 'Spider-Man:%20Brand%20New%20Day'],
-  ['inside-out-poster.jpg', 'Birthday Party Pack', 'Advance Booking Required • All Weekends', 'Includes Film, Popcorn & Soft Drink', '£6.00 per child package', 'Inside%20Out'],
-];
+import { useEffect, useState } from 'react';
+import { getFilmSelections } from '../bookingApi';
+import { useMovies } from '../useMovies';
 
 export function Offers() {
+  const { movies } = useMovies();
+  const [state, setState] = useState({ offers: [], loading: true, error: null });
+
+  useEffect(() => {
+    const controller = new AbortController();
+    getFilmSelections(controller.signal)
+      .then((selections) => {
+        setState({
+          offers: selections.filter((selection) => selection.type === 'offer'),
+          loading: false,
+          error: null,
+        });
+      })
+      .catch((error) => {
+        if (controller.signal.aborted) return;
+        setState({ offers: [], loading: false, error: error.message });
+      });
+    return () => controller.abort();
+  }, []);
+
   return (
     <section className="offers">
       <div className="section-header"><h1>Special Cinema Offers</h1></div>
+      {state.loading && <p role="status">Loading special offers...</p>}
+      {state.error && <p className="form-notice" role="alert">{state.error}</p>}
+      {!state.loading && !state.error && !state.offers.length
+        && <p>No special offers are currently available.</p>}
       <div className="offers-grid">
-        {offers.map(([image, title, line1, line2, line3, movie]) => (
-          <div className="col" key={title}>
-            <img className="poster icon" src={asset(`assets/images/special-offers/${image}`)} alt={title} />
-            <h2>{title}</h2><p>{line1}</p><p>{line2}</p><p>{line3}</p>
-            <a className="button" href={`./bookNow.html?movie=${movie}`}>Claim Offer</a>
-          </div>
-        ))}
+        {state.offers.map((offer) => {
+          const featuredMovie = movies.find((movie) => (
+            String(movie.movieId) === String(offer.featuredMovieId)
+          ));
+          return (
+            <div className="col" key={`${offer.type}:${offer.id}`}>
+              {featuredMovie?.poster && (
+                <img
+                  className="poster icon"
+                  src={featuredMovie.poster}
+                  alt={`${offer.title} featuring ${featuredMovie.title}`}
+                />
+              )}
+              <h2>{offer.title}</h2>
+              {offer.label && offer.label !== offer.title && <p>{offer.label}</p>}
+              {offer.description && <p>{offer.description}</p>}
+              {featuredMovie && <p>Featuring: {featuredMovie.title}</p>}
+              <a className="button" href={`./bookNow.html?offerId=${encodeURIComponent(offer.offerId)}`}>
+                Claim Offer
+              </a>
+            </div>
+          );
+        })}
       </div>
     </section>
   );

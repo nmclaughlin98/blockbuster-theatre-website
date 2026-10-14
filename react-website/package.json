@@ -8,6 +8,7 @@
     "dev": "vite",
     "prebuild": "node scripts/generate-config.js production",
     "build": "vite build",
+    "test": "node --test",
     "lint": "eslint .",
     "preview": "vite preview"
   },

@@ -4,6 +4,8 @@
 
 The movies API base URL is written to the gitignored `src/config.js` before each development server start and production build. It defaults to `https://i9sjtfnqw8.execute-api.eu-west-2.amazonaws.com`.
 
+The booking flow loads typed movie and offer entries from `GET /film-selections`, movie showtimes from `GET /movies/{id}`, and server-owned ticket tiers from `GET /ticket-pricing`. If film selections fail, it falls back to available records from `GET /movies` and reports that offer data is unavailable. The home-page offers are loaded from the offer entries in `/film-selections`. Checkout sends only the selected typed ID, showtime, and ticket quantities to `POST /checkout/validate`; the returned total is authoritative. Offer selections need to include `overrideShowtimes` keyed by weekday when their availability differs from their featured movie, so the frontend never assumes the movie's regular schedule belongs to an offer.
+
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
 Currently, two official plugins are available:
