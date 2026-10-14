@@ -8,7 +8,7 @@ function slugify(value) {
 async function resolveMovieId(identifier, signal) {
   if (/^\d+$/.test(identifier)) return identifier;
 
-  const response = await fetch(MOVIES_API_URL, { signal });
+  const response = await fetch(`${MOVIES_API_URL}/movies`, { signal });
   if (!response.ok) throw new Error('Unable to load movie list');
 
   const data = await response.json();
@@ -37,7 +37,7 @@ export function useMovieDetail(identifier) {
         }
 
         const response = await fetch(
-          `${MOVIES_API_URL.replace(/\/$/, '')}/${encodeURIComponent(id)}`,
+          `${MOVIES_API_URL}/movies/${encodeURIComponent(id)}`,
           { signal: controller.signal },
         );
         if (response.status === 404) {

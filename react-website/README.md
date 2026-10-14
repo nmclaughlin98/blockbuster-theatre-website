@@ -2,7 +2,7 @@
 
 ## Movies API
 
-The movies API endpoint is centralized in `src/config.js`. To override it locally, copy `.env.example` to `.env.local` and update `VITE_MOVIES_API_URL`; restart Vite after changing the setting.
+The movies API base URL is written to the gitignored `src/config.js` before each development server start and production build. It defaults to `https://i9sjtfnqw8.execute-api.eu-west-2.amazonaws.com`.
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 

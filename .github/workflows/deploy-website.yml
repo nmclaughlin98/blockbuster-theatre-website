@@ -46,16 +46,8 @@ jobs:
         working-directory: react-website
         run: npm ci
       - name: Build React site
-        env:
-          VITE_MOVIES_API_URL: ${{ vars.MOVIES_API_URL || secrets.MOVIES_API_URL }}
         working-directory: react-website
-        run: |
-          if [ -z "$VITE_MOVIES_API_URL" ]; then
-            echo "Set the MOVIES_API_URL GitHub Actions repository variable or secret."
-            exit 1
-          fi
-          node --input-type=module -e 'import fs from "node:fs"; fs.writeFileSync("src/config.js", "export const MOVIES_API_URL = " + JSON.stringify(process.env.VITE_MOVIES_API_URL) + ";\n");'
-          npm run build
+        run: npm run build
       - name: Setup Pages
         uses: actions/configure-pages@v6
       - name: Upload artifact
