@@ -4,7 +4,9 @@ import { Toast } from '../shared/Toast';
 import {
   getBookingSelections,
   createCheckoutPayload,
+  getMovieDetailIdForSelection,
   getMovieDetail,
+  hasOfferShowtimeOverrides,
   getSelectionShowtimes,
   getTicketPricing,
   selectionDisplayLabel,
@@ -129,8 +131,8 @@ function TicketSelection({
                   </button>
                 ))
                 : <span className="showtime-placeholder">
-                  {selection.type === 'offer' && !selection.overrideShowtimes
-                    ? 'Offer showtimes are unavailable. The backend must include overrideShowtimes by weekday in /film-selections.'
+                  {selection.type === 'offer'
+                    ? 'No showtimes are available for this offer and day.'
                     : 'No showtimes available for this selection and day.'}
                 </span>}
           </div>
@@ -310,12 +312,13 @@ export function Booking() {
   const { selections, loading: selectionLoading, error: selectionError } = selectionState;
   const selectedSelection = selections.find((item) => selectionKey(item) === selectedKey) || null;
   const requestedTime = params.get('time') || '';
-  const currentMovieDetail = selectedSelection?.type === 'movie'
+  const detailMovieId = getMovieDetailIdForSelection(selectedSelection);
+  const currentMovieDetail = detailMovieId != null
     && movieDetailState.requestKey === selectionKey(selectedSelection)
     ? movieDetailState
     : null;
   const scheduleForRequestedTime = selectedSelection
-    ? selectedSelection.type === 'offer'
+    ? hasOfferShowtimeOverrides(selectedSelection)
       ? selectedSelection.overrideShowtimes
       : currentMovieDetail?.movie?.showtimes
     : null;
@@ -385,13 +388,12 @@ export function Booking() {
   }, [params]);
 
   useEffect(() => {
-    if (!selectedSelection || selectedSelection.type !== 'movie') {
-      return undefined;
-    }
+    const movieId = getMovieDetailIdForSelection(selectedSelection);
+    if (movieId == null) return undefined;
 
     const controller = new AbortController();
     const requestKey = selectionKey(selectedSelection);
-    getMovieDetail(selectedSelection.movieId, controller.signal)
+    getMovieDetail(movieId, controller.signal)
       .then((movie) => setMovieDetailState({ requestKey, movie, loading: false, error: null }))
       .catch((error) => {
         if (controller.signal.aborted) return;
@@ -586,7 +588,7 @@ export function Booking() {
               dates={dates}
               selectionLoading={selectionLoading}
               selectionError={selectionError}
-              showtimeLoading={Boolean(selectedSelection?.type === 'movie' && (!currentMovieDetail || currentMovieDetail.loading))}
+              showtimeLoading={Boolean(detailMovieId != null && (!currentMovieDetail || currentMovieDetail.loading))}
               showtimeError={currentMovieDetail?.error}
               pricing={pricing}
               pricingLoading={pricingLoading}

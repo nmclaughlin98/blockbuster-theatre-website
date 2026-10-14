@@ -31,8 +31,27 @@ export function selectionApiId(selection) {
   throw new Error('Unsupported film selection type.');
 }
 
+export function hasOfferShowtimeOverrides(selection) {
+  const overrides = selection?.overrideShowtimes;
+  return Boolean(
+    selection?.type === 'offer'
+    && overrides
+    && typeof overrides === 'object'
+    && !Array.isArray(overrides)
+    && Object.keys(overrides).length > 0
+  );
+}
+
+export function getMovieDetailIdForSelection(selection) {
+  if (selection?.type === 'movie') return selection.movieId ?? null;
+  if (selection?.type === 'offer' && !hasOfferShowtimeOverrides(selection)) {
+    return selection.featuredMovieId ?? null;
+  }
+  return null;
+}
+
 export function getSelectionShowtimes(selection, movieDetail, day) {
-  const schedule = selection.type === 'offer'
+  const schedule = hasOfferShowtimeOverrides(selection)
     ? selection.overrideShowtimes
     : movieDetail?.showtimes;
 
@@ -50,8 +69,11 @@ export async function getFilmSelections(signal) {
     selection
     && (selection.type === 'movie' || selection.type === 'offer')
     && selection.id != null
+    && typeof selection.title === 'string'
     && typeof selection.label === 'string'
-    && (selection.type === 'movie' ? selection.movieId != null : selection.offerId != null)
+    && (selection.type === 'movie'
+      ? selection.movieId != null
+      : selection.offerId != null && selection.featuredMovieId != null && selection.pricingId != null)
   ));
   if (!validSelections) throw new Error('The booking service returned an invalid film selection.');
   return data.selections;

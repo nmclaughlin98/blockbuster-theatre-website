@@ -9,7 +9,7 @@
     "prebuild": "node scripts/generate-config.js production",
     "build": "vite build",
     "test": "node --test",
-    "lint": "eslint .",
+    "lint": "eslint --config public/eslint.config.js src tests",
     "preview": "vite preview"
   },
   "dependencies": {

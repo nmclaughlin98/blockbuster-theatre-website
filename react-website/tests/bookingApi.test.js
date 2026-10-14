@@ -5,9 +5,11 @@ import {
   getBookingSelections,
   getFilmSelections,
   getMovieDetail,
+  getMovieDetailIdForSelection,
   getMovies,
   getSelectionShowtimes,
   getTicketPricing,
+  hasOfferShowtimeOverrides,
   selectionDisplayLabel,
   selectionKey,
   validateCheckout,
@@ -109,14 +111,27 @@ test('follows movie catalogue pagination tokens', async () => {
   }
 });
 
-test('uses offer override showtimes and never falls back to its featured movie schedule', () => {
-  const movieSchedule = { Tuesday: ['11:00', '19:00'] };
+test('uses non-empty offer overrides authoritatively without falling back on missing days', () => {
+  const movieDetail = { showtimes: { Tuesday: ['11:00', '19:00'], Wednesday: ['15:00'] } };
   const offerWithOverrides = { ...offer, overrideShowtimes: { Tuesday: ['13:00'] } };
+
+  assert.equal(hasOfferShowtimeOverrides(offerWithOverrides), true);
+  assert.equal(getMovieDetailIdForSelection(offerWithOverrides), null);
+  assert.deepEqual(getSelectionShowtimes(offerWithOverrides, movieDetail, 'Tuesday'), ['13:00']);
+  assert.deepEqual(getSelectionShowtimes(offerWithOverrides, movieDetail, 'Wednesday'), []);
+});
+
+test('uses featured movie showtimes when an offer override is empty or missing', () => {
+  const movieDetail = { showtimes: { Tuesday: ['11:00', '19:00'] } };
+  const offerWithEmptyOverrides = { ...offer, overrideShowtimes: {} };
   const offerWithoutOverrides = { ...offer, overrideShowtimes: undefined };
 
-  assert.deepEqual(getSelectionShowtimes(movie, { showtimes: movieSchedule }, 'Tuesday'), ['11:00', '19:00']);
-  assert.deepEqual(getSelectionShowtimes(offerWithOverrides, { showtimes: movieSchedule }, 'Tuesday'), ['13:00']);
-  assert.equal(getSelectionShowtimes(offerWithoutOverrides, { showtimes: movieSchedule }, 'Tuesday'), null);
+  for (const selection of [offerWithEmptyOverrides, offerWithoutOverrides]) {
+    assert.equal(hasOfferShowtimeOverrides(selection), false);
+    assert.equal(getMovieDetailIdForSelection(selection), offer.featuredMovieId);
+    assert.deepEqual(getSelectionShowtimes(selection, movieDetail, 'Tuesday'), ['11:00', '19:00']);
+    assert.equal(getSelectionShowtimes(selection, null, 'Tuesday'), null);
+  }
 });
 
 test('loads standard movie showtimes by movie ID', async () => {
@@ -129,6 +144,37 @@ test('loads standard movie showtimes by movie ID', async () => {
     const details = await getMovieDetail(movie.movieId);
     assert.equal(requestedUrl.pathname, `/movies/${movie.movieId}`);
     assert.deepEqual(details.showtimes.Tuesday, ['11:00']);
+    assert.deepEqual(getSelectionShowtimes(movie, details, 'Tuesday'), ['11:00']);
+  } finally {
+    restoreFetch();
+  }
+});
+
+test('loads featured movie details for offers without override showtimes', async () => {
+  let requestedUrl;
+  const restoreFetch = mockFetch(async (url) => {
+    requestedUrl = new URL(url);
+    return new Response(JSON.stringify({ showtimes: { Tuesday: ['11:00'] } }));
+  });
+  try {
+    const movieId = getMovieDetailIdForSelection({ ...offer, overrideShowtimes: {} });
+    await getMovieDetail(movieId);
+    assert.equal(requestedUrl.pathname, `/movies/${offer.featuredMovieId}`);
+  } finally {
+    restoreFetch();
+  }
+});
+
+test('surfaces missing featured movie details as a clear API error', async () => {
+  const restoreFetch = mockFetch(async () => new Response(
+    JSON.stringify({ message: 'Featured movie details are unavailable.' }),
+    { status: 404 },
+  ));
+  try {
+    await assert.rejects(
+      getMovieDetail(getMovieDetailIdForSelection({ ...offer, overrideShowtimes: {} })),
+      { message: 'Featured movie details are unavailable.' },
+    );
   } finally {
     restoreFetch();
   }

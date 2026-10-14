@@ -46,7 +46,6 @@ export function Offers() {
               )}
               <h2>{offer.title}</h2>
               {offer.label && offer.label !== offer.title && <p>{offer.label}</p>}
-              {offer.description && <p>{offer.description}</p>}
               {featuredMovie && <p>Featuring: {featuredMovie.title}</p>}
               <a className="button" href={`./bookNow.html?offerId=${encodeURIComponent(offer.offerId)}`}>
                 Claim Offer
