@@ -1,14 +1,18 @@
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Layout, asset } from '../shared';
 import { Toast } from '../shared/Toast';
-import { useMovies } from './useMovies';
-
-const ticketTypes = [
-  { id: 'adult', title: 'Standard Adult', detail: 'Age 15+ · Full Admission', price: 9.5 },
-  { id: 'child', title: 'Child Ticket', detail: 'Under 15 years · Standard Admission', price: 6 },
-  { id: 'student', title: 'Student Ticket', detail: 'With valid Student ID', price: 7.5 },
-  { id: 'oap', title: 'Senior / OAP', detail: 'Age 60+', price: 7 },
-];
+import {
+  getBookingSelections,
+  createCheckoutPayload,
+  getMovieDetailIdForSelection,
+  getMovieDetail,
+  hasOfferShowtimeOverrides,
+  getSelectionShowtimes,
+  getTicketPricing,
+  selectionDisplayLabel,
+  selectionKey,
+  validateCheckout,
+} from './bookingApi';
 
 const steps = ['Tickets', 'Select Seats', 'Guest Info', 'Payment', 'Ticket Preview'];
 const weekdayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
@@ -29,15 +33,6 @@ function createUpcomingDates() {
     date.setDate(date.getDate() + offset);
     return { label: formatter.format(date).replace(/,/g, ''), weekday: weekdayNames[date.getDay()] };
   });
-}
-
-function findMovie(movies, identifier) {
-  const query = identifier.trim().toLowerCase();
-  return movies.find((movie) => [
-    movie.title,
-    movie.slug,
-    movie.movieId == null ? '' : String(movie.movieId),
-  ].some((value) => String(value).toLowerCase() === query));
 }
 
 function findDate(dates, dayParam) {
@@ -73,10 +68,13 @@ function StepActions({ onBack, onContinue, continueLabel }) {
 }
 
 function TicketSelection({
-  movies, movie, date, time, tickets, totalTickets, totalPrice, dates, onMovieChange, onDateChange,
-  onTimeChange, onTicketChange, onContinue, apiError,
+  selections, selection, date, time, tickets, totalTickets, showtimes, dates, pricing,
+  selectionLoading, selectionError, showtimeLoading, showtimeError, pricingLoading, pricingError,
+  validation, validationLoading, onSelectionChange, onDateChange, onTimeChange, onTicketChange,
+  onContinue,
 }) {
-  const movieShowtimes = movie?.showtimes?.[dates.find((item) => item.label === date)?.weekday] || [];
+  const movieSelections = selections.filter((item) => item.type === 'movie');
+  const offerSelections = selections.filter((item) => item.type === 'offer');
 
   return (
     <fieldset className="active" data-step="0">
@@ -85,12 +83,24 @@ function TicketSelection({
         description="Select your movie, screening time, and quantity of tickets."
       />
       <div className="form-group">
-        <label htmlFor="booking-movie">Select Film</label>
-        <select id="booking-movie" className="form-control" value={movie?.title || ''} onChange={(event) => onMovieChange(event.target.value)} required>
-          <option value="" disabled>-- Choose a Feature Film --</option>
-          {movies.map((item) => <option value={item.title} key={item.movieId ?? item.slug ?? item.title}>{item.title}</option>)}
+        <label htmlFor="booking-movie">Select Film or Special Offer</label>
+        <select id="booking-movie" className="form-control" value={selection ? selectionKey(selection) : ''} onChange={(event) => onSelectionChange(event.target.value)} required>
+          <option value="" disabled>-- Choose a Film or Special Offer --</option>
+          <optgroup label="Movies">
+            {movieSelections.map((item) => (
+              <option value={selectionKey(item)} key={selectionKey(item)}>{item.label}</option>
+            ))}
+          </optgroup>
+          <optgroup label="Special Offers">
+            {offerSelections.map((item) => (
+              <option value={selectionKey(item)} key={selectionKey(item)}>{selectionDisplayLabel(item)}</option>
+            ))}
+          </optgroup>
         </select>
-        {apiError && <p className="form-notice" role="alert">Movie listings are unavailable right now. Please try again later.</p>}
+        {selectionLoading && <p role="status">Loading films and special offers...</p>}
+        {selectionError && <p className="form-notice" role="alert">{selectionError}</p>}
+        {!selectionLoading && !selectionError && !selections.length
+          && <p className="form-notice" role="status">No films or special offers are currently available.</p>}
       </div>
       <div className="date-time-group">
         <div className="form-group">
@@ -102,10 +112,14 @@ function TicketSelection({
         <div className="form-group">
           <label>Select Showtime</label>
           <div className="showtime-chips" aria-label="Available showtimes">
-            {!movie
-              ? <span className="showtime-placeholder">Select a film to see available showtimes.</span>
-              : movieShowtimes.length
-                ? movieShowtimes.map((showtime) => (
+            {!selection
+              ? <span className="showtime-placeholder">Select a film or offer to see available showtimes.</span>
+              : showtimeLoading
+                ? <span role="status">Loading showtimes...</span>
+                : showtimeError
+                  ? <span className="form-notice" role="alert">{showtimeError}</span>
+              : showtimes?.length
+                ? showtimes.map((showtime) => (
                   <button
                     className={`time-chip ${time === showtime ? 'active' : ''}`}
                     type="button"
@@ -116,23 +130,33 @@ function TicketSelection({
                     {showtime}
                   </button>
                 ))
-                : <span className="showtime-placeholder">No showtimes available for this film and day.</span>}
+                : <span className="showtime-placeholder">
+                  {selection.type === 'offer'
+                    ? 'No showtimes are available for this offer and day.'
+                    : 'No showtimes available for this selection and day.'}
+                </span>}
           </div>
         </div>
       </div>
       <div className="form-group ticket-type-list">
         <label>Select Ticket Types</label>
-        {ticketTypes.map(({ id, title, detail, price }) => (
-          <div className="ticket-row" key={id}>
-            <div className="ticket-info"><h4>{title}</h4><span>{detail}</span></div>
+        {pricingLoading && <p role="status">Loading ticket prices...</p>}
+        {pricingError && <p className="form-notice" role="alert">{pricingError}</p>}
+        {!pricingLoading && !pricingError && selection && time && !pricing?.ticketTiers.length
+          && <p className="form-notice" role="status">No ticket types are available for this showtime.</p>}
+        {pricing?.ticketTiers.map((tier) => (
+          <div className="ticket-row" key={tier.id}>
+            <div className="ticket-info"><h4>{tier.label}</h4><span>{tier.description}</span></div>
             <div className="ticket-counter">
-              <strong>£{price.toFixed(2)}</strong>
-              <button className="counter-btn" type="button" aria-label={`Decrease ${title}`} onClick={() => onTicketChange(id, -1)}>−</button>
-              <span className="counter-val" aria-live="polite">{tickets[id]}</span>
-              <button className="counter-btn" type="button" aria-label={`Increase ${title}`} onClick={() => onTicketChange(id, 1)}>+</button>
+              <strong>{new Intl.NumberFormat('en-GB', { style: 'currency', currency: tier.currency || 'GBP' }).format(tier.price)}</strong>
+              <button className="counter-btn" type="button" aria-label={`Decrease ${tier.label}`} onClick={() => onTicketChange(tier.id, -1)}>−</button>
+              <span className="counter-val" aria-live="polite">{tickets[tier.id] || 0}</span>
+              <button className="counter-btn" type="button" aria-label={`Increase ${tier.label}`} onClick={() => onTicketChange(tier.id, 1)}>+</button>
             </div>
           </div>
         ))}
+        {validation?.error && <p className="form-notice" role="alert">{validation.error}</p>}
+        {validationLoading && <p role="status">Confirming your ticket choices...</p>}
       </div>
       <div className="booking-subtotal-bar">
         <div className="subtotal-item booking-subtotal-values">
@@ -142,11 +166,11 @@ function TicketSelection({
           </div>
           <div className="subtotal-metric">
             <span>Total</span>
-            <strong>£{totalPrice.toFixed(2)}</strong>
+            <strong>{validation?.quote ? new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP' }).format(validation.quote.total) : '—'}</strong>
           </div>
         </div>
         <div className="subtotal-item">
-          <button type="button" className="form-button next" onClick={onContinue}>Select Seats</button>
+          <button type="button" className="form-button next" onClick={onContinue} disabled={!validation?.quote || validationLoading}>Select Seats</button>
         </div>
       </div>
     </fieldset>
@@ -268,13 +292,16 @@ function BookingConfirmation({ movie, date, time, selectedSeats, totalTickets, t
 }
 
 export function Booking() {
-  const { movies, loading, error } = useMovies();
+  const [selectionState, setSelectionState] = useState({ selections: [], loading: true, error: null });
   const [step, setStep] = useState(0);
-  const [movieTitle, setMovieTitle] = useState('');
+  const [selectedKey, setSelectedKey] = useState('');
   const [dateOverride, setDateOverride] = useState('');
   const [selectedTime, setSelectedTime] = useState(() => new URLSearchParams(window.location.search).get('time') || '');
   const [screeningChanged, setScreeningChanged] = useState(false);
-  const [tickets, setTickets] = useState({ adult: 1, child: 0, student: 0, oap: 0 });
+  const [tickets, setTickets] = useState({});
+  const [movieDetailState, setMovieDetailState] = useState({ movie: null, loading: false, error: null });
+  const [pricingState, setPricingState] = useState({ requestKey: '', pricing: null, loading: false, error: null });
+  const [validationState, setValidationState] = useState({ requestKey: '', quote: null, loading: false, error: null });
   const [selectedSeats, setSelectedSeats] = useState([]);
   const [customer, setCustomer] = useState({ firstName: '', surname: '', email: '', phone: '' });
   const [bookingRef, setBookingRef] = useState('');
@@ -282,29 +309,155 @@ export function Booking() {
   const formRef = useRef(null);
   const dates = useMemo(() => createUpcomingDates(), []);
   const params = useMemo(() => new URLSearchParams(window.location.search), []);
-  const selectedMovie = findMovie(movies, movieTitle || params.get('movie') || '');
+  const { selections, loading: selectionLoading, error: selectionError } = selectionState;
+  const selectedSelection = selections.find((item) => selectionKey(item) === selectedKey) || null;
   const requestedTime = params.get('time') || '';
-  const matchingTimeDate = !params.get('day') && requestedTime
-    ? dates.find((item) => selectedMovie?.showtimes?.[item.weekday]?.includes(requestedTime))
+  const detailMovieId = getMovieDetailIdForSelection(selectedSelection);
+  const currentMovieDetail = detailMovieId != null
+    && movieDetailState.requestKey === selectionKey(selectedSelection)
+    ? movieDetailState
     : null;
-  const date = dateOverride || matchingTimeDate?.label || findDate(dates, params.get('day') || '').label;
-  const totalTickets = Object.values(tickets).reduce((total, count) => total + count, 0);
-  const totalPrice = ticketTypes.reduce((total, type) => total + tickets[type.id] * type.price, 0);
-  const sortedMovies = useMemo(() => movies
-    .filter((movie) => movie.visible !== false && movie.isComingSoon !== true)
-    .sort((a, b) => a.title.localeCompare(b.title, undefined, { sensitivity: 'base' })), [movies]);
-
-  const currentDate = dates.find((item) => item.label === date);
-  const movieTimes = selectedMovie?.showtimes?.[currentDate?.weekday] || [];
-  const time = movieTimes.includes(selectedTime)
+  const scheduleForRequestedTime = selectedSelection
+    ? hasOfferShowtimeOverrides(selectedSelection)
+      ? selectedSelection.overrideShowtimes
+      : currentMovieDetail?.movie?.showtimes
+    : null;
+  const requestedTimeDate = !params.get('day') && requestedTime && scheduleForRequestedTime
+    ? dates.find((item) => scheduleForRequestedTime[item.weekday]?.includes(requestedTime))
+    : null;
+  const currentDate = dateOverride
+    ? dates.find((item) => item.label === dateOverride)
+    : requestedTimeDate || findDate(dates, params.get('day') || '');
+  const date = currentDate?.label || dates[0].label;
+  const showtimes = selectedSelection
+    ? getSelectionShowtimes(selectedSelection, currentMovieDetail?.movie, currentDate?.weekday)
+    : null;
+  const time = showtimes?.includes(selectedTime)
     ? selectedTime
-    : !screeningChanged && movieTimes.includes(requestedTime) ? requestedTime : '';
+    : !screeningChanged && showtimes?.includes(requestedTime) ? requestedTime : '';
+  const day = currentDate?.weekday || dates[0].weekday;
+  const totalTickets = Object.values(tickets).reduce((total, count) => total + count, 0);
+  const pricingRequestKey = selectedSelection && time
+    ? `${selectionKey(selectedSelection)}|${day}|${time}`
+    : '';
+  const pricing = pricingState.requestKey === pricingRequestKey ? pricingState.pricing : null;
+  const pricingLoading = Boolean(pricingRequestKey && (
+    pricingState.requestKey !== pricingRequestKey || pricingState.loading
+  ));
+  const pricingError = pricingState.requestKey === pricingRequestKey ? pricingState.error : null;
+  const checkoutRequestKey = pricing && selectedSelection && totalTickets > 0
+    ? JSON.stringify([selectionKey(selectedSelection), day, time, tickets])
+    : '';
+  const validation = validationState.requestKey === checkoutRequestKey && checkoutRequestKey
+    ? validationState
+    : null;
+  const validationLoading = Boolean(checkoutRequestKey && (
+    validationState.requestKey !== checkoutRequestKey || validationState.loading
+  ));
 
-  function changeMovie(title) {
-    setMovieTitle(title);
+  useEffect(() => {
+    const controller = new AbortController();
+    getBookingSelections(controller.signal)
+      .then(({ selections: items, error: warning }) => {
+        setSelectionState({ selections: items, loading: false, error: warning });
+        const requestedOfferId = params.get('offerId');
+        const requestedOffer = items.find((item) => (
+          item.type === 'offer'
+          && requestedOfferId
+          && String(item.offerId) === requestedOfferId
+        ));
+        if (requestedOffer) {
+          setSelectedKey(selectionKey(requestedOffer));
+          return;
+        }
+
+        const requestedMovie = params.get('movie')?.trim().toLowerCase();
+        const requested = items.find((item) => (
+          item.type === 'movie'
+          && requestedMovie
+          && [item.title, item.slug, item.id, item.movieId]
+            .some((value) => String(value).toLowerCase() === requestedMovie)
+        ));
+        if (requested) setSelectedKey(selectionKey(requested));
+      })
+      .catch((error) => {
+        if (controller.signal.aborted) return;
+        setSelectionState({ selections: [], loading: false, error: error.message });
+      });
+    return () => controller.abort();
+  }, [params]);
+
+  useEffect(() => {
+    const movieId = getMovieDetailIdForSelection(selectedSelection);
+    if (movieId == null) return undefined;
+
+    const controller = new AbortController();
+    const requestKey = selectionKey(selectedSelection);
+    getMovieDetail(movieId, controller.signal)
+      .then((movie) => setMovieDetailState({ requestKey, movie, loading: false, error: null }))
+      .catch((error) => {
+        if (controller.signal.aborted) return;
+        setMovieDetailState({ requestKey, movie: null, loading: false, error: error.message });
+      });
+    return () => controller.abort();
+  }, [selectedSelection]);
+
+  useEffect(() => {
+    if (!pricingRequestKey || !selectedSelection) {
+      return undefined;
+    }
+
+    const controller = new AbortController();
+    const requestKey = pricingRequestKey;
+    getTicketPricing(selectedSelection, day, time, controller.signal)
+      .then((nextPricing) => {
+        if (controller.signal.aborted) return;
+        setPricingState({ requestKey, pricing: nextPricing, loading: false, error: null });
+        setTickets((current) => {
+          const tierIds = new Set(nextPricing.ticketTiers.map((tier) => String(tier.id)));
+          const next = Object.fromEntries(
+            Object.entries(current).filter(([tierId]) => tierIds.has(tierId)),
+          );
+          if (!Object.values(next).some((quantity) => quantity > 0) && nextPricing.ticketTiers[0]) {
+            next[nextPricing.ticketTiers[0].id] = 1;
+          }
+          return next;
+        });
+      })
+      .catch((error) => {
+        if (controller.signal.aborted) return;
+        setPricingState({ requestKey, pricing: null, loading: false, error: error.message });
+      });
+    return () => controller.abort();
+  }, [pricingRequestKey, selectedSelection, day, time]);
+
+  useEffect(() => {
+    if (!checkoutRequestKey || !pricing || !selectedSelection) {
+      return undefined;
+    }
+
+    const controller = new AbortController();
+    const requestKey = checkoutRequestKey;
+    const payload = createCheckoutPayload(selectedSelection, day, time, tickets);
+    validateCheckout(payload, controller.signal)
+      .then((quote) => {
+        if (!controller.signal.aborted) setValidationState({ requestKey, quote, loading: false, error: null });
+      })
+      .catch((error) => {
+        if (!controller.signal.aborted) setValidationState({ requestKey, quote: null, loading: false, error: error.message });
+      });
+    return () => controller.abort();
+  }, [checkoutRequestKey, pricing, selectedSelection, day, time, tickets]);
+
+  function changeSelection(value) {
+    setSelectedKey(value);
     setSelectedTime('');
     setScreeningChanged(true);
     setSelectedSeats([]);
+    setTickets({});
+    setMovieDetailState({ requestKey: '', movie: null, loading: false, error: null });
+    setPricingState({ requestKey: '', pricing: null, loading: false, error: null });
+    setValidationState({ requestKey: '', quote: null, loading: false, error: null });
   }
 
   function changeDate(label) {
@@ -312,25 +465,29 @@ export function Booking() {
     setSelectedTime('');
     setScreeningChanged(true);
     setSelectedSeats([]);
+    setPricingState({ requestKey: '', pricing: null, loading: false, error: null });
+    setValidationState({ requestKey: '', quote: null, loading: false, error: null });
   }
 
   function changeTime(value) {
     setSelectedTime(value);
     setScreeningChanged(true);
     setSelectedSeats([]);
+    setPricingState({ requestKey: '', pricing: null, loading: false, error: null });
+    setValidationState({ requestKey: '', quote: null, loading: false, error: null });
   }
 
-  function changeTicketCount(type, amount) {
+  function changeTicketCount(tierId, amount) {
     if (amount > 0 && totalTickets >= 10) {
       setToastMessage('You can book a maximum of 10 tickets.');
       return;
     }
-    if (amount < 0 && tickets[type] === 0) return;
+    if (amount < 0 && !tickets[tierId]) return;
 
-    const nextTickets = { ...tickets, [type]: Math.max(0, tickets[type] + amount) };
-    if (Object.values(nextTickets).every((count) => count === 0)) nextTickets.adult = 1;
+    const nextTickets = { ...tickets, [tierId]: Math.max(0, (tickets[tierId] || 0) + amount) };
     const nextTotal = Object.values(nextTickets).reduce((total, count) => total + count, 0);
     setTickets(nextTickets);
+    setValidationState({ requestKey: '', quote: null, loading: false, error: null });
     setSelectedSeats((current) => current.slice(0, nextTotal));
   }
 
@@ -359,12 +516,20 @@ export function Booking() {
   }
 
   function continueFromTickets() {
-    if (!selectedMovie) {
-      setToastMessage('Please select a movie to proceed.');
+    if (!selectedSelection) {
+      setToastMessage('Please select a film or special offer to proceed.');
       return;
     }
-    if (!time || !movieTimes.includes(time)) {
+    if (!time || !showtimes?.includes(time)) {
       setToastMessage('Please select an available showtime to proceed.');
+      return;
+    }
+    if (!totalTickets) {
+      setToastMessage('Please select at least one ticket.');
+      return;
+    }
+    if (!validation?.quote || validationLoading) {
+      setToastMessage(validation?.error || 'Your ticket choices have not been validated yet.');
       return;
     }
     goToStep(1);
@@ -391,6 +556,11 @@ export function Booking() {
   }
 
   function createDemoTicket() {
+    if (!validation?.quote) {
+      setToastMessage(validation?.error || 'Your ticket choices must be validated before proceeding.');
+      goToStep(0);
+      return;
+    }
     setBookingRef(`BBT-${Math.floor(100000 + Math.random() * 900000)}`);
     goToStep(4);
   }
@@ -406,23 +576,30 @@ export function Booking() {
         </div>
         <ProgressBar currentStep={step} />
         <form className="booking-form" ref={formRef} onSubmit={(event) => event.preventDefault()}>
-          {loading && <p role="status">Loading available movies...</p>}
           {step === 0 && (
             <TicketSelection
-              movies={sortedMovies}
-              movie={selectedMovie}
+              selections={selections}
+              selection={selectedSelection}
               date={date}
               time={time}
               tickets={tickets}
               totalTickets={totalTickets}
-              totalPrice={totalPrice}
+              showtimes={showtimes}
               dates={dates}
-              onMovieChange={changeMovie}
+              selectionLoading={selectionLoading}
+              selectionError={selectionError}
+              showtimeLoading={Boolean(detailMovieId != null && (!currentMovieDetail || currentMovieDetail.loading))}
+              showtimeError={currentMovieDetail?.error}
+              pricing={pricing}
+              pricingLoading={pricingLoading}
+              pricingError={pricingError}
+              validation={validation}
+              validationLoading={validationLoading}
+              onSelectionChange={changeSelection}
               onDateChange={changeDate}
               onTimeChange={changeTime}
               onTicketChange={changeTicketCount}
               onContinue={continueFromTickets}
-              apiError={Boolean(error)}
             />
           )}
           {step === 1 && (
@@ -445,12 +622,12 @@ export function Booking() {
           {step === 3 && <DemoPayment onBack={() => goToStep(2)} onConfirm={createDemoTicket} />}
           {step === 4 && (
             <BookingConfirmation
-              movie={selectedMovie}
+              movie={selectedSelection}
               date={date}
               time={time}
               selectedSeats={selectedSeats}
               totalTickets={totalTickets}
-              totalPrice={totalPrice}
+              totalPrice={validation?.quote?.total || 0}
               customer={customer}
               bookingRef={bookingRef}
             />
