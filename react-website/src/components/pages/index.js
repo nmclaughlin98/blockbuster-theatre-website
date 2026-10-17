@@ -1,5 +1,6 @@
 export { About } from './About';
 export { Booking } from './Booking';
+export { CollectionDetail } from './CollectionDetail';
 export { ComingSoon } from './ComingSoon';
 export { Detail } from './Detail';
 export { Home } from './Home';

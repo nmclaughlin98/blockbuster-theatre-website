@@ -1,7 +1,9 @@
 import { useMemo, useState } from 'react';
 import { MovieGrid } from '../movies';
 import { Layout } from '../shared';
-import { PageLoader } from '../shared/PageLoader';
+import { CollectionsView } from './Collections';
+import { NowShowingSwitch } from './NowShowingSwitch';
+import { useCollections } from './useCollections';
 import { useMovies } from './useMovies';
 
 const genres = ['all', 'action', 'adventure', 'animation', 'comedy', 'drama', 'family', 'fantasy', 'horror', 'music', 'romance', 'science fiction', 'thriller'];
@@ -54,11 +56,25 @@ function MovieFilters({ search, sort, genre, onSearch, onSort, onGenre }) {
     );
 }
 
-export function NowShowing() {
+export function NowShowing({ initialView }) {
+    const requestedView = initialView || new URLSearchParams(window.location.search).get('view');
+    const [view, setView] = useState(requestedView === 'collections' ? 'collections' : 'movies');
     const { movies, loading, error } = useMovies();
+    const collectionState = useCollections(view === 'collections');
     const [search, setSearch] = useState('');
     const [sort, setSort] = useState('title-asc');
     const [genre, setGenre] = useState('all');
+
+    function changeView(nextView) {
+        setView(nextView);
+        const url = new URL(window.location.href);
+        if (/\/collections\.html$/i.test(url.pathname)) {
+            url.pathname = url.pathname.replace(/collections\.html$/i, 'nowShowing.html');
+        }
+        if (nextView === 'collections') url.searchParams.set('view', 'collections');
+        else url.searchParams.delete('view');
+        window.history.replaceState(window.history.state, '', `${url.pathname}${url.search}${url.hash}`);
+    }
 
     const filtered = useMemo(() => {
         const getGenres = (movie) => [...(movie.genres || []), movie.genre].filter(Boolean).join(' ').toLowerCase();
@@ -80,37 +96,51 @@ export function NowShowing() {
         });
     }, [movies, search, sort, genre]);
 
-    if (loading) {
-        return (
-            <Layout current="now" loading>
-                <PageLoader label="Loading now showing movies" />
-            </Layout>
-        );
-    }
-
     return (
         <Layout current="now">
             <section className="movie-poster">
                 <div className="section-header">
                     <div>
-                        <h1>Now Showing</h1>
+                        <h1>{view === 'movies' ? 'Now Showing' : 'Collections'}</h1>
                         <p className="muted">
-                            Select a movie to view synopsis, showtimes, and book reserved luxury seats.
+                            {view === 'movies'
+                                ? 'Select a movie to view synopsis, showtimes, and book reserved luxury seats.'
+                                : 'Discover connected stories and films gathered together.'}
                         </p>
                     </div>
-                    <a className="button btn-glass" href="./timetable.html">View Timetable</a>
+                    {view === 'movies' && <a className="button btn-glass" href="./timetable.html">View Timetable</a>}
                 </div>
-                <MovieFilters
-                    search={search}
-                    sort={sort}
-                    genre={genre}
-                    onSearch={setSearch}
-                    onSort={setSort}
-                    onGenre={setGenre}
-                />
-                {error
-                    ? <p>Movie listings are temporarily unavailable.</p>
-                    : <MovieGrid movies={filtered} />}
+                <NowShowingSwitch current={view} onChange={changeView} />
+                <div
+                    className="now-showing-view"
+                    data-view={view}
+                    key={view}
+                    role="region"
+                    aria-label={view === 'movies' ? 'Now showing movies' : 'Movie collections'}
+                >
+                    {view === 'movies'
+                        ? loading
+                            ? <p className="collection-message" role="status">Loading now showing movies…</p>
+                            : error
+                                ? <p className="collection-message" role="alert">Movie listings are temporarily unavailable.</p>
+                                : <>
+                                    <MovieFilters
+                                        search={search}
+                                        sort={sort}
+                                        genre={genre}
+                                        onSearch={setSearch}
+                                        onSort={setSort}
+                                        onGenre={setGenre}
+                                    />
+                                    <MovieGrid movies={filtered} />
+                                </>
+                        : <CollectionsView
+                            collections={collectionState.collections}
+                            loading={collectionState.loading}
+                            error={collectionState.error}
+                            onRetry={collectionState.retry}
+                        />}
+                </div>
             </section>
         </Layout>
     );
