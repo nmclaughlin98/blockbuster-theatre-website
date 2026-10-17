@@ -32,7 +32,7 @@ export function CollectionDetail() {
             <p role={error ? 'alert' : undefined}>
               {error?.message || 'Choose a collection from the Collections tab in Now Showing.'}
             </p>
-            <a className="button btn-glass" href="./nowShowing.html?view=collections">Back to Collections</a>
+            <a className="button btn-glass previous" href="./nowShowing.html?view=collections">Back to Collections</a>
           </div>
         </section>
       ) : (
@@ -51,7 +51,7 @@ export function CollectionDetail() {
           </section>
           <section className="collection-movies">
             <div className="collection-content">
-              <a className="button btn-glass collection-back-button" href="./nowShowing.html?view=collections">
+              <a className="button btn-glass collection-back-button previous" href="./nowShowing.html?view=collections">
                 Back to Collections
               </a>
               <div className="section-header">

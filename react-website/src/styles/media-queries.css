@@ -6,7 +6,8 @@
 @media (min-width: 1920px) {
 
     .poster-section,
-    .grid {
+    .grid,
+    .collection-card-grid {
         grid-template-columns: repeat(7, minmax(0, 1fr));
     }
 
@@ -74,6 +75,11 @@
 @media (max-width: 1200px) {
     .movie-page {
         grid-template-columns: 2.9fr 2.1fr;
+    }
+
+    .collection-card-content p {
+        -webkit-line-clamp: 5;
+        line-clamp: 5;
     }
 }
 
@@ -1145,6 +1151,18 @@ header {
 @media (max-width: 380px) {
     .row-label {
         display: none;
+    }
+
+    .collection-card-content h2 {
+        margin-bottom: 0.25rem;
+        font-size: 0.85rem;
+    }
+
+    .collection-card-content p {
+        font-size: 0.7rem;
+        line-height: 1.15;
+        -webkit-line-clamp: 5;
+        line-clamp: 5;
     }
 }
 
