@@ -2033,7 +2033,6 @@ select option {
 .seat.selected-seat {
     background: var(--accent-red) !important;
     box-shadow: 0 0 14px var(--accent-glow);
-    transform: scale(1.15);
 }
 
 .seat.booked-seat {

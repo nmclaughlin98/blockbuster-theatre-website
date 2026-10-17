@@ -186,11 +186,13 @@ function SeatSelection({ selectedSeats, totalTickets, onToggleSeat, onBack, onCo
       />
       <div className="seating-plan">
         <div className="screen-container"><div className="screen" /><div className="screen-text">MAIN CINEMA SCREEN (CURVED)</div></div>
-        <div className="seat-legend">
-          <div className="legend-item"><div className="legend-seat" /><span>Available</span></div>
-          <div className="legend-item"><div className="legend-seat booked-seat" /><span>Booked</span></div>
-          <div className="legend-item"><div className="legend-seat selected-seat" /><span>Your Pick</span></div>
-          <div className="legend-item"><div className="legend-seat seat-accessible" /><span>Accessible</span></div>
+        <div className="seat-legend-container">
+          <div className="seat-legend">
+            <div className="legend-item"><div className="legend-seat" /><span>Available</span></div>
+            <div className="legend-item"><div className="legend-seat booked-seat" /><span>Booked</span></div>
+            <div className="legend-item"><div className="legend-seat selected-seat" /><span>Your Pick</span></div>
+            <div className="legend-item"><div className="legend-seat seat-accessible" /><span>Accessible</span></div>
+          </div>
         </div>
         <div className="seat-grid" aria-label="Cinema seating plan">
           {Array.from({ length: 7 }, (_, rowIndex) => {
@@ -198,14 +200,14 @@ function SeatSelection({ selectedSeats, totalTickets, onToggleSeat, onBack, onCo
             return (
               <div className="seat-row" key={row}>
                 <span className="row-label">{row}</span>
-                {Array.from({ length: 10 }, (_, seatIndex) => {
+                {Array.from({ length: row === 'G' ? 11 : 10 }, (_, seatIndex) => {
                   const seatId = `${row}${seatIndex + 1}`;
                   const isBooked = bookedSeats.has(seatId);
                   const isAccessible = accessibleSeats.has(seatId);
                   const isSelected = selectedSeats.includes(seatId);
                   return (
                     <span className="seat-cell" key={seatId}>
-                      {seatIndex === 5 && <span className="seat seat-spacer" aria-hidden="true" />}
+                      {row !== 'G' && seatIndex === 5 && <span className="seat seat-spacer" aria-hidden="true" />}
                       <button
                         className={`seat ${isAccessible ? 'seat-accessible' : ''} ${isBooked ? 'booked-seat' : ''} ${isSelected ? 'selected-seat' : ''}`}
                         type="button"
