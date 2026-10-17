@@ -951,6 +951,15 @@ header {
 
 @media (max-width: 650px) {
 
+    .collection-lookup {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .collection-lookup .button {
+        width: 100%;
+    }
+
     .seat-grid {
         width: 100%;
         min-width: 0;

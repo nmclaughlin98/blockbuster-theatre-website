@@ -12,7 +12,7 @@ export function MovieSection({ title, movies }) {
 
     const updateVisibleCount = () => {
       const columnCount = getComputedStyle(grid).gridTemplateColumns.trim().split(/\s+/).length;
-      const rowCount = columnCount < 4 ? 2 : 1;
+      const rowCount = columnCount === 2 ? 3 : columnCount < 4 ? 2 : 1;
       const nextCount = Math.min(columnCount * rowCount, movieCount);
       setVisibleCount((current) => current === nextCount ? current : nextCount);
     };
