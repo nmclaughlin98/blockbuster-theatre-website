@@ -36,7 +36,7 @@ cd react-website
 npm install
 ```
 
-The API endpoint can be set with `VITE_MOVIES_API_URL`. The project includes an `.env.example`; copy it to `.env.local` and change the value if needed. Use the full endpoint ending in `/movies`, with no trailing slash. Restart the Vite server after changing the setting.
+The API base URL is set with `VITE_MOVIES_API_URL`. Copy `react-website/.env.example` to `react-website/.env.local` and set the value to the API invoke base URL, for example `https://your-api-id.execute-api.your-region.amazonaws.com`. Do not append a route such as `/movies`. Restart the Vite server after changing the setting. Development and production builds fail with a clear error if the variable is missing or is not an absolute HTTP(S) URL.
 
 Start the development server:
 
