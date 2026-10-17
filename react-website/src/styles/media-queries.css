@@ -33,6 +33,7 @@
 
     .hero-caption p {
         max-width: 100%;
+        gap: 2px;
     }
 }
 
@@ -210,7 +211,6 @@
     }
 }
 
-@media (max-width: 860px) {}
 
 /* Mobile Devices (768px and down) */
 @media (max-width: 768px) {
@@ -255,10 +255,6 @@
         grid-template-columns: 1fr;
         padding: 18px 16px;
         gap: 16px;
-    }
-
-    .showtimes-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
     .hamburger {
@@ -485,6 +481,7 @@
 }
 
 @media (max-width: 600px) and (max-height: 400px) {
+
     .primary-nav.open {
         padding: 8px 16px;
     }
@@ -528,6 +525,7 @@
 
 /* Small Phones (480px and down) */
 @media (max-width: 480px) {
+
 
     .hero-caption h2 {
         font-size: clamp(2.2rem, 6vh, 2rem);
@@ -929,6 +927,15 @@ header {
 
 @media (max-width: 650px) {
 
+    .seat-grid {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .seat-row {
+        width: 97%;
+    }
+
     .date-time-group,
     .guest-name-grid,
     .payment-methods-grid {
@@ -985,6 +992,34 @@ header {
 }
 
 @media (max-width: 480px) {
+
+    .seat-legend-container {
+        display: flex;
+        justify-content: center;
+        /* Keeps the whole legend dead-center */
+        width: 100%;
+    }
+
+    .seat-legend {
+        display: grid;
+        grid-template-columns: repeat(2, auto);
+        /* Compact columns based on text size */
+        column-gap: clamp(2rem, 20vw, 45rem);
+        /* Scales smoothly up to a wider gap */
+        row-gap: 0.75rem;
+        /* Vertical spacing between rows */
+        max-width: 100%;
+        /* Prevents overflow on smaller devices */
+    }
+
+    .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        /* Space between icon and text */
+        font-size: clamp(0.8rem, 3.9vw, 1.4rem);
+    }
+
     :root {
         --header-height: 3.75rem;
     }
@@ -1023,19 +1058,17 @@ header {
         padding: 0.5rem;
     }
 
-    .seat-row {
-        gap: clamp(1px, 0.4vw, 4px);
-    }
-
     .row-label {
         flex: 0 0 0.875rem;
         width: 0.875rem;
     }
 
     .seat {
-        flex: 0 0 clamp(1.25rem, 5.4vw, 2.5rem);
-        width: clamp(1.25rem, 5.4vw, 2.5rem);
-        height: clamp(1.25rem, 5.4vw, 2.5rem);
+        flex: 1 1 0;
+        min-width: 0;
+        width: auto;
+        height: clamp(1.25rem, 7vw, 2rem);
+        aspect-ratio: 1;
     }
 
     .ticket-details-grid {
@@ -1057,6 +1090,7 @@ header {
 }
 
 @media (max-width: 390px) {
+
     .ticket-row {
         flex-direction: column;
         align-items: center;
@@ -1072,6 +1106,12 @@ header {
 
     .ticket-counter {
         justify-content: center;
+    }
+}
+
+@media (max-width: 380px) {
+    .row-label {
+        display: none;
     }
 }
 
