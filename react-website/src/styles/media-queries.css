@@ -207,7 +207,6 @@
     .date-time-group,
     .guest-name-grid {
         grid-template-columns: 1fr;
-        gap: 0;
     }
 }
 
@@ -557,6 +556,10 @@
 
     .step-header h2 {
         font-size: 1.7rem;
+        margin-bottom: 10px;
+    }
+
+    .selected-seats-badge {
         margin-bottom: 10px;
     }
 
@@ -921,7 +924,28 @@ header {
     .date-time-group,
     .guest-name-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: clamp(1rem, 2.5vw, 1.5rem);
+    }
+}
+
+@media (max-width: 870px) {
+    .date-time-group {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 0;
+    }
+
+    .showtime-chips {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        width: 100%;
+    }
+
+    .showtime-chips> :not(.time-chip) {
+        grid-column: 1 / -1;
+    }
+
+    .showtime-chips .time-chip {
+        box-sizing: border-box;
+        width: 100%;
     }
 }
 
@@ -1017,7 +1041,7 @@ header {
         align-items: center;
         gap: 0.5rem;
         /* Space between icon and text */
-        font-size: clamp(0.8rem, 3.9vw, 1.4rem);
+        font-size: clamp(0.8rem, 3.1vw, 1.0rem);
     }
 
     :root {
