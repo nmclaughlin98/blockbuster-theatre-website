@@ -397,7 +397,7 @@
     .btn,
     .button,
     .form-button {
-        font-size: 1.0rem;
+        font-size: clamp(0.8rem, 3.7vw, 1.0rem);
     }
 
     .hero-caption .hero-actions .button {
