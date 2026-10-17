@@ -2,7 +2,9 @@
 
 ## Movies API
 
-The movies API base URL is written to the gitignored `src/config.js` before each development server start and production build. It defaults to `https://i9sjtfnqw8.execute-api.eu-west-2.amazonaws.com`.
+The movies API base URL is written to the gitignored `src/config.js` before each development server start and production build. `VITE_MOVIES_API_URL` is required; there is no hardcoded URL fallback.
+
+For local development, copy `.env.example` to `.env.local` and set `VITE_MOVIES_API_URL` to the API invoke base URL. Include a stage path if the API uses one, but do not append a route such as `/movies`. You can also use mode-specific `.env.development.local` and `.env.production.local` files. For GitHub Pages deployments, add a repository Actions variable named `VITE_MOVIES_API_URL` under Settings → Secrets and variables → Actions → Variables. The deployment workflow requires this variable and passes it into the production build.
 
 The booking flow loads typed movie and offer entries from `GET /film-selections`, movie showtimes from `GET /movies/{id}`, and server-owned ticket tiers from `GET /ticket-pricing`. If film selections fail, it falls back to available records from `GET /movies` and reports that offer data is unavailable. The home-page offers are loaded from the offer entries in `/film-selections`. Checkout sends only the selected typed ID, showtime, and ticket quantities to `POST /checkout/validate`; the returned total is authoritative. A non-empty offer `overrideShowtimes` map is authoritative. If it is empty or missing, the frontend loads the featured movie's schedule; when present, override days with no entries do not fall back to the movie schedule.
 
