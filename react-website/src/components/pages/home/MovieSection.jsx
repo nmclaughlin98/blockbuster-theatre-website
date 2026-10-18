@@ -11,19 +11,24 @@ export function MovieSection({ title, movies }) {
     if (!grid) return;
 
     const updateVisibleCount = () => {
-      const columnCount = getComputedStyle(grid).gridTemplateColumns.trim().split(/\s+/).length;
+      const templateColumns = getComputedStyle(grid).gridTemplateColumns.trim();
+      const columnCount = !templateColumns || templateColumns === 'none'
+        ? movieCount
+        : templateColumns.split(/\s+/).length;
       const rowCount = columnCount < 4 ? 2 : 1;
       const nextCount = Math.min(columnCount * rowCount, movieCount);
       setVisibleCount((current) => current === nextCount ? current : nextCount);
     };
 
-    const observer = new ResizeObserver(updateVisibleCount);
-    observer.observe(grid);
+    const observer = typeof ResizeObserver === 'undefined'
+      ? null
+      : new ResizeObserver(updateVisibleCount);
+    observer?.observe(grid);
     window.addEventListener('resize', updateVisibleCount);
     updateVisibleCount();
 
     return () => {
-      observer.disconnect();
+      observer?.disconnect();
       window.removeEventListener('resize', updateVisibleCount);
     };
   }, [movieCount]);

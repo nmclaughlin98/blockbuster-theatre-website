@@ -1,3 +1,5 @@
+import 'abortcontroller-polyfill/dist/abortcontroller-polyfill-only';
+import 'whatwg-fetch';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import App from './App';
