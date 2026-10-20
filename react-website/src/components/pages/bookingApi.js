@@ -60,6 +60,10 @@ export function getSelectionShowtimes(selection, movieDetail, day) {
   return Array.isArray(schedule[day]) ? schedule[day] : [];
 }
 
+export function getSelectionShowtimeDates(selection, movieDetail, dates) {
+  return dates.filter(({ weekday }) => getSelectionShowtimes(selection, movieDetail, weekday)?.length > 0);
+}
+
 export async function getFilmSelections(signal) {
   const data = await requestJson('/film-selections', { signal });
   if (!Array.isArray(data.selections)) {

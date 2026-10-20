@@ -6,7 +6,7 @@ import {
   createCheckoutPayload,
   getMovieDetailIdForSelection,
   getMovieDetail,
-  hasOfferShowtimeOverrides,
+  getSelectionShowtimeDates,
   getSelectionShowtimes,
   getTicketPricing,
   selectionDisplayLabel,
@@ -14,7 +14,7 @@ import {
   validateCheckout,
 } from './bookingApi';
 
-const steps = ['Tickets', 'Select Seats', 'Guest Info', 'Payment', 'Ticket Preview'];
+const steps = ['Tickets', 'Select Seats', 'Guest Info', 'Payment', 'Confirmed'];
 const weekdayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 const bookedSeats = new Set(['B4', 'C2', 'C3', 'D7', 'D8', 'E3', 'E4', 'E9', 'F9', 'F10', 'G3', 'G4', 'G9']);
 const accessibleSeats = new Set(['A1', 'A5', 'A6', 'A10']);
@@ -110,6 +110,11 @@ function TicketSelection({
         <div className="form-group">
           <label htmlFor="booking-date">Day of Screening</label>
           <select id="booking-date" className="form-control" value={date} onChange={(event) => onDateChange(event.target.value)}>
+            {!dates.length && (
+              <option value="" disabled>
+                {showtimeLoading ? 'Loading screening dates...' : 'No screening dates available'}
+              </option>
+            )}
             {dates.map((item) => <option value={item.label} key={item.label}>{item.label}</option>)}
           </select>
         </div>
@@ -131,7 +136,8 @@ function TicketSelection({
                         key={`${showtime.time}-${showtime.screen}`}
                         onClick={() => onTimeChange(showtime)}
                       >
-                        {showtime.time}: Screen {showtime.screen}
+                        <span className="time-chip-time">{showtime.time}</span>
+                        <span className="time-chip-screen">Screen {showtime.screen}</span>
                       </button>
                     ))
                     : <span className="showtime-placeholder">
@@ -179,12 +185,12 @@ function TicketSelection({
       <div className="booking-subtotal-bar">
         <div className="subtotal-item booking-subtotal-values">
           <div className="subtotal-metric">
-            <span>Selected</span>
+            <span>Selected:</span>
             <strong>{totalTickets} Seat{totalTickets === 1 ? '' : 's'}</strong>
           </div>
           <div className="subtotal-metric">
-            <span>Total</span>
-            <strong>{validation?.quote ? new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP' }).format(validation.quote.total) : '—'}</strong>
+            <span>Total:</span>
+            <strong>{validation?.quote ? new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP' }).format(validation.quote.total) : new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP' }).format(0)}</strong>
           </div>
         </div>
         <div className="subtotal-item">
@@ -302,7 +308,7 @@ function SeatSelection({ selectedSeats, totalTickets, onToggleSeat, onBack, onCo
           Selected Seats: <strong>{selectedSeats.length ? selectedSeats.join(', ') : 'None selected yet'}</strong>
         </div>
       </div>
-      <StepActions onBack={onBack} onContinue={onContinue} continueLabel="Continue to Guest Details" />
+      <StepActions onBack={onBack} onContinue={onContinue} continueLabel="Guest Info" />
     </fieldset>
   );
 }
@@ -322,14 +328,105 @@ function GuestDetails({ customer, onChange, onBack, onContinue }) {
   );
 }
 
-function DemoPayment({ onBack, onConfirm }) {
+function DemoPayment({ onBack, onConfirm, onPaymentInput }) {
+  const [paymentMethod, setPaymentMethod] = useState('card');
+  const demoNoticeShown = useRef(false);
+  const paymentMethods = [
+    { id: 'card', label: 'Credit / Debit Card' },
+    { id: 'apple-pay', label: 'Apple Pay' },
+    { id: 'google-pay', label: 'Google Pay' },
+  ];
+
+  function handlePaymentInput(event) {
+    if (!event.currentTarget.value.trim() || demoNoticeShown.current) return;
+    demoNoticeShown.current = true;
+    onPaymentInput();
+  }
+
   return (
     <fieldset className="active" data-step="3">
-      <StepHeader title="Step 4: Payment" description="Online payment is not connected in this demo." />
-      <div className="demo-payment-notice" role="note">
-        <h3>Demo checkout only</h3>
-        <p>No payment will be taken and no reservation will be made. Do not enter or submit real payment details.</p>
+      <StepHeader title="Step 4: Payment" description="Choose a demo payment option to continue to your ticket preview." />
+      {paymentMethod === 'card' && (
+        <div className="card-preview-container" aria-label="Sample payment card preview">
+          <div className="credit-card-mockup">
+            <div className="demo-card-top-row">
+              <span className="card-chip" />
+              <strong className="demo-card-brand">VISA</strong>
+            </div>
+            <div className="card-number-display" aria-label="Masked sample card number">•••• •••• •••• ••••</div>
+            <div className="card-meta-row">
+              <div className="card-holder-display">Cardholder<span>Your Name</span></div>
+              <div className="card-expiry-display">Expires<span>MM/YY</span></div>
+            </div>
+          </div>
+        </div>
+      )}
+      <div className="payment-methods-grid" role="group" aria-label="Demo payment method">
+        {paymentMethods.map((method) => (
+          <button
+            className={`payment-chip ${paymentMethod === method.id ? 'active' : ''}`}
+            type="button"
+            aria-pressed={paymentMethod === method.id}
+            key={method.id}
+            onClick={() => setPaymentMethod(method.id)}
+          >
+            {method.label}
+          </button>
+        ))}
       </div>
+      {paymentMethod === 'card' ? (
+        <div className="demo-payment-fields" role="group" aria-label="Optional demo card details">
+          <div className="demo-payment-field-group">
+            <label className="demo-payment-field-label" htmlFor="demo-card-number">Card Number</label>
+            <input
+              className="demo-payment-field"
+              id="demo-card-number"
+              type="text"
+              inputMode="numeric"
+              placeholder="Card number"
+              onChange={handlePaymentInput}
+            />
+          </div>
+          <div className="demo-payment-field-group">
+            <label className="demo-payment-field-label" htmlFor="demo-cardholder-name">Cardholder Name</label>
+            <input
+              className="demo-payment-field"
+              id="demo-cardholder-name"
+              type="text"
+              placeholder="Name on card"
+              onChange={handlePaymentInput}
+            />
+          </div>
+          <div className="demo-payment-fields-row">
+            <div className="demo-payment-field-group">
+              <label className="demo-payment-field-label" htmlFor="demo-card-expiration">Expiration (MM/YY)</label>
+              <input
+                className="demo-payment-field"
+                id="demo-card-expiration"
+                type="text"
+                inputMode="numeric"
+                placeholder="MM/YY"
+                onChange={handlePaymentInput}
+              />
+            </div>
+            <div className="demo-payment-field-group">
+              <label className="demo-payment-field-label" htmlFor="demo-card-security-code">Security Code (CVV)</label>
+              <input
+                className="demo-payment-field"
+                id="demo-card-security-code"
+                type="text"
+                inputMode="numeric"
+                placeholder="CVV"
+                onChange={handlePaymentInput}
+              />
+            </div>
+          </div>
+        </div>
+      ) : (
+        <p className="demo-payment-wallet" role="status">
+          {paymentMethod === 'apple-pay' ? 'Apple Pay' : 'Google Pay'} is not connected in this demo. No payment will be processed.
+        </p>
+      )}
       <div className="form-actions">
         <button className="form-button previous" type="button" onClick={onBack}>Back</button>
         <button className="form-button next" type="button" onClick={onConfirm}>Create Demo Ticket</button>
@@ -393,18 +490,20 @@ export function Booking() {
     && movieDetailState.requestKey === selectionKey(selectedSelection)
     ? movieDetailState
     : null;
-  const scheduleForRequestedTime = selectedSelection
-    ? hasOfferShowtimeOverrides(selectedSelection)
-      ? selectedSelection.overrideShowtimes
-      : currentMovieDetail?.movie?.showtimes
+  const availableDates = selectedSelection
+    ? getSelectionShowtimeDates(selectedSelection, currentMovieDetail?.movie, dates)
+    : dates;
+  const requestedTimeDate = !params.get('day') && requestedTime && selectedSelection
+    ? availableDates.find((item) => getSelectionShowtimes(
+      selectedSelection,
+      currentMovieDetail?.movie,
+      item.weekday,
+    )?.some((slot) => slot.time === requestedTime))
     : null;
-  const requestedTimeDate = !params.get('day') && requestedTime && scheduleForRequestedTime
-    ? dates.find((item) => scheduleForRequestedTime[item.weekday]?.some((slot) => slot.time === requestedTime))
-    : null;
-  const currentDate = dateOverride
-    ? dates.find((item) => item.label === dateOverride)
-    : requestedTimeDate || findDate(dates, params.get('day') || '');
-  const date = currentDate?.label || dates[0].label;
+  const currentDate = (dateOverride && availableDates.find((item) => item.label === dateOverride))
+    || requestedTimeDate
+    || findDate(availableDates, params.get('day') || '');
+  const date = currentDate?.label || '';
   const showtimes = selectedSelection
     ? getSelectionShowtimes(selectedSelection, currentMovieDetail?.movie, currentDate?.weekday)
     : null;
@@ -414,7 +513,7 @@ export function Booking() {
   const screen = showtimes?.find((slot) => slot.time === time && slot.screen === selectedScreen)?.screen
     || showtimes?.find((slot) => slot.time === time)?.screen
     || '';
-  const day = currentDate?.weekday || dates[0].weekday;
+  const day = currentDate?.weekday || '';
   const totalTickets = Object.values(tickets).reduce((total, count) => total + count, 0);
   const pricingRequestKey = selectedSelection && time
     ? `${selectionKey(selectedSelection)}|${day}|${time}`
@@ -675,7 +774,7 @@ export function Booking() {
               tickets={tickets}
               totalTickets={totalTickets}
               showtimes={showtimes}
-              dates={dates}
+              dates={availableDates}
               selectionLoading={selectionLoading}
               selectionError={selectionError}
               showtimeLoading={Boolean(detailMovieId != null && (!currentMovieDetail || currentMovieDetail.loading))}
@@ -709,7 +808,13 @@ export function Booking() {
               onContinue={continueFromGuestDetails}
             />
           )}
-          {step === 3 && <DemoPayment onBack={() => goToStep(2)} onConfirm={createDemoTicket} />}
+          {step === 3 && (
+            <DemoPayment
+              onBack={() => goToStep(2)}
+              onConfirm={createDemoTicket}
+              onPaymentInput={() => setToastMessage('Demo only: payment details are not processed. You can continue without entering them.')}
+            />
+          )}
           {step === 4 && (
             <BookingConfirmation
               movie={selectedSelection}
