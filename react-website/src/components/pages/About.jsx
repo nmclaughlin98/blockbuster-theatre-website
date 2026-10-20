@@ -130,7 +130,7 @@ function BoxOfficeLocation() {
       </h3>
       <p>
         Blockbuster Theatre Complex<br />
-        Cinema Way, Strand Road<br />
+        Unit 16, Crescent Link Retail Park<br />
         Direct Telephone: <strong>028 7147 2869</strong>
       </p>
     </div>

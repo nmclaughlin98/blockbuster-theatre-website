@@ -291,11 +291,6 @@
         font-size: 0.7rem;
     }
 
-    .legend-seat {
-        width: 18px;
-        height: 18px;
-    }
-
     .seat-accessible-icon {
         width: 19px;
         height: 19px;
@@ -402,7 +397,7 @@
 
     .hero-caption .hero-actions .button {
         padding: 10px 10px;
-        font-size: 0.85rem;
+        font-size: clamp(0.8rem, 3.4vw, 1.0rem);
     }
 
 }
@@ -459,7 +454,7 @@
 
     .hero-caption .hero-actions .button {
         padding: 8px 12px;
-        font-size: 0.85rem;
+        font-size: clamp(0.8rem, 3.7vw, 1.0rem);
     }
 
     .carousel-indicators {
@@ -555,17 +550,9 @@
         display: none;
     }
 
-    .step-header h2 {
-        font-size: 1.7rem;
-        margin-bottom: 10px;
-    }
 
     .selected-seats-badge {
         margin-bottom: 10px;
-    }
-
-    .step-header p {
-        font-size: 1.0rem;
     }
 
     .date-time-group {
@@ -589,11 +576,6 @@
     .seat {
         width: 22px;
         height: 22px;
-    }
-
-    .legend-seat {
-        width: 16px;
-        height: 16px;
     }
 
     .form-actions {
@@ -649,7 +631,12 @@
     .poster-section>h1,
     .offers>h1,
     .genre>h1 {
-        font-size: 1.8rem;
+        line-height: 1.0;
+        font-size: clamp(1.2rem, 6.7vw, 2rem);
+    }
+
+    .toast-notification {
+        width: 100%;
     }
 
 }
@@ -758,12 +745,6 @@ header {
     min-width: 0;
 }
 
-.booking-form,
-.contact-card,
-.box-office-location {
-    padding: clamp(1rem, 3vw, 2rem);
-}
-
 .credit-card-mockup {
     padding: clamp(1rem, 4vw, 1.5rem);
 }
@@ -795,7 +776,7 @@ header {
 
 #progressbar li {
     min-width: 0;
-    font-size: clamp(0.55rem, 1.2vw, 0.85rem);
+    font-size: clamp(0.4rem, 3vw, 0.8rem);
     overflow-wrap: anywhere;
 }
 
@@ -856,13 +837,6 @@ header {
     bottom: clamp(0.75rem, 3vw, 1.75rem);
     width: clamp(2.625rem, 5vw, 3rem);
     height: clamp(2.625rem, 5vw, 3rem);
-}
-
-.toast-notification {
-    right: var(--page-gutter);
-    bottom: var(--page-gutter);
-    max-width: calc(100vw - var(--page-gutter) - var(--page-gutter));
-    overflow-wrap: anywhere;
 }
 
 /*
@@ -1017,11 +991,16 @@ header {
     }
 
     .hero-caption .hero-actions {
+        display: grid;
         width: 100%;
+        grid-auto-flow: column;
+        grid-auto-columns: minmax(0, 1fr);
     }
 
     .hero-caption .hero-actions .button {
-        flex: 1 1 auto;
+        width: 100%;
+        min-width: 0;
+        text-align: center;
     }
 }
 
