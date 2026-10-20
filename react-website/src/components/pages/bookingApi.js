@@ -207,3 +207,58 @@ export async function validateCheckout(payload, signal) {
   }
   return data;
 }
+
+export function createBookingConfirmationPayload({
+  bookingRef, customer, selectedSelection, date, time, screen, selectedSeats, totalTickets, totalPrice,
+}) {
+  return {
+    bookingRef,
+    customer: {
+      firstName: customer.firstName,
+      surname: customer.surname,
+      email: customer.email,
+      phone: customer.phone || '',
+    },
+    movieTitle: selectedSelection.title,
+    date,
+    time,
+    screen,
+    seats: [...selectedSeats],
+    tickets: totalTickets,
+    totalPrice,
+  };
+}
+
+export async function sendBookingConfirmation(payload) {
+  return requestJson('/booking/confirmation', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+}
+
+export function createBookingConfirmationSubmitter(send = sendBookingConfirmation) {
+  let isSending = false;
+
+  return async function submitBookingConfirmation({
+    payload, onSendingChange, onSuccess, onError,
+  }) {
+    if (isSending) return false;
+
+    isSending = true;
+    onSendingChange(true);
+    let succeeded = false;
+    try {
+      await send(payload);
+      succeeded = true;
+    } catch (error) {
+      onError(error);
+    } finally {
+      isSending = false;
+      onSendingChange(false);
+    }
+
+    if (succeeded) onSuccess();
+    return succeeded;
+  };
+}

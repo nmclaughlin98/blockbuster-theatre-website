@@ -46,7 +46,7 @@ export function BookingConfirmation({
           { label: 'Demo Total', value: `£${totalPrice.toFixed(2)}` },
           { label: 'Guest Name', value: `${customer.firstName} ${customer.surname}`.trim() || 'Guest' },
           { label: 'Booking Ref', value: bookingRef },
-          { label: 'Status', value: 'Booking Confirmed' },
+          { label: 'Status', value: 'DEMO PREVIEW - NOT VALID FOR ENTRY' },
         ],
         locations: [{
           latitude: 55.044358,
@@ -107,7 +107,10 @@ export function BookingConfirmation({
 
   return (
     <fieldset className="active" data-step="4">
-      <StepHeader title="Booking confirmed!" description="This is a preview only. No payment was processed or seats reserved." />
+      <StepHeader
+        title="Demo booking confirmation"
+        description="This summary is shown even if the confirmation email could not be sent. No payment was processed, and no valid ticket or seat reservation was issued."
+      />
       <div className="ticket-pass">
         <div className="ticket-pass-header">
           <div className="ticket-pass-brand">BLOCKBUSTER THEATRE</div>

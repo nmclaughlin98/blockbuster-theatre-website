@@ -9,7 +9,10 @@ import {
   getSelectionShowtimeDates,
   getSelectionShowtimes,
   getTicketPricing,
+  createBookingConfirmationPayload,
+  createBookingConfirmationSubmitter,
   selectionKey,
+  sendBookingConfirmation,
   validateCheckout,
 } from './bookingApi';
 import { BookingConfirmation } from './booking/BookingConfirmation';
@@ -59,7 +62,12 @@ export function Booking() {
   const [selectedSeats, setSelectedSeats] = useState([]);
   const [customer, setCustomer] = useState({ firstName: '', surname: '', email: '', phone: '' });
   const [bookingRef, setBookingRef] = useState('');
+  const [confirmationSending, setConfirmationSending] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
+  const bookingRefRef = useRef('');
+  const [submitConfirmation] = useState(
+    () => createBookingConfirmationSubmitter(sendBookingConfirmation),
+  );
   const formRef = useRef(null);
   const dates = useMemo(() => createUpcomingDates(), []);
   const params = useMemo(() => new URLSearchParams(window.location.search), []);
@@ -324,14 +332,37 @@ export function Booking() {
     goToStep(3);
   }
 
-  function createDemoTicket() {
+  async function createDemoTicket() {
     if (!validation?.quote) {
       setToastMessage(validation?.error || 'Your ticket choices must be validated before proceeding.');
       goToStep(0);
       return;
     }
-    setBookingRef(`BBT-${Math.floor(100000 + Math.random() * 900000)}`);
-    goToStep(4);
+
+    const currentBookingRef = bookingRefRef.current
+      || bookingRef
+      || `BBT-${Math.floor(100000 + Math.random() * 900000)}`;
+    bookingRefRef.current = currentBookingRef;
+    if (bookingRef !== currentBookingRef) setBookingRef(currentBookingRef);
+
+    const payload = createBookingConfirmationPayload({
+      bookingRef: currentBookingRef,
+      customer,
+      selectedSelection,
+      date,
+      time,
+      screen,
+      selectedSeats,
+      totalTickets,
+      totalPrice: validation.quote.total,
+    });
+
+    await submitConfirmation({
+      payload,
+      onSendingChange: setConfirmationSending,
+      onSuccess: () => goToStep(4),
+      onError: () => goToStep(4),
+    });
   }
 
   const dismissToast = useCallback(() => setToastMessage(''), []);
@@ -393,6 +424,7 @@ export function Booking() {
             <DemoPayment
               onBack={() => goToStep(2)}
               onConfirm={createDemoTicket}
+              isSending={confirmationSending}
               onPaymentInput={() => setToastMessage('Demo only: payment details are not processed. You can continue without entering them.')}
             />
           )}

@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react';
 import { StepHeader } from './BookingStepComponents';
 
-export function DemoPayment({ onBack, onConfirm, onPaymentInput }) {
+export function DemoPayment({ onBack, onConfirm, onPaymentInput, isSending = false }) {
   const [paymentMethod, setPaymentMethod] = useState('card');
   const demoNoticeShown = useRef(false);
   const paymentMethods = [
@@ -18,7 +18,10 @@ export function DemoPayment({ onBack, onConfirm, onPaymentInput }) {
 
   return (
     <fieldset className="active" data-step="3">
-      <StepHeader title="Step 4: Payment" description="Choose a demo payment option to continue to your ticket preview." />
+      <StepHeader
+        title="Step 4: Payment"
+        description="This is a demo only. No payment is processed, and no valid ticket or seat reservation is issued."
+      />
       {paymentMethod === 'card' && (
         <div className="card-preview-container" aria-label="Sample payment card preview">
           <div className="credit-card-mockup">
@@ -101,9 +104,12 @@ export function DemoPayment({ onBack, onConfirm, onPaymentInput }) {
         </p>
       )}
       <div className="form-actions">
-        <button className="form-button previous" type="button" onClick={onBack}>Back</button>
-        <button className="form-button next" type="button" onClick={onConfirm}>Complete purchase</button>
+        <button className="form-button previous" type="button" onClick={onBack} disabled={isSending}>Back</button>
+        <button className="form-button next" type="button" onClick={onConfirm} disabled={isSending}>
+          {isSending ? 'Sending confirmation...' : 'Send demo confirmation'}
+        </button>
       </div>
+      {isSending && <p role="status">Sending demo confirmation email...</p>}
     </fieldset>
   );
 }
