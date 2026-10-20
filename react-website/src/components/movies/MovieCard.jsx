@@ -1,24 +1,17 @@
 import { useState } from 'react';
 import { asset } from '../shared';
+import { getPosterSrc, getPosterSrcSet } from '../../utils/posterImages';
+import { useNetworkSpeed } from '../../utils/useNetworkSpeed';
 import { Countdown } from './Countdown';
 import { movieId } from './movieId';
-
-const buildPosterSrcSet = (posterUrl) => {
-    if (!posterUrl || !posterUrl.includes('image.tmdb.org')) return undefined;
-
-    return [
-        `${posterUrl.replace('/original/', '/w185/')} 185w`,
-        `${posterUrl.replace('/original/', '/w342/')} 342w`,
-        `${posterUrl.replace('/original/', '/w500/')} 500w`,
-        `${posterUrl.replace('/original/', '/w780/')} 780w`,
-    ].join(', ');
-};
 
 export function MovieCard({ movie, comingSoon = false }) {
     const fallbackPoster = asset('assets/images/logo/png/logo-full.png');
     const [imageFailed, setImageFailed] = useState(false);
+    const isSlowConnection = useNetworkSpeed();
 
     const hasValidPoster = !imageFailed && movie.poster;
+    const posterSrc = getPosterSrc(movie.poster, isSlowConnection) || fallbackPoster;
 
     return (
         <div className="poster-card-container">
@@ -29,8 +22,8 @@ export function MovieCard({ movie, comingSoon = false }) {
             >
                 <img
                     className="poster"
-                    src={imageFailed ? fallbackPoster : movie.poster || fallbackPoster}
-                    srcSet={hasValidPoster ? buildPosterSrcSet(movie.poster) : undefined}
+                    src={imageFailed ? fallbackPoster : posterSrc}
+                    srcSet={hasValidPoster ? getPosterSrcSet(movie.poster, isSlowConnection) : undefined}
                     sizes="(max-width: 480px) 50vw, (max-width: 1024px) 33vw, 25vw"
                     alt={movie.title}
                     onError={() => setImageFailed(true)}

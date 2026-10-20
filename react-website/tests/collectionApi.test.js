@@ -101,6 +101,36 @@ test('loads a collection by ID and preserves the movie order returned by the API
   }
 });
 
+test('preserves an explicitly active collection', async () => {
+  const response = {
+    ...collectionResponse,
+    collection: { ...collectionResponse.collection, isActive: true },
+  };
+  const restoreFetch = mockFetch(async () => new Response(JSON.stringify(response)));
+
+  try {
+    const result = await getCollection('8706524');
+    assert.equal(result.collection.isActive, true);
+  } finally {
+    restoreFetch();
+  }
+});
+
+test('preserves an explicitly inactive collection', async () => {
+  const response = {
+    ...collectionResponse,
+    collection: { ...collectionResponse.collection, isActive: false },
+  };
+  const restoreFetch = mockFetch(async () => new Response(JSON.stringify(response)));
+
+  try {
+    const result = await getCollection('8706524');
+    assert.equal(result.collection.isActive, false);
+  } finally {
+    restoreFetch();
+  }
+});
+
 test('rejects non-numeric IDs without making a request', async () => {
   let requestCount = 0;
   const restoreFetch = mockFetch(async () => {

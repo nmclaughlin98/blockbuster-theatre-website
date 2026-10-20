@@ -74,6 +74,7 @@ export async function getCollection(collectionId, signal) {
     || typeof collection.description !== 'string'
     || typeof collection.posterUrl !== 'string'
     || typeof collection.backdropUrl !== 'string'
+    || (collection.isActive !== undefined && typeof collection.isActive !== 'boolean')
     || !Array.isArray(collection.movieIds)
     || !collection.movieIds.every((id) => typeof id === 'string' && /^\d+$/.test(id))
     || !Array.isArray(data.movies)

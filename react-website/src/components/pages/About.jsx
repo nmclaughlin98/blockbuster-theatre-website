@@ -36,9 +36,9 @@ function CinemaHero() {
         <h1>Experience Cinema In Full Glory</h1>
         <div className="movie-meta-bar">
           <span className="rating-badge">8 SCREENS</span>
-          <span className="runtime-badge">Dolby Atmos 3D Audio</span>
-          <span className="runtime-badge">4K IMAX Laser</span>
-          <span className="runtime-badge">100% Accessible</span>
+          <span className="about-section-badge">Dolby Atmos 3D Audio</span>
+          <span className="about-section-badge">4K IMAX Laser</span>
+          <span className="about-section-badge">100% Accessible</span>
         </div>
       </div>
     </section>

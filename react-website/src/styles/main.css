@@ -264,7 +264,7 @@ header {
     height: 100%;
     font-family: var(--font-display), serif;
     font-weight: 600;
-    font-size: clamp(0.8rem, 1.8vw, 1.6rem);
+    font-size: clamp(0.9rem, 1.8vw, 1.45rem);
     line-height: 1.1;
     letter-spacing: 0.12em;
     color: var(--text-primary);
@@ -867,7 +867,7 @@ section {
 .collection-card-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(min(100%, clamp(8.125rem, 38vw, 12.5rem)), 1fr));
-    gap: clamp(0.5rem, 1.5vw, 0.875rem);
+    gap: clamp(0.8rem, 1.5vw, 0.9rem);
     min-width: 0;
     width: 100%;
     margin: 0 auto;
@@ -896,6 +896,7 @@ section {
     transform: translateY(-8px);
     box-shadow: var(--shadow-lg), 0 0 30px rgba(255, 51, 75, 0.2);
     border-color: var(--border-accent);
+    border-width: 3px;
     color: inherit;
 }
 
@@ -911,7 +912,7 @@ section {
 .poster-card-container:hover .poster-column .poster,
 .poster-card-container:focus-within .poster-column .poster {
     transform: scale(1.05);
-    filter: brightness(0.65);
+    filter: brightness(0.7);
 }
 
 /* Movie Card Overlay / Content */
@@ -1172,22 +1173,34 @@ section {
 
 .offers h2 {
     font-family: var(--font-heading);
-    font-size: 1.5rem;
+    font-size: clamp(1.4rem, 2vw, 1.75rem);
     color: #fff;
-    margin-bottom: 8px;
+    margin-bottom: clamp(8px, 1vw, 12px);
 }
 
 .offers p {
     color: var(--text-secondary);
-    font-size: 0.95rem;
-    margin-bottom: 6px;
+    font-size: clamp(0.8rem, 1vw, 0.9rem);
+    margin-bottom: clamp(6px, 1vw, 10px);
+}
+
+.offers .featured-movie {
+    font-family: var(--font-body);
+    font-size: clamp(1.0rem, 1vw, 1.2rem);
+    font-weight: 700;
+    color: var(--text-secondary);
+    margin-bottom: clamp(6px, 1vw, 20px);
 }
 
 .offers p:last-child {
     font-weight: 700;
     color: var(--accent-gold);
-    margin-top: 8px;
-    font-size: 1.05rem;
+    margin-top: clamp(8px, 1vw, 16px);
+}
+
+.offers .button {
+    margin-top: clamp(12px, 1vw, 20px);
+    transition: all var(--transition);
 }
 
 /* ==========================================================================
@@ -2730,7 +2743,8 @@ select option {
     align-items: center;
     gap: 14px;
     flex-wrap: wrap;
-    margin-bottom: 16px;
+    margin-top: 20px;
+    margin-bottom: 15px;
 }
 
 .rating-badge {
@@ -2740,6 +2754,12 @@ select option {
     border-radius: var(--radius-sm);
     font-weight: 700;
     font-size: 0.85rem;
+}
+
+.about-section-badge {
+    color: var(--text-secondary);
+    font-size: clamp(0.85rem, 1vw, 0.95rem);
+    font-weight: 600;
 }
 
 .runtime-badge {
@@ -3240,17 +3260,17 @@ select option {
 
 .col.col-1-3 h1 {
     font-family: var(--font-heading);
-    font-size: 24px;
+    font-size: clamp(1.5rem, 2vw, 2rem);
     color: #fff;
-    margin-bottom: 16px;
+    margin-bottom: clamp(12px, 1vw, 24px);
     border-bottom: 1px solid var(--border-subtle);
     padding-bottom: 10px;
 }
 
 .day-of-week {
-    font-weight: 700;
+    font-weight: 600;
     color: #fff;
-    font-size: clamp(1.2rem, 1.5vw, 1rem);
+    font-size: clamp(1.2rem, 1.5vw, 1.4rem);
     margin-top: 10px;
     display: block;
     margin-bottom: clamp(12px, 1vw, 20px);
@@ -3258,7 +3278,7 @@ select option {
 
 .show-time-list {
     display: flex;
-    gap: 8px;
+    gap: clamp(8px, 1vw, 16px);
     flex-wrap: wrap;
     margin-top: 6px;
     margin-bottom: 10px;
@@ -3380,14 +3400,14 @@ footer small {
 
 .secondary-nav ul {
     display: flex;
-    gap: clamp(7px, 2vw, 16px);
+    gap: clamp(10px, 2vw, 16px);
     flex-wrap: wrap;
 }
 
 .secondary-nav ul li a {
     color: var(--text-secondary);
     text-transform: uppercase;
-    font-size: clamp(0.6rem, 1.2rem, 0.9rem);
+    font-size: clamp(0.7rem, 3vw, 0.9rem);
     font-family: var(--font-body);
     font-weight: 700;
     transition: color var(--transition);

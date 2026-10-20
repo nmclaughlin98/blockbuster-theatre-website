@@ -22,7 +22,8 @@ export function selectionKey(selection) {
 }
 
 export function selectionDisplayLabel(selection) {
-  return selection.type === 'offer' ? `Special offer: ${selection.label}` : selection.label;
+  if (selection.type !== 'offer') return selection.label;
+  return `Special offer: ${selection.displayLabel ?? selection.label ?? selection.title}`;
 }
 
 export function selectionApiId(selection) {
@@ -65,18 +66,34 @@ export async function getFilmSelections(signal) {
     throw new Error('The booking service returned an invalid film selection list.');
   }
 
-  const validSelections = data.selections.every((selection) => (
+  const selections = data.selections.map((selection) => {
+    if (!selection || typeof selection !== 'object' || Array.isArray(selection)) return selection;
+    if (selection.type === 'offer') {
+      return { ...selection, id: selection.id ?? selection.offerId };
+    }
+    if (selection.type == null && selection.offerId != null) {
+      return { ...selection, type: 'offer', id: selection.id ?? selection.offerId };
+    }
+    return selection;
+  });
+
+  const validSelections = selections.every((selection) => (
     selection
     && (selection.type === 'movie' || selection.type === 'offer')
     && selection.id != null
-    && typeof selection.title === 'string'
-    && typeof selection.label === 'string'
     && (selection.type === 'movie'
-      ? selection.movieId != null
-      : selection.offerId != null && selection.featuredMovieId != null && selection.pricingId != null)
+      ? selection.movieId != null && typeof selection.title === 'string' && typeof selection.label === 'string'
+      : selection.offerId != null
+        && selection.featuredMovieId != null
+        && selection.pricingId != null
+        && (typeof selection.displayLabel === 'string'
+          || typeof selection.label === 'string'
+          || typeof selection.title === 'string'))
   ));
   if (!validSelections) throw new Error('The booking service returned an invalid film selection.');
-  return data.selections;
+  return selections.filter((selection) => (
+    selection.type !== 'movie' || selection.isComingSoon !== true
+  ));
 }
 
 export async function getMovies(signal) {

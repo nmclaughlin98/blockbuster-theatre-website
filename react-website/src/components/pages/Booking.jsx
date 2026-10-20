@@ -140,6 +140,20 @@ function TicketSelection({
       </div>
       <div className="form-group ticket-type-list">
         <label>Select Ticket Types</label>
+        {!selectionLoading
+          && !showtimeLoading
+          && !showtimeError
+          && !pricingLoading
+          && !pricingError
+          && !time
+          && (!selection || showtimes?.length > 0)
+          && (
+            <p className="showtime-placeholder" role="status">
+              {selection
+                ? 'Select a showtime to view ticket types and prices.'
+                : 'Choose a film and showtime to view ticket types and prices.'}
+            </p>
+          )}
         {pricingLoading && <p role="status">Loading ticket prices...</p>}
         {pricingError && <p className="form-notice" role="alert">{pricingError}</p>}
         {!pricingLoading && !pricingError && selection && time && !pricing?.ticketTiers.length

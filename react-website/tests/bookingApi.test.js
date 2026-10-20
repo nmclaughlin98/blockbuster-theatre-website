@@ -10,6 +10,7 @@ import {
   getSelectionShowtimes,
   getTicketPricing,
   hasOfferShowtimeOverrides,
+  selectionApiId,
   selectionDisplayLabel,
   selectionKey,
   validateCheckout,
@@ -40,8 +41,16 @@ function mockFetch(handler) {
   };
 }
 
-test('loads typed film selections and keeps movie and offer identities distinct', async () => {
-  const restoreFetch = mockFetch(async () => new Response(JSON.stringify({ selections: [movie, offer] })));
+test('excludes coming-soon movies and keeps movie and offer identities distinct', async () => {
+  const comingSoonMovie = {
+    ...movie,
+    id: 'catalog-coming-soon-id',
+    movieId: 'movie-43',
+    title: 'Coming Soon',
+    label: 'Coming Soon',
+    isComingSoon: true,
+  };
+  const restoreFetch = mockFetch(async () => new Response(JSON.stringify({ selections: [movie, comingSoonMovie, offer] })));
   try {
     const selections = await getFilmSelections();
     assert.deepEqual(selections, [movie, offer]);
@@ -50,6 +59,36 @@ test('loads typed film selections and keeps movie and offer identities distinct'
     assert.equal(selectionKey(offer), 'offer:catalog-offer-id');
     assert.equal(selectionDisplayLabel(movie), 'Example Film');
     assert.equal(selectionDisplayLabel(offer), 'Special offer: Family Deal');
+  } finally {
+    restoreFetch();
+  }
+});
+
+test('loads offers using their DynamoDB attribute names', async () => {
+  const dynamoOffer = {
+    offerId: 'halloween-spooktacular',
+    ctaLabel: 'Claim Offer',
+    displayLabel: 'Halloween Spooktacular',
+    featuredMovieId: '27850',
+    isActive: true,
+    priceDescription: '£2.50 with valid Student ID',
+    pricingId: 'STANDARD_RATES',
+    tagline: 'Through the month of October',
+    title: 'Halloween Spooktacular',
+  };
+  const restoreFetch = mockFetch(async () => new Response(JSON.stringify({ selections: [dynamoOffer] })));
+
+  try {
+    const [selection] = await getFilmSelections();
+
+    assert.equal(selection.type, 'offer');
+    assert.equal(selection.id, dynamoOffer.offerId);
+    assert.equal(selection.displayLabel, dynamoOffer.displayLabel);
+    assert.equal(selection.ctaLabel, dynamoOffer.ctaLabel);
+    assert.equal(selection.priceDescription, dynamoOffer.priceDescription);
+    assert.equal(selection.tagline, dynamoOffer.tagline);
+    assert.equal(selectionApiId(selection), dynamoOffer.offerId);
+    assert.equal(selectionDisplayLabel(selection), 'Special offer: Halloween Spooktacular');
   } finally {
     restoreFetch();
   }

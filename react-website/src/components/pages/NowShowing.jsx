@@ -6,9 +6,14 @@ import { NowShowingSwitch } from './NowShowingSwitch';
 import { useCollections } from './useCollections';
 import { useMovies } from './useMovies';
 
-const genres = ['all', 'action', 'adventure', 'animation', 'comedy', 'drama', 'family', 'fantasy', 'horror', 'music', 'romance', 'science fiction', 'thriller'];
+function getMovieGenres(movie) {
+    return [...(Array.isArray(movie.genres) ? movie.genres : []), movie.genre]
+        .filter((item) => typeof item === 'string')
+        .map((item) => item.trim())
+        .filter(Boolean);
+}
 
-function MovieFilters({ search, sort, genre, onSearch, onSort, onGenre }) {
+function MovieFilters({ genres, search, sort, genre, onSearch, onSort, onGenre }) {
     return (
         <div className="genre-filter-container">
             <div className="movie-filter-controls">
@@ -48,7 +53,7 @@ function MovieFilters({ search, sort, genre, onSearch, onSort, onGenre }) {
                         key={item}
                         onClick={() => onGenre(item)}
                     >
-                        {item === 'all' ? 'All Genres' : item === 'science fiction' ? 'Sci-Fi' : item[0].toUpperCase() + item.slice(1)}
+                        {item === 'all' ? 'All Genres' : item === 'Science Fiction' ? 'Sci-Fi' : item[0].toUpperCase() + item.slice(1)}
                     </button>
                 ))}
             </div>
@@ -65,6 +70,15 @@ export function NowShowing({ initialView }) {
     const [sort, setSort] = useState('title-asc');
     const [genre, setGenre] = useState('all');
 
+    const genres = useMemo(() => [
+        'all',
+        ...[...new Set(
+            movies
+                .filter((movie) => movie.visible !== false && movie.isComingSoon !== true)
+                .flatMap(getMovieGenres)
+        )].sort((a, b) => a.localeCompare(b)),
+    ], [movies]);
+
     function changeView(nextView) {
         setView(nextView);
         const url = new URL(window.location.href);
@@ -77,12 +91,11 @@ export function NowShowing({ initialView }) {
     }
 
     const filtered = useMemo(() => {
-        const getGenres = (movie) => [...(movie.genres || []), movie.genre].filter(Boolean).join(' ').toLowerCase();
         const result = movies.filter((movie) => (
             movie.visible !== false
             && movie.isComingSoon !== true
             && movie.title.toLowerCase().includes(search.toLowerCase())
-            && (genre === 'all' || getGenres(movie).includes(genre))
+            && (genre === 'all' || getMovieGenres(movie).includes(genre))
         ));
 
         return result.sort((a, b) => {
@@ -125,6 +138,7 @@ export function NowShowing({ initialView }) {
                                 ? <p className="collection-message" role="alert">Movie listings are temporarily unavailable.</p>
                                 : <>
                                     <MovieFilters
+                                        genres={genres}
                                         search={search}
                                         sort={sort}
                                         genre={genre}
