@@ -264,7 +264,7 @@ header {
     height: 100%;
     font-family: var(--font-display), serif;
     font-weight: 600;
-    font-size: clamp(0.9rem, 1.8vw, 1.45rem);
+    font-size: clamp(1.1rem, 1.8vw, 1.45rem);
     line-height: 1.1;
     letter-spacing: 0.12em;
     color: var(--text-primary);
@@ -829,6 +829,21 @@ section {
     padding-bottom: 16px;
     flex-wrap: wrap;
     gap: 16px;
+}
+
+.movie-section-header {
+    align-items: flex-start;
+    flex-wrap: nowrap;
+}
+
+.movie-section-header>h1 {
+    flex: 1 1 0;
+    min-width: 0;
+}
+
+.movie-section-header>a {
+    flex: 0 0 auto;
+    white-space: nowrap;
 }
 
 .section-header h1,

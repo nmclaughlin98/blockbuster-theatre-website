@@ -30,10 +30,6 @@
         height: 54px;
     }
 
-    .header-text {
-        font-size: 1.3rem;
-    }
-
     .hero-caption p {
         max-width: 100%;
         gap: 2px;
@@ -71,10 +67,6 @@
 
     .logo {
         height: 45px;
-    }
-
-    .header-text {
-        font-size: 1.1rem;
     }
 
 }
@@ -1069,10 +1061,6 @@ header {
     .header-box {
         gap: 0.5rem;
         min-width: 0;
-    }
-
-    .header-text {
-        font-size: clamp(0.8rem, 1.8vw, 1rem);
     }
 
     .page-banner h1 {

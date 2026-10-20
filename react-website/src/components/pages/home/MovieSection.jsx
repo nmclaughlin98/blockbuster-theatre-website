@@ -35,7 +35,7 @@ export function MovieSection({
 
   return (
     <section className="movie-poster">
-      <div className="section-header">
+      <div className="section-header movie-section-header">
         <h1>{title}</h1>
         <a className="btn-glass button button-no-gap" href={viewAllHref}>{viewAllLabel} <span className="material-symbols-outlined">chevron_right</span></a>
       </div>
