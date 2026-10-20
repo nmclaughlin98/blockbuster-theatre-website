@@ -770,40 +770,17 @@ async function initBookingWizard() {
     // Next and Previous Button Handlers
     form.querySelectorAll('.form-button.next').forEach(btn => {
         btn.addEventListener('click', () => {
-            // Step 1 Validation
             if (currentStep === 0) {
                 if (!bookingState.movie && movieSelect) {
                     bookingState.movie = movieSelect.value;
                 }
-                if (!bookingState.movie || bookingState.movie === 'Please Select') {
-                    showToast('Please select a movie to proceed.');
-                    return;
-                }
-                if (!bookingState.time) {
-                    showToast('Please select a showtime to proceed.');
-                    return;
-                }
             }
 
-            // Step 2 Validation (Seat count)
-            if (currentStep === 1) {
-                if (bookingState.selectedSeats.length < bookingState.totalTickets) {
-                    showToast(`Please pick all seats to continue.`);
-                    return;
-                }
-            }
-
-            // Step 3 Validation (Personal Details)
             if (currentStep === 2) {
                 const fname = document.getElementById('Fname')?.value.trim();
                 const sname = document.getElementById('Sname')?.value.trim();
                 const email = document.getElementById('email')?.value.trim();
                 const phone = document.getElementById('phone')?.value.trim();
-
-                if (!fname || !sname || !email) {
-                    showToast('Please fill in your name and email address.');
-                    return;
-                }
 
                 bookingState.customer = {fname, sname, email, phone};
             }
