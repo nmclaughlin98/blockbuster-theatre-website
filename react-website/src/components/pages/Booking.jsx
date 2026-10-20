@@ -351,7 +351,7 @@ function BookingConfirmation({ movie, date, time, screen, selectedSeats, totalTi
           <div className="ticket-movie-title">{movie?.title || 'Movie'}</div>
           <div className="ticket-details-grid">
             <div className="ticket-detail-item"><span>Date & Showtime</span><strong>{date} at {time}</strong></div>
-            <div className="ticket-detail-item"><span>Screen / Hall</span><strong>Screen {screen} (Dolby Atmos)</strong></div>
+            <div className="ticket-detail-item"><span>Screen / Hall</span><strong>Screen {screen}</strong></div>
             <div className="ticket-detail-item"><span>Seat Numbers</span><strong>{selectedSeats.join(', ')}</strong></div>
             <div className="ticket-detail-item"><span>Demo Total</span><strong>£{totalPrice.toFixed(2)}</strong></div>
             <div className="ticket-detail-item"><span>Guest Name</span><strong>{customer.firstName} {customer.surname}</strong></div>
