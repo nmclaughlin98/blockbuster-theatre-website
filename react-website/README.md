@@ -6,6 +6,10 @@ The movies API base URL is written to the gitignored `src/config.js` before each
 
 For local development, copy `.env.example` to `.env.local` and set `VITE_MOVIES_API_URL` to the API invoke base URL. Include a stage path if the API uses one, but do not append a route such as `/movies`. You can also use mode-specific `.env.development.local` and `.env.production.local` files. For GitHub Pages deployments, add a repository Actions variable named `VITE_MOVIES_API_URL` under Settings → Secrets and variables → Actions → Variables. The deployment workflow requires this variable and passes it into the production build.
 
+## Wallet passes
+
+Apple and Google Wallet buttons are shown on the demo ticket preview. Pass generation is disabled by default; clicking either button displays a toast. To enable generation, set `VITE_ENABLE_WALLET_PASSES=true` for the build. The existing wallet worker is used by default; set `VITE_WALLET_PASS_API_URL` to override its URL. For GitHub Pages, configure these as repository Actions variables.
+
 The booking flow loads typed movie and offer entries from `GET /film-selections`, movie showtimes from `GET /movies/{id}`, and server-owned ticket tiers from `GET /ticket-pricing`. Showtimes use the screened format `{ day: [{ screen, time }] }`; the frontend does not support the deprecated string-only schedule. If film selections fail, it falls back to available records from `GET /movies` and reports that offer data is unavailable. The home-page offers are loaded from the offer entries in `/film-selections`. Checkout sends only the selected typed ID, showtime day/time, and ticket quantities to `POST /checkout/validate`; the returned total is authoritative. A non-empty offer `overrideShowtimes` map is authoritative. If it is empty or missing, the frontend loads the featured movie's schedule; when present, override days with no entries do not fall back to the movie schedule.
 
 ## Movie Collections

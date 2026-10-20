@@ -1,0 +1,30 @@
+const steps = ['Tickets', 'Select Seats', 'Guest Info', 'Payment', 'Confirmed'];
+
+export function ProgressBar({ currentStep }) {
+  return (
+    <ol id="progressbar" aria-label="Booking progress">
+      {steps.map((label, index) => (
+        <li
+          className={`${index <= currentStep ? 'active' : ''} ${index < currentStep || (index === currentStep && currentStep === steps.length - 1) ? 'completed' : ''
+            }`}
+          key={label}
+        >
+          {label}
+        </li>
+      ))}
+    </ol>
+  );
+}
+
+export function StepHeader({ title, description }) {
+  return <div className="step-header"><h2>{title}</h2><p>{description}</p></div>;
+}
+
+export function StepActions({ onBack, onContinue, continueLabel }) {
+  return (
+    <div className="form-actions">
+      <button className="form-button previous" type="button" onClick={onBack}>Back</button>
+      <button className="form-button next" type="button" onClick={onContinue}>{continueLabel}</button>
+    </div>
+  );
+}
