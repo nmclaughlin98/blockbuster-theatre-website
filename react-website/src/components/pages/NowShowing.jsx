@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { MovieGrid } from '../movies';
 import { Layout } from '../shared';
+import { PageLoader } from '../shared/PageLoader';
 import { CollectionsView } from './Collections';
 import { NowShowingSwitch } from './NowShowingSwitch';
 import { useCollections } from './useCollections';
@@ -79,6 +80,8 @@ export function NowShowing({ initialView }) {
         )].sort((a, b) => a.localeCompare(b)),
     ], [movies]);
 
+    const pageLoading = view === 'movies' ? loading : collectionState.loading;
+
     function changeView(nextView) {
         setView(nextView);
         const url = new URL(window.location.href);
@@ -109,6 +112,14 @@ export function NowShowing({ initialView }) {
         });
     }, [movies, search, sort, genre]);
 
+    if (pageLoading) {
+        return (
+            <Layout current="now" loading>
+                <PageLoader label={view === 'movies' ? 'Loading now showing movies' : 'Loading collections'} />
+            </Layout>
+        );
+    }
+
     return (
         <Layout current="now">
             <section className="movie-poster">
@@ -132,22 +143,20 @@ export function NowShowing({ initialView }) {
                     aria-label={view === 'movies' ? 'Now showing movies' : 'Movie collections'}
                 >
                     {view === 'movies'
-                        ? loading
-                            ? <p className="collection-message" role="status">Loading now showing movies…</p>
-                            : error
-                                ? <p className="collection-message" role="alert">Movie listings are temporarily unavailable.</p>
-                                : <>
-                                    <MovieFilters
-                                        genres={genres}
-                                        search={search}
-                                        sort={sort}
-                                        genre={genre}
-                                        onSearch={setSearch}
-                                        onSort={setSort}
-                                        onGenre={setGenre}
-                                    />
-                                    <MovieGrid movies={filtered} />
-                                </>
+                        ? error
+                            ? <p className="collection-message" role="alert">Movie listings are temporarily unavailable.</p>
+                            : <>
+                                <MovieFilters
+                                    genres={genres}
+                                    search={search}
+                                    sort={sort}
+                                    genre={genre}
+                                    onSearch={setSearch}
+                                    onSort={setSort}
+                                    onGenre={setGenre}
+                                />
+                                <MovieGrid movies={filtered} />
+                            </>
                         : <CollectionsView
                             collections={collectionState.collections}
                             loading={collectionState.loading}

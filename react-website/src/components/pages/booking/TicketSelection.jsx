@@ -126,10 +126,8 @@ export function TicketSelection({
             <strong>{validation?.quote ? new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP' }).format(validation.quote.total) : new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP' }).format(0)}</strong>
           </div>
         </div>
-        <div className="subtotal-item">
-          <button type="button" className="form-button next" onClick={onContinue}>Select Seats</button>
-        </div>
       </div>
+      <button type="button" className="form-button next booking-continue-button" onClick={onContinue}>Select Seats</button>
     </fieldset>
   );
 }

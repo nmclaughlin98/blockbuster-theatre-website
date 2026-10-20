@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Layout } from '../shared';
+import { PageLoader } from '../shared/PageLoader';
 import { Toast } from '../shared/Toast';
 import {
   getBookingSelections,
@@ -121,6 +122,20 @@ export function Booking() {
   const validationLoading = Boolean(checkoutRequestKey && (
     validationState.requestKey !== checkoutRequestKey || validationState.loading
   ));
+  const initialShowtimeLoading = Boolean(
+    requestedTime
+    && !screeningChanged
+    && time
+    && (pricingLoading || validationLoading),
+  );
+  const bookingLoading = selectionLoading
+    || Boolean(
+      !screeningChanged
+      && selectedSelection
+      && detailMovieId != null
+      && (!currentMovieDetail || currentMovieDetail.loading),
+    )
+    || initialShowtimeLoading;
 
   useEffect(() => {
     const controller = new AbortController();
@@ -366,6 +381,14 @@ export function Booking() {
   }
 
   const dismissToast = useCallback(() => setToastMessage(''), []);
+
+  if (bookingLoading) {
+    return (
+      <Layout current="booking" loading>
+        <PageLoader label="Loading booking options" />
+      </Layout>
+    );
+  }
 
   return (
     <Layout current="booking">
