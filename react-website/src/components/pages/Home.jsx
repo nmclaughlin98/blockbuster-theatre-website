@@ -4,9 +4,17 @@ import { useMovies } from './useMovies';
 import { HeroCarousel } from './home/HeroCarousel';
 import { MovieSection } from './home/MovieSection';
 import { Offers } from './home/Offers';
+import { useCollection } from './useCollection';
+
+const SEASONAL_PICKS_COLLECTION_ID = '8706566';
 
 export function Home() {
   const { movies, loading, error } = useMovies();
+  const {
+    collection: seasonalCollection,
+    movies: seasonalMovies,
+    error: seasonalCollectionError,
+  } = useCollection(SEASONAL_PICKS_COLLECTION_ID);
   const current = movies.filter((movie) => movie.visible !== false && movie.isComingSoon !== true);
   const carousel = movies.filter((movie) => movie.visible !== false && movie.isCarousel === true);
 
@@ -25,6 +33,17 @@ export function Home() {
       {!error && <>
         <MovieSection title="What's On" movies={[...current].sort((a, b) => new Date(b.releaseDate || 0) - new Date(a.releaseDate || 0)).slice(0, 7)} />
         <MovieSection title="Top Picks" movies={[...current].sort((a, b) => (b.score ?? 0) - (a.score ?? 0)).slice(0, 7)} />
+        {seasonalCollectionError && (
+          <p role="alert">Seasonal picks are temporarily unavailable.</p>
+        )}
+        {seasonalCollection?.isActive === true && seasonalMovies.length > 0 && (
+          <MovieSection
+            title={seasonalCollection.name}
+            movies={seasonalMovies}
+            viewAllHref={`./collection.html?collection=${SEASONAL_PICKS_COLLECTION_ID}`}
+            viewAllLabel="View Collection"
+          />
+        )}
       </>}
       <Offers />
     </Layout>

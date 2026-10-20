@@ -20,34 +20,53 @@ function formatReleaseDate(value) {
     return date.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' });
 }
 
+// Helper function to build TMDB URLs dynamically if using TMDB image paths
+const getTmdbUrl = (url, size) => {
+    if (!url) return '';
+    return url.replace(/\/w\d+\/|\/original\//, `/${size}/`);
+};
+
 function MovieHero({ movie }) {
     const directors = formatPeople(movie.director);
     const cast = formatPeople(movie.starring);
     const rating = typeof movie.rating === 'string' ? movie.rating.toUpperCase() : '';
 
+    // Pick the primary image source
+    const heroImage = movie.still || movie.largeStill || movie.poster;
+
+    // Build the responsive srcset dynamically if it's a TMDB image URL
+    const isTmdb = heroImage?.includes('image.tmdb.org');
+    const srcSet = isTmdb
+        ? `${getTmdbUrl(heroImage, 'w780')} 780w,
+           ${getTmdbUrl(heroImage, 'w1280')} 1280w,
+           ${getTmdbUrl(heroImage, 'original')} 1920w`
+        : undefined;
+
     return (
         <section className="movie-still">
             <img
                 className="still"
-                src={ movie.still || movie.largeStill || movie.poster }
-                alt=""
+                src={heroImage}
+                srcSet={srcSet}
+                sizes="(max-width: 768px) 100vw, 1200px"
+                alt={movie.title ? `${movie.title} Hero Still` : ''}
             />
             <div className="movie-detail-caption">
-                <h1>{ movie.title }</h1>
+                <h1>{movie.title}</h1>
                 <div className="rating-container">
-                    { rating && (
-                        <img className="rating-movies" src={ asset(`assets/images/ratings/${ rating }.svg`) }
-                             alt={ `${ rating } age rating` }/>
-                    ) }
+                    {rating && (
+                        <img className="rating-movies" src={asset(`assets/images/ratings/${rating}.svg`)}
+                            alt={`${rating} age rating`} />
+                    )}
                     <div className="runtime-movies"><strong>Run
-                        Time:</strong> { movie.runtime ? `${ movie.runtime } mins` : 'TBD' }</div>
+                        Time:</strong> {movie.runtime ? `${movie.runtime} mins` : 'TBD'}</div>
                 </div>
                 <div className="movie-detail-meta">
                     <p>
-                        <strong>{ directors.length === 1 ? 'Director' : 'Directors' }:</strong> { directors.join(', ') || 'Unknown' }
+                        <strong>{directors.length === 1 ? 'Director' : 'Directors'}:</strong> {directors.join(', ') || 'Unknown'}
                     </p>
-                    { cast.length > 0 && <p><strong>Starring:</strong> { cast.join(', ') }</p> }
-                    <p><strong>Release Date:</strong> { formatReleaseDate(movie.releaseDate) }</p>
+                    {cast.length > 0 && <p><strong>Starring:</strong> {cast.join(', ')}</p>}
+                    <p><strong>Release Date:</strong> {formatReleaseDate(movie.releaseDate)}</p>
                 </div>
             </div>
         </section>
@@ -72,26 +91,26 @@ function ShowtimeSchedule({ movie, selectedDay, selectedTime, onSelectTime, book
     return (
         <aside className="col col-1-3">
             <h1>Show Times:</h1>
-            { showtimes.length > 0 ? showtimes.map(([day, times]) => (
-                <div className="showtime-day" key={ day }>
-                    <h2 className="day-of-week">{ day }</h2>
+            {showtimes.length > 0 ? showtimes.map(([day, times]) => (
+                <div className="showtime-day" key={day}>
+                    <h2 className="day-of-week">{day}</h2>
                     <div className="show-time-list">
-                        { (Array.isArray(times) ? times : []).map((time) => (
+                        {(Array.isArray(times) ? times : []).map((time) => (
                             <button
-                                className={ `show-time ${ selectedDay === day && selectedTime === time ? 'active' : '' }` }
+                                className={`show-time ${selectedDay === day && selectedTime === time ? 'active' : ''}`}
                                 type="button"
-                                aria-pressed={ selectedDay === day && selectedTime === time }
-                                key={ time }
-                                onClick={ () => onSelectTime(day, time) }
+                                aria-pressed={selectedDay === day && selectedTime === time}
+                                key={time}
+                                onClick={() => onSelectTime(day, time)}
                             >
-                                { time }
+                                {time}
                             </button>
-                        )) }
+                        ))}
                     </div>
-                    <hr/>
+                    <hr />
                 </div>
-            )) : <p>No showtimes available.</p> }
-            <a className="form-button" href={ bookingHref }>Book Now</a>
+            )) : <p>No showtimes available.</p>}
+            <a className="form-button" href={bookingHref}>Book Now</a>
         </aside>
     );
 }
@@ -111,14 +130,14 @@ function MovieContent({ movie, comingSoon }) {
             Array.isArray(times) && times.includes(requestedTime)
         ))?.[0] || '';
     });
-    const movieBookingUrl = `../bookNow.html?movie=${ encodeURIComponent(movie.title) }`;
+    const movieBookingUrl = `../bookNow.html?movie=${encodeURIComponent(movie.title)}`;
     const bookingHref = selectedDay && selectedTime
-        ? `${ movieBookingUrl }&day=${ encodeURIComponent(selectedDay) }&time=${ encodeURIComponent(selectedTime) }`
+        ? `${movieBookingUrl}&day=${encodeURIComponent(selectedDay)}&time=${encodeURIComponent(selectedTime)}`
         : movieBookingUrl;
     const synopsis = typeof movie.synopsis === 'string' ? movie.synopsis.split('\n').filter(Boolean) : [];
 
     useEffect(() => {
-        document.title = `Blockbuster Theatre - ${ movie.title }`;
+        document.title = `Blockbuster Theatre - ${movie.title}`;
     }, [movie.title]);
 
     function selectTime(day, time) {
@@ -128,23 +147,23 @@ function MovieContent({ movie, comingSoon }) {
 
     return (
         <>
-            <MovieHero movie={ movie }/>
+            <MovieHero movie={movie} />
             <section className="movie-page">
                 <div className="col-no-border col-2-3">
                     <h2>Synopsis</h2>
                     <div id="movie-synopsis">
-                        { synopsis.length > 0
+                        {synopsis.length > 0
                             ? synopsis.map((paragraph, index) => <p
-                                key={ `${ index }-${ paragraph }` }>{ paragraph }</p>)
-                            : <p>Synopsis unavailable.</p> }
+                                key={`${index}-${paragraph}`}>{paragraph}</p>)
+                            : <p>Synopsis unavailable.</p>}
                     </div>
                     <div className="move-trailer"
-                         aria-label={ `${ movie.title } ${ movie.trailer ? 'trailer' : 'still' }` }>
-                        { movie.trailer ? (
+                        aria-label={`${movie.title} ${movie.trailer ? 'trailer' : 'still'}`}>
+                        {movie.trailer ? (
                             <iframe
                                 className="trailer-media"
-                                src={ movie.trailer }
-                                title={ `${ movie.title } trailer` }
+                                src={movie.trailer}
+                                title={`${movie.title} trailer`}
                                 referrerPolicy="strict-origin-when-cross-origin"
                                 allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
                                 allowFullScreen
@@ -152,26 +171,26 @@ function MovieContent({ movie, comingSoon }) {
                         ) : (
                             <img
                                 className="trailer-media trailer-still"
-                                src={ movie.still || movie.largeStill || movie.poster || asset('assets/images/logo/png/logo-full.png') }
-                                alt={ `${ movie.title } still` }
+                                src={movie.still || movie.largeStill || movie.poster || asset('assets/images/logo/png/logo-full.png')}
+                                alt={`${movie.title} still`}
                             />
-                        ) }
+                        )}
                     </div>
                 </div>
-                { comingSoon ? (
+                {comingSoon ? (
                     <aside className="col col-1-3">
                         <h1>Coming Soon:</h1>
-                        <Countdown movie={ movie } className="detail-countdown"/>
+                        <Countdown movie={movie} className="detail-countdown" />
                     </aside>
                 ) : (
                     <ShowtimeSchedule
-                        movie={ movie }
-                        selectedDay={ selectedDay }
-                        selectedTime={ selectedTime }
-                        onSelectTime={ selectTime }
-                        bookingHref={ bookingHref }
+                        movie={movie}
+                        selectedDay={selectedDay}
+                        selectedTime={selectedTime}
+                        onSelectTime={selectTime}
+                        bookingHref={bookingHref}
                     />
-                ) }
+                )}
             </section>
         </>
     );
@@ -184,16 +203,16 @@ export function Detail({ comingSoon = false }) {
     if (loading) {
         return (
             <Layout loading>
-                <PageLoader label="Loading movie details"/>
+                <PageLoader label="Loading movie details" />
             </Layout>
         );
     }
 
     return (
         <Layout>
-            { error || !movie
+            {error || !movie
                 ? <p role="alert">Movie details are temporarily unavailable.</p>
-                : <MovieContent movie={ movie } comingSoon={ comingSoon }/> }
+                : <MovieContent movie={movie} comingSoon={comingSoon} />}
         </Layout>
     );
 }

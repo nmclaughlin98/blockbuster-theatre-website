@@ -8,6 +8,10 @@ For local development, copy `.env.example` to `.env.local` and set `VITE_MOVIES_
 
 The booking flow loads typed movie and offer entries from `GET /film-selections`, movie showtimes from `GET /movies/{id}`, and server-owned ticket tiers from `GET /ticket-pricing`. If film selections fail, it falls back to available records from `GET /movies` and reports that offer data is unavailable. The home-page offers are loaded from the offer entries in `/film-selections`. Checkout sends only the selected typed ID, showtime, and ticket quantities to `POST /checkout/validate`; the returned total is authoritative. A non-empty offer `overrideShowtimes` map is authoritative. If it is empty or missing, the frontend loads the featured movie's schedule; when present, override days with no entries do not fall back to the movie schedule.
 
+## Movie Collections
+
+Collections is a section of Now Showing, available through an animated page-level switch rather than the primary navigation. The browse view loads collection cards from `GET /collections`; each card opens `collection.html?collection={id}`. The detail page calls `GET /collections/{id}` and displays the available movie summaries in the order returned by the API.
+
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
 Currently, two official plugins are available:

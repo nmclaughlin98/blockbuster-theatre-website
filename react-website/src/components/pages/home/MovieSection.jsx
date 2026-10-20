@@ -1,7 +1,12 @@
 import { useLayoutEffect, useRef, useState } from 'react';
 import { MovieGrid } from '../../movies';
 
-export function MovieSection({ title, movies }) {
+export function MovieSection({
+  title,
+  movies,
+  viewAllHref = './nowShowing.html',
+  viewAllLabel = 'View All Movies',
+}) {
   const gridRef = useRef(null);
   const [visibleCount, setVisibleCount] = useState(movies.length);
   const movieCount = movies.length;
@@ -12,7 +17,7 @@ export function MovieSection({ title, movies }) {
 
     const updateVisibleCount = () => {
       const columnCount = getComputedStyle(grid).gridTemplateColumns.trim().split(/\s+/).length;
-      const rowCount = columnCount < 4 ? 2 : 1;
+      const rowCount = columnCount === 2 ? 3 : columnCount < 4 ? 2 : 1;
       const nextCount = Math.min(columnCount * rowCount, movieCount);
       setVisibleCount((current) => current === nextCount ? current : nextCount);
     };
@@ -30,9 +35,9 @@ export function MovieSection({ title, movies }) {
 
   return (
     <section className="movie-poster">
-      <div className="section-header">
+      <div className="section-header movie-section-header">
         <h1>{title}</h1>
-        <a className="btn-glass button button-no-gap" href="./nowShowing.html">View All Movies <span className="material-symbols-outlined">chevron_right</span></a>
+        <a className="btn-glass button button-no-gap" href={viewAllHref}>{viewAllLabel} <span className="material-symbols-outlined">chevron_right</span></a>
       </div>
       <MovieGrid movies={movies.slice(0, visibleCount)} containerRef={gridRef} />
     </section>

@@ -1,4 +1,13 @@
-import { About, Booking, ComingSoon, Detail, Home, NowShowing, Timetable } from './components/pages';
+import {
+  About,
+  Booking,
+  CollectionDetail,
+  ComingSoon,
+  Detail,
+  Home,
+  NowShowing,
+  Timetable,
+} from './components/pages';
 import { useRouter } from './router';
 
 export default function App() {
@@ -7,6 +16,8 @@ export default function App() {
 
   let page = <Home />;
   if (path.includes('booknow')) page = <Booking />;
+  else if (path.endsWith('/collections.html')) page = <NowShowing initialView="collections" />;
+  else if (path.endsWith('/collection.html')) page = <CollectionDetail />;
   else if (path.includes('movie-detail-coming-soon')) page = <Detail comingSoon />;
   else if (path.includes('movie-detail')) page = <Detail />;
   else if (path.includes('nowshowing')) page = <NowShowing />;

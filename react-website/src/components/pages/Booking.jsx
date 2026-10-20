@@ -46,7 +46,11 @@ function ProgressBar({ currentStep }) {
   return (
     <ol id="progressbar" aria-label="Booking progress">
       {steps.map((label, index) => (
-        <li className={`${index <= currentStep ? 'active' : ''} ${index < currentStep ? 'completed' : ''}`} key={label}>
+        <li
+          className={`${index <= currentStep ? 'active' : ''} ${index < currentStep || (index === currentStep && currentStep === steps.length - 1) ? 'completed' : ''
+            }`}
+          key={label}
+        >
           {label}
         </li>
       ))}
@@ -97,7 +101,7 @@ function TicketSelection({
             ))}
           </optgroup>
         </select>
-        {selectionLoading && <p role="status">Loading films and special offers...</p>}
+        {selectionLoading && <span className="showtime-placeholder" role="status">Loading films and special offers...</span>}
         {selectionError && <p className="form-notice" role="alert">{selectionError}</p>}
         {!selectionLoading && !selectionError && !selections.length
           && <p className="form-notice" role="status">No films or special offers are currently available.</p>}
@@ -118,28 +122,42 @@ function TicketSelection({
                 ? <span role="status">Loading showtimes...</span>
                 : showtimeError
                   ? <span className="form-notice" role="alert">{showtimeError}</span>
-              : showtimes?.length
-                ? showtimes.map((showtime) => (
-                  <button
-                    className={`time-chip ${time === showtime ? 'active' : ''}`}
-                    type="button"
-                    aria-pressed={time === showtime}
-                    key={showtime}
-                    onClick={() => onTimeChange(showtime)}
-                  >
-                    {showtime}
-                  </button>
-                ))
-                : <span className="showtime-placeholder">
-                  {selection.type === 'offer'
-                    ? 'No showtimes are available for this offer and day.'
-                    : 'No showtimes available for this selection and day.'}
-                </span>}
+                  : showtimes?.length
+                    ? showtimes.map((showtime) => (
+                      <button
+                        className={`time-chip ${time === showtime ? 'active' : ''}`}
+                        type="button"
+                        aria-pressed={time === showtime}
+                        key={showtime}
+                        onClick={() => onTimeChange(showtime)}
+                      >
+                        {showtime}
+                      </button>
+                    ))
+                    : <span className="showtime-placeholder">
+                      {selection.type === 'offer'
+                        ? 'No showtimes are available for this offer and day.'
+                        : 'No showtimes available for this selection and day.'}
+                    </span>}
           </div>
         </div>
       </div>
       <div className="form-group ticket-type-list">
         <label>Select Ticket Types</label>
+        {!selectionLoading
+          && !showtimeLoading
+          && !showtimeError
+          && !pricingLoading
+          && !pricingError
+          && !time
+          && (!selection || showtimes?.length > 0)
+          && (
+            <p className="showtime-placeholder" role="status">
+              {selection
+                ? 'Select a showtime to view ticket types and prices.'
+                : 'Choose a film and showtime to view ticket types and prices.'}
+            </p>
+          )}
         {pricingLoading && <p role="status">Loading ticket prices...</p>}
         {pricingError && <p className="form-notice" role="alert">{pricingError}</p>}
         {!pricingLoading && !pricingError && selection && time && !pricing?.ticketTiers.length
@@ -156,7 +174,7 @@ function TicketSelection({
           </div>
         ))}
         {validation?.error && <p className="form-notice" role="alert">{validation.error}</p>}
-        {validationLoading && <p role="status">Confirming your ticket choices...</p>}
+        {validationLoading && <p role="status"></p>}
       </div>
       <div className="booking-subtotal-bar">
         <div className="subtotal-item booking-subtotal-values">
@@ -170,7 +188,7 @@ function TicketSelection({
           </div>
         </div>
         <div className="subtotal-item">
-          <button type="button" className="form-button next" onClick={onContinue} disabled={!validation?.quote || validationLoading}>Select Seats</button>
+          <button type="button" className="form-button next" onClick={onContinue}>Select Seats</button>
         </div>
       </div>
     </fieldset>
@@ -178,6 +196,36 @@ function TicketSelection({
 }
 
 function SeatSelection({ selectedSeats, totalTickets, onToggleSeat, onBack, onContinue }) {
+  const [hoveredSeat, setHoveredSeat] = useState(null);
+
+  function updateSeatTooltip(seatId, x, y) {
+    const offset = 12;
+    const tooltipWidth = 84;
+    const tooltipHeight = 40;
+    const left = x + offset + tooltipWidth < window.innerWidth - 8
+      ? x + offset
+      : x - offset - tooltipWidth;
+    const top = y + offset + tooltipHeight < window.innerHeight - 8
+      ? y + offset
+      : y - offset - tooltipHeight;
+
+    setHoveredSeat({
+      seatId,
+      left: Math.max(8, left),
+      top: Math.max(8, top),
+    });
+  }
+
+  function handleSeatPointer(seatId, event) {
+    if (event.pointerType !== 'mouse') return;
+    if (event.target.closest('.seat-spacer')) {
+      setHoveredSeat(null);
+      return;
+    }
+
+    updateSeatTooltip(seatId, event.clientX, event.clientY);
+  }
+
   return (
     <fieldset className="active" data-step="1">
       <StepHeader
@@ -191,7 +239,12 @@ function SeatSelection({ selectedSeats, totalTickets, onToggleSeat, onBack, onCo
             <div className="legend-item"><div className="legend-seat" /><span>Available</span></div>
             <div className="legend-item"><div className="legend-seat booked-seat" /><span>Booked</span></div>
             <div className="legend-item"><div className="legend-seat selected-seat" /><span>Your Pick</span></div>
-            <div className="legend-item"><div className="legend-seat seat-accessible" /><span>Accessible</span></div>
+            <div className="legend-item">
+              <div className="legend-seat seat-accessible">
+                <img src={asset('assets/images/icons/accessible.png')} alt="" />
+              </div>
+              <span>Accessible</span>
+            </div>
           </div>
         </div>
         <div className="seat-grid" aria-label="Cinema seating plan">
@@ -206,7 +259,13 @@ function SeatSelection({ selectedSeats, totalTickets, onToggleSeat, onBack, onCo
                   const isAccessible = accessibleSeats.has(seatId);
                   const isSelected = selectedSeats.includes(seatId);
                   return (
-                    <span className="seat-cell" key={seatId}>
+                    <span
+                      className="seat-cell"
+                      key={seatId}
+                      onPointerEnter={(event) => handleSeatPointer(seatId, event)}
+                      onPointerMove={(event) => handleSeatPointer(seatId, event)}
+                      onPointerLeave={() => setHoveredSeat(null)}
+                    >
                       {row !== 'G' && seatIndex === 5 && <span className="seat seat-spacer" aria-hidden="true" />}
                       <button
                         className={`seat ${isAccessible ? 'seat-accessible' : ''} ${isBooked ? 'booked-seat' : ''} ${isSelected ? 'selected-seat' : ''}`}
@@ -215,6 +274,11 @@ function SeatSelection({ selectedSeats, totalTickets, onToggleSeat, onBack, onCo
                         aria-label={`Seat ${seatId}${isAccessible ? ', accessible' : ''}${isBooked ? ', booked' : ''}${isSelected ? ', selected' : ''}`}
                         aria-pressed={isSelected}
                         onClick={() => onToggleSeat(seatId)}
+                        onFocus={(event) => {
+                          const bounds = event.currentTarget.getBoundingClientRect();
+                          updateSeatTooltip(seatId, bounds.right, bounds.top);
+                        }}
+                        onBlur={() => setHoveredSeat(null)}
                       >
                         {isAccessible && <img src={asset('assets/images/icons/accessible.png')} alt="" className="seat-accessible-icon" />}
                       </button>
@@ -225,6 +289,15 @@ function SeatSelection({ selectedSeats, totalTickets, onToggleSeat, onBack, onCo
             );
           })}
         </div>
+        {hoveredSeat && (
+          <div
+            className="seat-hover-tooltip"
+            style={{ left: hoveredSeat.left, top: hoveredSeat.top }}
+            aria-hidden="true"
+          >
+            <strong>{hoveredSeat.seatId}</strong>
+          </div>
+        )}
         <div className="selected-seats-badge">
           Selected Seats: <strong>{selectedSeats.length ? selectedSeats.join(', ') : 'None selected yet'}</strong>
         </div>
@@ -472,6 +545,8 @@ export function Booking() {
   }
 
   function changeTime(value) {
+    if (value === time) return;
+
     setSelectedTime(value);
     setScreeningChanged(true);
     setSelectedSeats([]);
@@ -481,7 +556,7 @@ export function Booking() {
 
   function changeTicketCount(tierId, amount) {
     if (amount > 0 && totalTickets >= 10) {
-      setToastMessage('You can book a maximum of 10 tickets.');
+      setToastMessage('Maximum of 10 tickets allowed.');
       return;
     }
     if (amount < 0 && !tickets[tierId]) return;
@@ -519,19 +594,23 @@ export function Booking() {
 
   function continueFromTickets() {
     if (!selectedSelection) {
-      setToastMessage('Please select a film or special offer to proceed.');
+      setToastMessage('Please choose a film or special offer before selecting seats.');
       return;
     }
     if (!time || !showtimes?.includes(time)) {
-      setToastMessage('Please select an available showtime to proceed.');
+      setToastMessage('Please choose an available showtime before selecting seats.');
       return;
     }
     if (!totalTickets) {
-      setToastMessage('Please select at least one ticket.');
+      setToastMessage('Please select at least one ticket before choosing seats.');
       return;
     }
-    if (!validation?.quote || validationLoading) {
-      setToastMessage(validation?.error || 'Your ticket choices have not been validated yet.');
+    if (validationLoading) {
+      setToastMessage('Your ticket choices are still being confirmed. Please wait and try again.');
+      return;
+    }
+    if (!validation?.quote) {
+      setToastMessage(validation?.error || 'Your ticket choices could not be confirmed. Please review them and try again.');
       return;
     }
     goToStep(1);
