@@ -19,8 +19,8 @@ function getMovieGenre(movie) {
 }
 
 function getShowtimes(movie, day) {
-  const times = movie.showtimes?.[day];
-  return Array.isArray(times) ? [...new Set(times)] : [];
+  const slots = movie.showtimes?.[day];
+  return Array.isArray(slots) ? slots : [];
 }
 
 function addPageHeader(pdf, weekCommencing, layout) {
@@ -134,11 +134,11 @@ function drawMovieTable(pdf, movie, y, layout) {
         pdf.setDrawColor(...COLORS.border);
         pdf.line(x, rowY, x, rowY + rowHeight);
 
-        const time = weekTimes[rowIndex][columnStart + column];
+        const slot = weekTimes[rowIndex][columnStart + column];
         pdf.setFont('helvetica', 'normal');
         pdf.setFontSize(9);
-        pdf.setTextColor(...(time ? COLORS.dark : COLORS.muted));
-        pdf.text(time || '-', x + showingColumnWidth / 2, rowY + 12, { align: 'center' });
+        pdf.setTextColor(...(slot ? COLORS.dark : COLORS.muted));
+        pdf.text(slot ? `${slot.time} — Screen ${slot.screen}` : '-', x + showingColumnWidth / 2, rowY + 12, { align: 'center' });
       }
     });
 

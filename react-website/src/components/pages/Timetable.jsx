@@ -18,8 +18,8 @@ function getMovieGenre(movie) {
 }
 
 function getShowtimes(movie, day) {
-    const times = movie.showtimes?.[day];
-    return Array.isArray(times) ? [...new Set(times)] : [];
+    const slots = movie.showtimes?.[day];
+    return Array.isArray(slots) ? slots : [];
 }
 
 function getWeekCommencing() {
@@ -90,13 +90,13 @@ function TimetableMovie({ movie, day }) {
                 </div>
             </div>
             <div className="showtimes-grid">
-                { times.map((time, index) => (
+                { times.map((slot) => (
                     <a
                         className="showtime-btn"
-                        href={ `./bookNow.html?movie=${ encodeURIComponent(getMovieTitle(movie)) }&time=${ encodeURIComponent(time) }&day=${ encodeURIComponent(day) }` }
-                        key={ `${ time }-${ index }` }
+                        href={ `./bookNow.html?movie=${ encodeURIComponent(getMovieTitle(movie)) }&time=${ encodeURIComponent(slot.time) }&day=${ encodeURIComponent(day) }` }
+                        key={ `${ slot.time }-${ slot.screen }` }
                     >
-                        { time }<span>Screen { index + 1 }</span>
+                        { slot.time }<span>Screen { slot.screen }</span>
                     </a>
                 )) }
             </div>
