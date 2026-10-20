@@ -19,8 +19,8 @@ function getMovieGenre(movie) {
 }
 
 function getShowtimes(movie, day) {
-  const times = movie.showtimes?.[day];
-  return Array.isArray(times) ? [...new Set(times)] : [];
+  const slots = movie.showtimes?.[day];
+  return Array.isArray(slots) ? slots : [];
 }
 
 function addPageHeader(pdf, weekCommencing, layout) {
@@ -61,10 +61,11 @@ function addPageFooter(pdf, layout, pageNumber, totalPages) {
 function drawMovieTable(pdf, movie, y, layout) {
   const { margin, contentWidth, bottomLimit } = layout;
   const dayColumnWidth = 82;
-  const minShowingColumnWidth = 86;
-  const maxColumnsPerTable = Math.max(1, Math.floor((contentWidth - dayColumnWidth) / minShowingColumnWidth));
   const weekTimes = DAYS.map((day) => getShowtimes(movie, day));
-  const showingCount = Math.max(1, ...weekTimes.map((times) => times.length));
+  const screens = [...new Set(weekTimes.flat().map((slot) => slot.screen))]
+    .sort((screenA, screenB) => Number(screenA) - Number(screenB));
+  const screenColumns = screens.length ? screens : ['1'];
+  const showingColumnWidth = (contentWidth - dayColumnWidth) / screenColumns.length;
   const title = getMovieTitle(movie);
   const genre = getMovieGenre(movie);
   const titleWidth = contentWidth - 20;
@@ -77,75 +78,80 @@ function drawMovieTable(pdf, movie, y, layout) {
   const genreLines = pdf.splitTextToSize(genre, titleWidth);
   const titleBarHeight = Math.max(37, 24 + titleLines.length * 13 + genreLines.length * 9);
   const headerHeight = 22;
-  const rowHeight = 18;
-  const tableHeight = titleBarHeight + headerHeight + DAYS.length * rowHeight;
+  pdf.setFont('helvetica', 'normal');
+  pdf.setFontSize(8);
+  const rowCells = weekTimes.map((slots) => screenColumns.map((screen) => {
+    const times = slots.filter((slot) => slot.screen === screen).map((slot) => slot.time);
+    return times.length ? times.join(', ') : '-';
+  }));
+  const rowHeights = rowCells.map((cells) => Math.max(
+    18,
+    ...cells.map((text) => pdf.splitTextToSize(text, showingColumnWidth - 12).length * 9 + 8),
+  ));
+  const tableHeight = titleBarHeight + headerHeight + rowHeights.reduce((total, height) => total + height, 0);
   const pageContentTop = 76;
 
-  for (let columnStart = 0; columnStart < showingCount; columnStart += maxColumnsPerTable) {
-    if (y + tableHeight > bottomLimit) {
-      pdf.addPage();
-      y = pageContentTop;
-    }
-
-    const columns = Math.min(maxColumnsPerTable, showingCount - columnStart);
-    const showingColumnWidth = (contentWidth - dayColumnWidth) / columns;
-
-    pdf.setFillColor(...COLORS.red);
-    pdf.rect(margin, y, contentWidth, titleBarHeight, 'F');
-    pdf.setFont('helvetica', 'bold');
-    pdf.setFontSize(12);
-    pdf.setTextColor(...COLORS.white);
-    pdf.text(titleLines, margin + 10, y + 12, { lineHeightFactor: 1.05 });
-
-    pdf.setFont('helvetica', 'normal');
-    pdf.setFontSize(8);
-    pdf.setTextColor(255, 215, 220);
-    pdf.text(genreLines, margin + 10, y + 16 + titleLines.length * 13, { lineHeightFactor: 1.05 });
-    y += titleBarHeight;
-
-    pdf.setFillColor(...COLORS.dark);
-    pdf.rect(margin, y, contentWidth, headerHeight, 'F');
-    pdf.setFont('helvetica', 'bold');
-    pdf.setFontSize(8);
-    pdf.setTextColor(...COLORS.white);
-    pdf.text('DAY', margin + 9, y + 14);
-
-    for (let column = 0; column < columns; column += 1) {
-      const x = margin + dayColumnWidth + column * showingColumnWidth;
-      pdf.text(`SHOWING ${columnStart + column + 1}`, x + showingColumnWidth / 2, y + 14, { align: 'center' });
-    }
-    y += headerHeight;
-
-    DAYS.forEach((day, rowIndex) => {
-      const rowY = y + rowIndex * rowHeight;
-      pdf.setFillColor(...(rowIndex % 2 ? COLORS.alternate : COLORS.white));
-      pdf.rect(margin, rowY, contentWidth, rowHeight, 'F');
-      pdf.setDrawColor(...COLORS.border);
-      pdf.setLineWidth(0.4);
-      pdf.rect(margin, rowY, contentWidth, rowHeight);
-
-      pdf.setFont('helvetica', 'bold');
-      pdf.setFontSize(8);
-      pdf.setTextColor(...COLORS.red);
-      pdf.text(day.toUpperCase(), margin + 9, rowY + 12);
-
-      for (let column = 0; column < columns; column += 1) {
-        const x = margin + dayColumnWidth + column * showingColumnWidth;
-        pdf.setDrawColor(...COLORS.border);
-        pdf.line(x, rowY, x, rowY + rowHeight);
-
-        const time = weekTimes[rowIndex][columnStart + column];
-        pdf.setFont('helvetica', 'normal');
-        pdf.setFontSize(9);
-        pdf.setTextColor(...(time ? COLORS.dark : COLORS.muted));
-        pdf.text(time || '-', x + showingColumnWidth / 2, rowY + 12, { align: 'center' });
-      }
-    });
-
-    y += DAYS.length * rowHeight + 16;
+  if (y + tableHeight > bottomLimit) {
+    pdf.addPage();
+    y = pageContentTop;
   }
 
-  return y;
+  pdf.setFillColor(...COLORS.red);
+  pdf.rect(margin, y, contentWidth, titleBarHeight, 'F');
+  pdf.setFont('helvetica', 'bold');
+  pdf.setFontSize(12);
+  pdf.setTextColor(...COLORS.white);
+  pdf.text(titleLines, margin + 10, y + 12, { lineHeightFactor: 1.05 });
+
+  pdf.setFont('helvetica', 'normal');
+  pdf.setFontSize(8);
+  pdf.setTextColor(255, 215, 220);
+  pdf.text(genreLines, margin + 10, y + 16 + titleLines.length * 13, { lineHeightFactor: 1.05 });
+  y += titleBarHeight;
+
+  pdf.setFillColor(...COLORS.dark);
+  pdf.rect(margin, y, contentWidth, headerHeight, 'F');
+  pdf.setFont('helvetica', 'bold');
+  pdf.setFontSize(8);
+  pdf.setTextColor(...COLORS.white);
+  pdf.text('DAY', margin + 9, y + 14);
+
+  screenColumns.forEach((screen, column) => {
+    const x = margin + dayColumnWidth + column * showingColumnWidth;
+    pdf.text(`SCREEN ${screen}`, x + showingColumnWidth / 2, y + 14, { align: 'center' });
+  });
+  y += headerHeight;
+
+  DAYS.forEach((day, rowIndex) => {
+    const rowHeight = rowHeights[rowIndex];
+    const rowY = y;
+    pdf.setFillColor(...(rowIndex % 2 ? COLORS.alternate : COLORS.white));
+    pdf.rect(margin, rowY, contentWidth, rowHeight, 'F');
+    pdf.setDrawColor(...COLORS.border);
+    pdf.setLineWidth(0.4);
+    pdf.rect(margin, rowY, contentWidth, rowHeight);
+
+    pdf.setFont('helvetica', 'bold');
+    pdf.setFontSize(8);
+    pdf.setTextColor(...COLORS.red);
+    pdf.text(day.toUpperCase(), margin + 9, rowY + rowHeight / 2 + 3);
+
+    for (let column = 0; column < screenColumns.length; column += 1) {
+      const x = margin + dayColumnWidth + column * showingColumnWidth;
+      pdf.setDrawColor(...COLORS.border);
+      pdf.line(x, rowY, x, rowY + rowHeight);
+
+      const text = rowCells[rowIndex][column];
+      const lines = pdf.splitTextToSize(text, showingColumnWidth - 12);
+      pdf.setFont('helvetica', 'normal');
+      pdf.setFontSize(8);
+      pdf.setTextColor(...(text === '-' ? COLORS.muted : COLORS.dark));
+      pdf.text(lines, x + showingColumnWidth / 2, rowY + (rowHeight - lines.length * 9) / 2 + 8, { align: 'center' });
+    }
+    y += rowHeight;
+  });
+
+  return y + 16;
 }
 
 export async function downloadTimetablePdf(movies, weekCommencing) {

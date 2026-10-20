@@ -86,7 +86,8 @@ function sortShowtimesFromToday(showtimes) {
 }
 
 function ShowtimeSchedule({ movie, selectedDay, selectedTime, onSelectTime, bookingHref }) {
-    const showtimes = sortShowtimesFromToday(movie.showtimes);
+    const showtimes = sortShowtimesFromToday(movie.showtimes)
+        .filter(([, slots]) => Array.isArray(slots) && slots.length > 0);
 
     return (
         <aside className="col col-1-3">
@@ -95,15 +96,15 @@ function ShowtimeSchedule({ movie, selectedDay, selectedTime, onSelectTime, book
                 <div className="showtime-day" key={day}>
                     <h2 className="day-of-week">{day}</h2>
                     <div className="show-time-list">
-                        {(Array.isArray(times) ? times : []).map((time) => (
+                        {(Array.isArray(times) ? times : []).map((slot) => (
                             <button
-                                className={`show-time ${selectedDay === day && selectedTime === time ? 'active' : ''}`}
+                                className={`show-time ${selectedDay === day && selectedTime === slot.time ? 'active' : ''}`}
                                 type="button"
-                                aria-pressed={selectedDay === day && selectedTime === time}
-                                key={time}
-                                onClick={() => onSelectTime(day, time)}
+                                aria-pressed={selectedDay === day && selectedTime === slot.time}
+                                key={`${slot.time}-${slot.screen}`}
+                                onClick={() => onSelectTime(day, slot.time)}
                             >
-                                {time}
+                                {slot.time}
                             </button>
                         ))}
                     </div>
@@ -127,7 +128,7 @@ function MovieContent({ movie, comingSoon }) {
         const requestedTime = query.get('time');
         if (!requestedTime) return '';
         return Object.entries(movie.showtimes || {}).find(([, times]) => (
-            Array.isArray(times) && times.includes(requestedTime)
+            Array.isArray(times) && times.some((slot) => slot.time === requestedTime)
         ))?.[0] || '';
     });
     const movieBookingUrl = `../bookNow.html?movie=${encodeURIComponent(movie.title)}`;

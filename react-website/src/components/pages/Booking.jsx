@@ -72,7 +72,7 @@ function StepActions({ onBack, onContinue, continueLabel }) {
 }
 
 function TicketSelection({
-  selections, selection, date, time, tickets, totalTickets, showtimes, dates, pricing,
+  selections, selection, date, time, screen, tickets, totalTickets, showtimes, dates, pricing,
   selectionLoading, selectionError, showtimeLoading, showtimeError, pricingLoading, pricingError,
   validation, validationLoading, onSelectionChange, onDateChange, onTimeChange, onTicketChange,
   onContinue,
@@ -125,13 +125,13 @@ function TicketSelection({
                   : showtimes?.length
                     ? showtimes.map((showtime) => (
                       <button
-                        className={`time-chip ${time === showtime ? 'active' : ''}`}
+                        className={`time-chip ${time === showtime.time && screen === showtime.screen ? 'active' : ''}`}
                         type="button"
-                        aria-pressed={time === showtime}
-                        key={showtime}
+                        aria-pressed={time === showtime.time && screen === showtime.screen}
+                        key={`${showtime.time}-${showtime.screen}`}
                         onClick={() => onTimeChange(showtime)}
                       >
-                        {showtime}
+                        {showtime.time}: Screen {showtime.screen}
                       </button>
                     ))
                     : <span className="showtime-placeholder">
@@ -338,7 +338,7 @@ function DemoPayment({ onBack, onConfirm }) {
   );
 }
 
-function BookingConfirmation({ movie, date, time, selectedSeats, totalTickets, totalPrice, customer, bookingRef }) {
+function BookingConfirmation({ movie, date, time, screen, selectedSeats, totalTickets, totalPrice, customer, bookingRef }) {
   return (
     <fieldset className="active" data-step="4">
       <StepHeader title="Demo Ticket Preview" description="This is a preview only. No payment was processed or seats reserved." />
@@ -351,7 +351,7 @@ function BookingConfirmation({ movie, date, time, selectedSeats, totalTickets, t
           <div className="ticket-movie-title">{movie?.title || 'Movie'}</div>
           <div className="ticket-details-grid">
             <div className="ticket-detail-item"><span>Date & Showtime</span><strong>{date} at {time}</strong></div>
-            <div className="ticket-detail-item"><span>Screen / Hall</span><strong>Screen 1 (Dolby Atmos)</strong></div>
+            <div className="ticket-detail-item"><span>Screen / Hall</span><strong>Screen {screen}</strong></div>
             <div className="ticket-detail-item"><span>Seat Numbers</span><strong>{selectedSeats.join(', ')}</strong></div>
             <div className="ticket-detail-item"><span>Demo Total</span><strong>£{totalPrice.toFixed(2)}</strong></div>
             <div className="ticket-detail-item"><span>Guest Name</span><strong>{customer.firstName} {customer.surname}</strong></div>
@@ -372,6 +372,7 @@ export function Booking() {
   const [selectedKey, setSelectedKey] = useState('');
   const [dateOverride, setDateOverride] = useState('');
   const [selectedTime, setSelectedTime] = useState(() => new URLSearchParams(window.location.search).get('time') || '');
+  const [selectedScreen, setSelectedScreen] = useState('');
   const [screeningChanged, setScreeningChanged] = useState(false);
   const [tickets, setTickets] = useState({});
   const [movieDetailState, setMovieDetailState] = useState({ movie: null, loading: false, error: null });
@@ -398,7 +399,7 @@ export function Booking() {
       : currentMovieDetail?.movie?.showtimes
     : null;
   const requestedTimeDate = !params.get('day') && requestedTime && scheduleForRequestedTime
-    ? dates.find((item) => scheduleForRequestedTime[item.weekday]?.includes(requestedTime))
+    ? dates.find((item) => scheduleForRequestedTime[item.weekday]?.some((slot) => slot.time === requestedTime))
     : null;
   const currentDate = dateOverride
     ? dates.find((item) => item.label === dateOverride)
@@ -407,9 +408,12 @@ export function Booking() {
   const showtimes = selectedSelection
     ? getSelectionShowtimes(selectedSelection, currentMovieDetail?.movie, currentDate?.weekday)
     : null;
-  const time = showtimes?.includes(selectedTime)
+  const time = showtimes?.some((slot) => slot.time === selectedTime)
     ? selectedTime
-    : !screeningChanged && showtimes?.includes(requestedTime) ? requestedTime : '';
+    : !screeningChanged && showtimes?.some((slot) => slot.time === requestedTime) ? requestedTime : '';
+  const screen = showtimes?.find((slot) => slot.time === time && slot.screen === selectedScreen)?.screen
+    || showtimes?.find((slot) => slot.time === time)?.screen
+    || '';
   const day = currentDate?.weekday || dates[0].weekday;
   const totalTickets = Object.values(tickets).reduce((total, count) => total + count, 0);
   const pricingRequestKey = selectedSelection && time
@@ -527,6 +531,7 @@ export function Booking() {
   function changeSelection(value) {
     setSelectedKey(value);
     setSelectedTime('');
+    setSelectedScreen('');
     setScreeningChanged(true);
     setSelectedSeats([]);
     setTickets({});
@@ -538,16 +543,19 @@ export function Booking() {
   function changeDate(label) {
     setDateOverride(label);
     setSelectedTime('');
+    setSelectedScreen('');
     setScreeningChanged(true);
     setSelectedSeats([]);
     setPricingState({ requestKey: '', pricing: null, loading: false, error: null });
     setValidationState({ requestKey: '', quote: null, loading: false, error: null });
   }
 
-  function changeTime(value) {
-    if (value === time) return;
+  function changeTime(showtime) {
+    if (showtime.time === time && showtime.screen === screen) return;
 
-    setSelectedTime(value);
+    setSelectedTime(showtime.time);
+    setSelectedScreen(showtime.screen);
+    if (showtime.time === time) return;
     setScreeningChanged(true);
     setSelectedSeats([]);
     setPricingState({ requestKey: '', pricing: null, loading: false, error: null });
@@ -597,7 +605,7 @@ export function Booking() {
       setToastMessage('Please choose a film or special offer before selecting seats.');
       return;
     }
-    if (!time || !showtimes?.includes(time)) {
+    if (!time || !showtimes?.some((slot) => slot.time === time)) {
       setToastMessage('Please choose an available showtime before selecting seats.');
       return;
     }
@@ -663,6 +671,7 @@ export function Booking() {
               selection={selectedSelection}
               date={date}
               time={time}
+              screen={screen}
               tickets={tickets}
               totalTickets={totalTickets}
               showtimes={showtimes}
@@ -706,6 +715,7 @@ export function Booking() {
               movie={selectedSelection}
               date={date}
               time={time}
+              screen={screen}
               selectedSeats={selectedSeats}
               totalTickets={totalTickets}
               totalPrice={validation?.quote?.total || 0}

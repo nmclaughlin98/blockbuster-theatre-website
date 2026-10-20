@@ -151,24 +151,31 @@ test('follows movie catalogue pagination tokens', async () => {
 });
 
 test('uses non-empty offer overrides authoritatively without falling back on missing days', () => {
-  const movieDetail = { showtimes: { Tuesday: ['11:00', '19:00'], Wednesday: ['15:00'] } };
-  const offerWithOverrides = { ...offer, overrideShowtimes: { Tuesday: ['13:00'] } };
+  const movieDetail = { showtimes: {
+    Tuesday: [{ time: '11:00', screen: '1' }, { time: '19:00', screen: '2' }],
+    Wednesday: [{ time: '15:00', screen: '3' }],
+  } };
+  const offerWithOverrides = { ...offer, overrideShowtimes: { Tuesday: [{ time: '13:00', screen: '4' }] } };
 
   assert.equal(hasOfferShowtimeOverrides(offerWithOverrides), true);
   assert.equal(getMovieDetailIdForSelection(offerWithOverrides), null);
-  assert.deepEqual(getSelectionShowtimes(offerWithOverrides, movieDetail, 'Tuesday'), ['13:00']);
+  assert.deepEqual(getSelectionShowtimes(offerWithOverrides, movieDetail, 'Tuesday'), [{ time: '13:00', screen: '4' }]);
   assert.deepEqual(getSelectionShowtimes(offerWithOverrides, movieDetail, 'Wednesday'), []);
+  assert.deepEqual(getSelectionShowtimes(offerWithOverrides, movieDetail, 'Monday'), []);
 });
 
 test('uses featured movie showtimes when an offer override is empty or missing', () => {
-  const movieDetail = { showtimes: { Tuesday: ['11:00', '19:00'] } };
+  const movieDetail = { showtimes: { Tuesday: [{ time: '11:00', screen: '1' }, { time: '19:00', screen: '2' }] } };
   const offerWithEmptyOverrides = { ...offer, overrideShowtimes: {} };
   const offerWithoutOverrides = { ...offer, overrideShowtimes: undefined };
 
   for (const selection of [offerWithEmptyOverrides, offerWithoutOverrides]) {
     assert.equal(hasOfferShowtimeOverrides(selection), false);
     assert.equal(getMovieDetailIdForSelection(selection), offer.featuredMovieId);
-    assert.deepEqual(getSelectionShowtimes(selection, movieDetail, 'Tuesday'), ['11:00', '19:00']);
+    assert.deepEqual(getSelectionShowtimes(selection, movieDetail, 'Tuesday'), [
+      { time: '11:00', screen: '1' },
+      { time: '19:00', screen: '2' },
+    ]);
     assert.equal(getSelectionShowtimes(selection, null, 'Tuesday'), null);
   }
 });
@@ -177,13 +184,13 @@ test('loads standard movie showtimes by movie ID', async () => {
   let requestedUrl;
   const restoreFetch = mockFetch(async (url) => {
     requestedUrl = new URL(url);
-    return new Response(JSON.stringify({ showtimes: { Tuesday: ['11:00'] } }));
+    return new Response(JSON.stringify({ showtimes: { Tuesday: [{ time: '11:00', screen: '1' }] } }));
   });
   try {
     const details = await getMovieDetail(movie.movieId);
     assert.equal(requestedUrl.pathname, `/movies/${movie.movieId}`);
-    assert.deepEqual(details.showtimes.Tuesday, ['11:00']);
-    assert.deepEqual(getSelectionShowtimes(movie, details, 'Tuesday'), ['11:00']);
+    assert.deepEqual(details.showtimes.Tuesday, [{ time: '11:00', screen: '1' }]);
+    assert.deepEqual(getSelectionShowtimes(movie, details, 'Tuesday'), [{ time: '11:00', screen: '1' }]);
   } finally {
     restoreFetch();
   }
@@ -193,7 +200,7 @@ test('loads featured movie details for offers without override showtimes', async
   let requestedUrl;
   const restoreFetch = mockFetch(async (url) => {
     requestedUrl = new URL(url);
-    return new Response(JSON.stringify({ showtimes: { Tuesday: ['11:00'] } }));
+    return new Response(JSON.stringify({ showtimes: { Tuesday: [{ time: '11:00', screen: '1' }] } }));
   });
   try {
     const movieId = getMovieDetailIdForSelection({ ...offer, overrideShowtimes: {} });
@@ -235,8 +242,10 @@ test('requests pricing with exactly the selected type-specific ID and refreshes 
 
     assert.equal(requestedUrls[0].searchParams.get('movieId'), 'movie-42');
     assert.equal(requestedUrls[0].searchParams.has('offerId'), false);
+    assert.equal(requestedUrls[0].searchParams.has('screen'), false);
     assert.equal(requestedUrls[1].searchParams.get('offerId'), 'offer-42');
     assert.equal(requestedUrls[1].searchParams.has('movieId'), false);
+    assert.equal(requestedUrls[1].searchParams.has('screen'), false);
     assert.equal(requestedUrls[2].searchParams.get('day'), 'Wednesday');
     assert.equal(requestedUrls[2].searchParams.get('time'), '19:00');
     assert.equal(requestedUrls[1].pathname, requestedUrls[2].pathname);
