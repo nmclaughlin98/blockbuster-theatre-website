@@ -333,11 +333,6 @@
         overflow: hidden;
     }
 
-    .runtime-movies,
-    .day-of-week {
-        font-size: clamp(0.9rem, 1.5vw, 1rem);
-    }
-
     .col-no-border.col-2-3 h2,
     .col.col-1-3 h1 {
         font-size: 22px;

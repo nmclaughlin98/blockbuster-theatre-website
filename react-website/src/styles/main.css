@@ -3375,10 +3375,10 @@ select option {
 .day-of-week {
     font-weight: 600;
     color: #fff;
-    font-size: clamp(1.2rem, 1.5vw, 1.4rem);
+    font-size: clamp(0.8rem, 6vw, 1.2rem);
     margin-top: 10px;
     display: block;
-    margin-bottom: clamp(12px, 1vw, 20px);
+    margin-bottom: clamp(7px, 1vw, 20px);
 }
 
 .show-time-list {
