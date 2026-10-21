@@ -105,11 +105,16 @@ export function DemoPayment({ onBack, onConfirm, onPaymentInput, isSending = fal
       )}
       <div className="form-actions">
         <button className="form-button previous" type="button" onClick={onBack} disabled={isSending}>Back</button>
-        <button className="form-button next" type="button" onClick={onConfirm} disabled={isSending}>
-          {isSending ? 'Sending confirmation...' : 'Send demo confirmation'}
+        <button
+          className="form-button next"
+          type="button"
+          onClick={onConfirm}
+          disabled={isSending}
+          aria-live="polite"
+        >
+          {isSending ? 'Sending confirmation...' : 'Complete booking'}
         </button>
       </div>
-      {isSending && <p role="status">Sending demo confirmation email...</p>}
     </fieldset>
   );
 }

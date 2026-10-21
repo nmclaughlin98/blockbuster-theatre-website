@@ -1854,6 +1854,11 @@ section {
     align-items: stretch;
 }
 
+.showtimes-grid[data-count='1'] .showtime-btn,
+.showtimes-grid[data-count='2'] .showtime-btn {
+    grid-column: span 2;
+}
+
 .showtime-btn {
     display: flex;
     flex-direction: column;
