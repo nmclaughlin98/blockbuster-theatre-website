@@ -60,6 +60,10 @@ export function getSelectionShowtimes(selection, movieDetail, day) {
   return Array.isArray(schedule[day]) ? schedule[day] : [];
 }
 
+export function getSelectionShowtimeDates(selection, movieDetail, dates) {
+  return dates.filter(({ weekday }) => getSelectionShowtimes(selection, movieDetail, weekday)?.length > 0);
+}
+
 export async function getFilmSelections(signal) {
   const data = await requestJson('/film-selections', { signal });
   if (!Array.isArray(data.selections)) {
@@ -202,4 +206,59 @@ export async function validateCheckout(payload, signal) {
     throw new Error('The booking service returned an invalid checkout total.');
   }
   return data;
+}
+
+export function createBookingConfirmationPayload({
+  bookingRef, customer, selectedSelection, date, time, screen, selectedSeats, totalTickets, totalPrice,
+}) {
+  return {
+    bookingRef,
+    customer: {
+      firstName: customer.firstName,
+      surname: customer.surname,
+      email: customer.email,
+      phone: customer.phone || '',
+    },
+    movieTitle: selectedSelection.title,
+    date,
+    time,
+    screen,
+    seats: [...selectedSeats],
+    tickets: totalTickets,
+    totalPrice,
+  };
+}
+
+export async function sendBookingConfirmation(payload) {
+  return requestJson('/booking/confirmation', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+}
+
+export function createBookingConfirmationSubmitter(send = sendBookingConfirmation) {
+  let isSending = false;
+
+  return async function submitBookingConfirmation({
+    payload, onSendingChange, onSuccess, onError,
+  }) {
+    if (isSending) return false;
+
+    isSending = true;
+    onSendingChange(true);
+    let succeeded = false;
+    try {
+      await send(payload);
+      succeeded = true;
+    } catch (error) {
+      onError(error);
+    } finally {
+      isSending = false;
+      onSendingChange(false);
+    }
+
+    if (succeeded) onSuccess();
+    return succeeded;
+  };
 }

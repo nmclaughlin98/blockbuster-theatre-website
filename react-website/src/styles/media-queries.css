@@ -297,7 +297,7 @@
     }
 
     .booking-form {
-        padding: 20px 14px;
+        padding: 20px clamp(17px, 7vw, 20px);
     }
 
     .movie-detail-caption h1 {
@@ -513,6 +513,69 @@
     }
 }
 
+@media (max-width: 530px) {
+    .form-actions {
+        flex-direction: column-reverse;
+    }
+
+    .form-actions .form-button .wallet-badge-btn {
+        width: 100%;
+    }
+
+    .ticket-counter {
+        gap: 10px;
+    }
+
+    .ticket-details-grid {
+        grid-template-columns: 1fr;
+    }
+
+    /* Live Booking Subtotal summary */
+    .booking-subtotal-bar {
+        box-sizing: border-box;
+        display: block;
+        margin-top: 18px;
+        padding: 10px;
+    }
+
+    .subtotal-item {
+        text-align: center;
+        align-content: center;
+        box-sizing: border-box;
+        display: block;
+        width: 100%;
+        font-size: clamp(0.8rem, 4.3vw, 1.5rem);
+    }
+
+    .booking-subtotal-bar .booking-subtotal-values {
+        display: flex;
+        justify-content: space-between;
+        gap: 8px 20px;
+    }
+
+    .booking-continue-button {
+        margin-top: 12px;
+    }
+
+    .rating {
+        height: 35px;
+    }
+
+    .section-header h1,
+    .section-header h2,
+    .poster-section>h1,
+    .offers>h1,
+    .genre>h1 {
+        line-height: 1.0;
+        font-size: clamp(1.2rem, 6.7vw, 2rem);
+    }
+
+    .toast-notification {
+        width: 100%;
+    }
+}
+
+
 /* Small Phones (480px and down) */
 @media (max-width: 480px) {
 
@@ -571,67 +634,6 @@
     .seat {
         width: 22px;
         height: 22px;
-    }
-
-    .form-actions {
-        flex-direction: column-reverse;
-    }
-
-    .form-actions .form-button .wallet-badge-btn {
-        width: 100%;
-    }
-
-    .ticket-counter {
-        gap: 10px;
-    }
-
-    .ticket-details-grid {
-        grid-template-columns: 1fr;
-    }
-
-    /* Live Booking Subtotal summary */
-    .booking-subtotal-bar {
-        box-sizing: border-box;
-        display: block;
-        justify-content: center;
-        margin: 0;
-        padding: 10px;
-    }
-
-    .subtotal-item {
-        text-align: center;
-        align-content: center;
-        box-sizing: border-box;
-        display: block;
-        width: 100%;
-    }
-
-    .booking-subtotal-bar .booking-subtotal-values {
-        display: flex;
-        justify-content: center;
-        gap: 8px 20px;
-    }
-
-    .subtotal-item button {
-        margin-top: 25px;
-        margin-bottom: 10px;
-    }
-
-    .rating {
-        height: 35px;
-    }
-
-    .section-header h1,
-    .section-header h2,
-    .poster-section>h1,
-    .offers>h1,
-    .genre>h1 {
-        line-height: 1.0;
-        font-size: clamp(1.2rem, 6.7vw, 2rem);
-    }
-
-    .toast-notification {
-        width: 100%;
     }
 
 }
@@ -728,7 +730,7 @@ header {
 }
 
 .showtimes-grid {
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 7.5rem), 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(max(7.5rem, calc((100% - 36px) / 4)), 1fr));
 }
 
 .booking-section {
@@ -771,7 +773,7 @@ header {
 
 #progressbar li {
     min-width: 0;
-    font-size: clamp(0.4rem, 3vw, 0.8rem);
+    font-size: clamp(0.4rem, 2.8vw, 0.8rem);
     overflow-wrap: anywhere;
 }
 
@@ -838,9 +840,15 @@ header {
  * Final breakpoint overrides follow fluid refinements. Matching breakpoints
  * above are intentionally separate so these rules retain their current priority.
  */
-@media (max-width: 965px) {
+@media (max-width: 974px) {
     .primary-nav {
         top: var(--header-height);
+    }
+
+    .showtime-chips {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        width: 100%;
     }
 
     .movie-page,
@@ -880,6 +888,7 @@ header {
         display: grid;
         grid-template-columns: repeat(2, minmax(0, 1fr));
         width: 100%;
+        gap: 0.8rem
     }
 
     .showtime-chips> :not(.time-chip) {
@@ -889,6 +898,14 @@ header {
     .showtime-chips .time-chip {
         box-sizing: border-box;
         width: 100%;
+    }
+
+    .time-chip-time {
+        font-size: 1.1rem;
+    }
+
+    .time-chip-screen {
+        font-size: 0.8rem;
     }
 }
 
@@ -941,7 +958,8 @@ header {
 
     .date-time-group,
     .guest-name-grid,
-    .payment-methods-grid {
+    .payment-methods-grid,
+    .demo-payment-fields-row {
         grid-template-columns: minmax(0, 1fr);
     }
 
@@ -975,14 +993,6 @@ header {
     .print-pdf-btn {
         width: 100%;
         margin-left: 0;
-    }
-
-    .booking-subtotal-bar {
-        align-items: stretch;
-    }
-
-    .booking-subtotal-bar .form-button {
-        width: 100%;
     }
 
     .hero-caption .hero-actions {

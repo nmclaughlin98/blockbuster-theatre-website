@@ -1,23 +1,29 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Layout, asset } from '../shared';
+import { Layout } from '../shared';
+import { PageLoader } from '../shared/PageLoader';
 import { Toast } from '../shared/Toast';
 import {
   getBookingSelections,
   createCheckoutPayload,
   getMovieDetailIdForSelection,
   getMovieDetail,
-  hasOfferShowtimeOverrides,
+  getSelectionShowtimeDates,
   getSelectionShowtimes,
   getTicketPricing,
-  selectionDisplayLabel,
+  createBookingConfirmationPayload,
+  createBookingConfirmationSubmitter,
   selectionKey,
+  sendBookingConfirmation,
   validateCheckout,
 } from './bookingApi';
+import { BookingConfirmation } from './booking/BookingConfirmation';
+import { DemoPayment } from './booking/DemoPayment';
+import { GuestDetails } from './booking/GuestDetails';
+import { ProgressBar } from './booking/BookingStepComponents';
+import { SeatSelection } from './booking/SeatSelection';
+import { TicketSelection } from './booking/TicketSelection';
 
-const steps = ['Tickets', 'Select Seats', 'Guest Info', 'Payment', 'Ticket Preview'];
 const weekdayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-const bookedSeats = new Set(['B4', 'C2', 'C3', 'D7', 'D8', 'E3', 'E4', 'E9', 'F9', 'F10', 'G3', 'G4', 'G9']);
-const accessibleSeats = new Set(['A1', 'A5', 'A6', 'A10']);
 
 function createUpcomingDates() {
   const formatter = new Intl.DateTimeFormat('en-GB', {
@@ -42,330 +48,6 @@ function findDate(dates, dayParam) {
     || dates[0];
 }
 
-function ProgressBar({ currentStep }) {
-  return (
-    <ol id="progressbar" aria-label="Booking progress">
-      {steps.map((label, index) => (
-        <li
-          className={`${index <= currentStep ? 'active' : ''} ${index < currentStep || (index === currentStep && currentStep === steps.length - 1) ? 'completed' : ''
-            }`}
-          key={label}
-        >
-          {label}
-        </li>
-      ))}
-    </ol>
-  );
-}
-
-function StepHeader({ title, description }) {
-  return <div className="step-header"><h2>{title}</h2><p>{description}</p></div>;
-}
-
-function StepActions({ onBack, onContinue, continueLabel }) {
-  return (
-    <div className="form-actions">
-      <button className="form-button previous" type="button" onClick={onBack}>Back</button>
-      <button className="form-button next" type="button" onClick={onContinue}>{continueLabel}</button>
-    </div>
-  );
-}
-
-function TicketSelection({
-  selections, selection, date, time, screen, tickets, totalTickets, showtimes, dates, pricing,
-  selectionLoading, selectionError, showtimeLoading, showtimeError, pricingLoading, pricingError,
-  validation, validationLoading, onSelectionChange, onDateChange, onTimeChange, onTicketChange,
-  onContinue,
-}) {
-  const movieSelections = selections.filter((item) => item.type === 'movie');
-  const offerSelections = selections.filter((item) => item.type === 'offer');
-
-  return (
-    <fieldset className="active" data-step="0">
-      <StepHeader
-        title="Step 1: Choose Film & Tickets"
-        description="Select your movie, screening time, and quantity of tickets."
-      />
-      <div className="form-group">
-        <label htmlFor="booking-movie">Select Film or Special Offer</label>
-        <select id="booking-movie" className="form-control" value={selection ? selectionKey(selection) : ''} onChange={(event) => onSelectionChange(event.target.value)} required>
-          <option value="" disabled>-- Choose a Film or Special Offer --</option>
-          <optgroup label="Movies">
-            {movieSelections.map((item) => (
-              <option value={selectionKey(item)} key={selectionKey(item)}>{item.label}</option>
-            ))}
-          </optgroup>
-          <optgroup label="Special Offers">
-            {offerSelections.map((item) => (
-              <option value={selectionKey(item)} key={selectionKey(item)}>{selectionDisplayLabel(item)}</option>
-            ))}
-          </optgroup>
-        </select>
-        {selectionLoading && <span className="showtime-placeholder" role="status">Loading films and special offers...</span>}
-        {selectionError && <p className="form-notice" role="alert">{selectionError}</p>}
-        {!selectionLoading && !selectionError && !selections.length
-          && <p className="form-notice" role="status">No films or special offers are currently available.</p>}
-      </div>
-      <div className="date-time-group">
-        <div className="form-group">
-          <label htmlFor="booking-date">Day of Screening</label>
-          <select id="booking-date" className="form-control" value={date} onChange={(event) => onDateChange(event.target.value)}>
-            {dates.map((item) => <option value={item.label} key={item.label}>{item.label}</option>)}
-          </select>
-        </div>
-        <div className="form-group">
-          <label>Select Showtime</label>
-          <div className="showtime-chips" aria-label="Available showtimes">
-            {!selection
-              ? <span className="showtime-placeholder">Select a film or offer to see available showtimes.</span>
-              : showtimeLoading
-                ? <span role="status">Loading showtimes...</span>
-                : showtimeError
-                  ? <span className="form-notice" role="alert">{showtimeError}</span>
-                  : showtimes?.length
-                    ? showtimes.map((showtime) => (
-                      <button
-                        className={`time-chip ${time === showtime.time && screen === showtime.screen ? 'active' : ''}`}
-                        type="button"
-                        aria-pressed={time === showtime.time && screen === showtime.screen}
-                        key={`${showtime.time}-${showtime.screen}`}
-                        onClick={() => onTimeChange(showtime)}
-                      >
-                        {showtime.time}: Screen {showtime.screen}
-                      </button>
-                    ))
-                    : <span className="showtime-placeholder">
-                      {selection.type === 'offer'
-                        ? 'No showtimes are available for this offer and day.'
-                        : 'No showtimes available for this selection and day.'}
-                    </span>}
-          </div>
-        </div>
-      </div>
-      <div className="form-group ticket-type-list">
-        <label>Select Ticket Types</label>
-        {!selectionLoading
-          && !showtimeLoading
-          && !showtimeError
-          && !pricingLoading
-          && !pricingError
-          && !time
-          && (!selection || showtimes?.length > 0)
-          && (
-            <p className="showtime-placeholder" role="status">
-              {selection
-                ? 'Select a showtime to view ticket types and prices.'
-                : 'Choose a film and showtime to view ticket types and prices.'}
-            </p>
-          )}
-        {pricingLoading && <p role="status">Loading ticket prices...</p>}
-        {pricingError && <p className="form-notice" role="alert">{pricingError}</p>}
-        {!pricingLoading && !pricingError && selection && time && !pricing?.ticketTiers.length
-          && <p className="form-notice" role="status">No ticket types are available for this showtime.</p>}
-        {pricing?.ticketTiers.map((tier) => (
-          <div className="ticket-row" key={tier.id}>
-            <div className="ticket-info"><h4>{tier.label}</h4><span>{tier.description}</span></div>
-            <div className="ticket-counter">
-              <strong>{new Intl.NumberFormat('en-GB', { style: 'currency', currency: tier.currency || 'GBP' }).format(tier.price)}</strong>
-              <button className="counter-btn" type="button" aria-label={`Decrease ${tier.label}`} onClick={() => onTicketChange(tier.id, -1)}>−</button>
-              <span className="counter-val" aria-live="polite">{tickets[tier.id] || 0}</span>
-              <button className="counter-btn" type="button" aria-label={`Increase ${tier.label}`} onClick={() => onTicketChange(tier.id, 1)}>+</button>
-            </div>
-          </div>
-        ))}
-        {validation?.error && <p className="form-notice" role="alert">{validation.error}</p>}
-        {validationLoading && <p role="status"></p>}
-      </div>
-      <div className="booking-subtotal-bar">
-        <div className="subtotal-item booking-subtotal-values">
-          <div className="subtotal-metric">
-            <span>Selected</span>
-            <strong>{totalTickets} Seat{totalTickets === 1 ? '' : 's'}</strong>
-          </div>
-          <div className="subtotal-metric">
-            <span>Total</span>
-            <strong>{validation?.quote ? new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP' }).format(validation.quote.total) : '—'}</strong>
-          </div>
-        </div>
-        <div className="subtotal-item">
-          <button type="button" className="form-button next" onClick={onContinue}>Select Seats</button>
-        </div>
-      </div>
-    </fieldset>
-  );
-}
-
-function SeatSelection({ selectedSeats, totalTickets, onToggleSeat, onBack, onContinue }) {
-  const [hoveredSeat, setHoveredSeat] = useState(null);
-
-  function updateSeatTooltip(seatId, x, y) {
-    const offset = 12;
-    const tooltipWidth = 84;
-    const tooltipHeight = 40;
-    const left = x + offset + tooltipWidth < window.innerWidth - 8
-      ? x + offset
-      : x - offset - tooltipWidth;
-    const top = y + offset + tooltipHeight < window.innerHeight - 8
-      ? y + offset
-      : y - offset - tooltipHeight;
-
-    setHoveredSeat({
-      seatId,
-      left: Math.max(8, left),
-      top: Math.max(8, top),
-    });
-  }
-
-  function handleSeatPointer(seatId, event) {
-    if (event.pointerType !== 'mouse') return;
-    if (event.target.closest('.seat-spacer')) {
-      setHoveredSeat(null);
-      return;
-    }
-
-    updateSeatTooltip(seatId, event.clientX, event.clientY);
-  }
-
-  return (
-    <fieldset className="active" data-step="1">
-      <StepHeader
-        title="Step 2: Reserve Your Seats"
-        description={`Please choose exactly ${totalTickets} seat${totalTickets === 1 ? '' : 's'} on the map below.`}
-      />
-      <div className="seating-plan">
-        <div className="screen-container"><div className="screen" /><div className="screen-text">MAIN CINEMA SCREEN (CURVED)</div></div>
-        <div className="seat-legend-container">
-          <div className="seat-legend">
-            <div className="legend-item"><div className="legend-seat" /><span>Available</span></div>
-            <div className="legend-item"><div className="legend-seat booked-seat" /><span>Booked</span></div>
-            <div className="legend-item"><div className="legend-seat selected-seat" /><span>Your Pick</span></div>
-            <div className="legend-item">
-              <div className="legend-seat seat-accessible">
-                <img src={asset('assets/images/icons/accessible.png')} alt="" />
-              </div>
-              <span>Accessible</span>
-            </div>
-          </div>
-        </div>
-        <div className="seat-grid" aria-label="Cinema seating plan">
-          {Array.from({ length: 7 }, (_, rowIndex) => {
-            const row = String.fromCharCode(65 + rowIndex);
-            return (
-              <div className="seat-row" key={row}>
-                <span className="row-label">{row}</span>
-                {Array.from({ length: row === 'G' ? 11 : 10 }, (_, seatIndex) => {
-                  const seatId = `${row}${seatIndex + 1}`;
-                  const isBooked = bookedSeats.has(seatId);
-                  const isAccessible = accessibleSeats.has(seatId);
-                  const isSelected = selectedSeats.includes(seatId);
-                  return (
-                    <span
-                      className="seat-cell"
-                      key={seatId}
-                      onPointerEnter={(event) => handleSeatPointer(seatId, event)}
-                      onPointerMove={(event) => handleSeatPointer(seatId, event)}
-                      onPointerLeave={() => setHoveredSeat(null)}
-                    >
-                      {row !== 'G' && seatIndex === 5 && <span className="seat seat-spacer" aria-hidden="true" />}
-                      <button
-                        className={`seat ${isAccessible ? 'seat-accessible' : ''} ${isBooked ? 'booked-seat' : ''} ${isSelected ? 'selected-seat' : ''}`}
-                        type="button"
-                        disabled={isBooked}
-                        aria-label={`Seat ${seatId}${isAccessible ? ', accessible' : ''}${isBooked ? ', booked' : ''}${isSelected ? ', selected' : ''}`}
-                        aria-pressed={isSelected}
-                        onClick={() => onToggleSeat(seatId)}
-                        onFocus={(event) => {
-                          const bounds = event.currentTarget.getBoundingClientRect();
-                          updateSeatTooltip(seatId, bounds.right, bounds.top);
-                        }}
-                        onBlur={() => setHoveredSeat(null)}
-                      >
-                        {isAccessible && <img src={asset('assets/images/icons/accessible.png')} alt="" className="seat-accessible-icon" />}
-                      </button>
-                    </span>
-                  );
-                })}
-              </div>
-            );
-          })}
-        </div>
-        {hoveredSeat && (
-          <div
-            className="seat-hover-tooltip"
-            style={{ left: hoveredSeat.left, top: hoveredSeat.top }}
-            aria-hidden="true"
-          >
-            <strong>{hoveredSeat.seatId}</strong>
-          </div>
-        )}
-        <div className="selected-seats-badge">
-          Selected Seats: <strong>{selectedSeats.length ? selectedSeats.join(', ') : 'None selected yet'}</strong>
-        </div>
-      </div>
-      <StepActions onBack={onBack} onContinue={onContinue} continueLabel="Continue to Guest Details" />
-    </fieldset>
-  );
-}
-
-function GuestDetails({ customer, onChange, onBack, onContinue }) {
-  return (
-    <fieldset className="active" data-step="2">
-      <StepHeader title="Step 3: Guest Details" description="Where should we send your digital cinema ticket preview?" />
-      <div className="guest-name-grid">
-        <div className="form-group"><label htmlFor="guest-first-name">First Name</label><input type="text" id="guest-first-name" value={customer.firstName} onChange={(event) => onChange('firstName', event.target.value)} autoComplete="given-name" required /></div>
-        <div className="form-group"><label htmlFor="guest-surname">Surname</label><input type="text" id="guest-surname" value={customer.surname} onChange={(event) => onChange('surname', event.target.value)} autoComplete="family-name" required /></div>
-      </div>
-      <div className="form-group"><label htmlFor="guest-email">Email Address</label><input id="guest-email" type="email" value={customer.email} onChange={(event) => onChange('email', event.target.value)} autoComplete="email" required /></div>
-      <div className="form-group"><label htmlFor="guest-phone">Phone Number (Optional)</label><input id="guest-phone" type="tel" value={customer.phone} onChange={(event) => onChange('phone', event.target.value)} autoComplete="tel" /></div>
-      <StepActions onBack={onBack} onContinue={onContinue} continueLabel="Continue to Payment" />
-    </fieldset>
-  );
-}
-
-function DemoPayment({ onBack, onConfirm }) {
-  return (
-    <fieldset className="active" data-step="3">
-      <StepHeader title="Step 4: Payment" description="Online payment is not connected in this demo." />
-      <div className="demo-payment-notice" role="note">
-        <h3>Demo checkout only</h3>
-        <p>No payment will be taken and no reservation will be made. Do not enter or submit real payment details.</p>
-      </div>
-      <div className="form-actions">
-        <button className="form-button previous" type="button" onClick={onBack}>Back</button>
-        <button className="form-button next" type="button" onClick={onConfirm}>Create Demo Ticket</button>
-      </div>
-    </fieldset>
-  );
-}
-
-function BookingConfirmation({ movie, date, time, screen, selectedSeats, totalTickets, totalPrice, customer, bookingRef }) {
-  return (
-    <fieldset className="active" data-step="4">
-      <StepHeader title="Demo Ticket Preview" description="This is a preview only. No payment was processed or seats reserved." />
-      <div className="ticket-pass">
-        <div className="ticket-pass-header">
-          <div className="ticket-pass-brand">BLOCKBUSTER THEATRE</div>
-          <div className="ticket-pass-status">DEMO PREVIEW</div>
-        </div>
-        <div className="ticket-pass-body">
-          <div className="ticket-movie-title">{movie?.title || 'Movie'}</div>
-          <div className="ticket-details-grid">
-            <div className="ticket-detail-item"><span>Date & Showtime</span><strong>{date} at {time}</strong></div>
-            <div className="ticket-detail-item"><span>Screen / Hall</span><strong>Screen {screen}</strong></div>
-            <div className="ticket-detail-item"><span>Seat Numbers</span><strong>{selectedSeats.join(', ')}</strong></div>
-            <div className="ticket-detail-item"><span>Demo Total</span><strong>£{totalPrice.toFixed(2)}</strong></div>
-            <div className="ticket-detail-item"><span>Guest Name</span><strong>{customer.firstName} {customer.surname}</strong></div>
-            <div className="ticket-detail-item"><span>Ticket Breakdown</span><strong>{totalTickets} Ticket{totalTickets === 1 ? '' : 's'}</strong></div>
-          </div>
-          <div className="ticket-perforation"><div className="ticket-perforation-line" /></div>
-          <div className="ticket-barcode-area"><div className="ticket-booking-ref">DEMO REF: {bookingRef}</div></div>
-        </div>
-      </div>
-      <a className="form-button previous home" href="./index.html">Back to Home</a>
-    </fieldset>
-  );
-}
-
 export function Booking() {
   const [selectionState, setSelectionState] = useState({ selections: [], loading: true, error: null });
   const [step, setStep] = useState(0);
@@ -381,7 +63,12 @@ export function Booking() {
   const [selectedSeats, setSelectedSeats] = useState([]);
   const [customer, setCustomer] = useState({ firstName: '', surname: '', email: '', phone: '' });
   const [bookingRef, setBookingRef] = useState('');
+  const [confirmationSending, setConfirmationSending] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
+  const bookingRefRef = useRef('');
+  const [submitConfirmation] = useState(
+    () => createBookingConfirmationSubmitter(sendBookingConfirmation),
+  );
   const formRef = useRef(null);
   const dates = useMemo(() => createUpcomingDates(), []);
   const params = useMemo(() => new URLSearchParams(window.location.search), []);
@@ -393,18 +80,20 @@ export function Booking() {
     && movieDetailState.requestKey === selectionKey(selectedSelection)
     ? movieDetailState
     : null;
-  const scheduleForRequestedTime = selectedSelection
-    ? hasOfferShowtimeOverrides(selectedSelection)
-      ? selectedSelection.overrideShowtimes
-      : currentMovieDetail?.movie?.showtimes
+  const availableDates = selectedSelection
+    ? getSelectionShowtimeDates(selectedSelection, currentMovieDetail?.movie, dates)
+    : dates;
+  const requestedTimeDate = !params.get('day') && requestedTime && selectedSelection
+    ? availableDates.find((item) => getSelectionShowtimes(
+      selectedSelection,
+      currentMovieDetail?.movie,
+      item.weekday,
+    )?.some((slot) => slot.time === requestedTime))
     : null;
-  const requestedTimeDate = !params.get('day') && requestedTime && scheduleForRequestedTime
-    ? dates.find((item) => scheduleForRequestedTime[item.weekday]?.some((slot) => slot.time === requestedTime))
-    : null;
-  const currentDate = dateOverride
-    ? dates.find((item) => item.label === dateOverride)
-    : requestedTimeDate || findDate(dates, params.get('day') || '');
-  const date = currentDate?.label || dates[0].label;
+  const currentDate = (dateOverride && availableDates.find((item) => item.label === dateOverride))
+    || requestedTimeDate
+    || findDate(availableDates, params.get('day') || '');
+  const date = currentDate?.label || '';
   const showtimes = selectedSelection
     ? getSelectionShowtimes(selectedSelection, currentMovieDetail?.movie, currentDate?.weekday)
     : null;
@@ -414,7 +103,7 @@ export function Booking() {
   const screen = showtimes?.find((slot) => slot.time === time && slot.screen === selectedScreen)?.screen
     || showtimes?.find((slot) => slot.time === time)?.screen
     || '';
-  const day = currentDate?.weekday || dates[0].weekday;
+  const day = currentDate?.weekday || '';
   const totalTickets = Object.values(tickets).reduce((total, count) => total + count, 0);
   const pricingRequestKey = selectedSelection && time
     ? `${selectionKey(selectedSelection)}|${day}|${time}`
@@ -433,6 +122,20 @@ export function Booking() {
   const validationLoading = Boolean(checkoutRequestKey && (
     validationState.requestKey !== checkoutRequestKey || validationState.loading
   ));
+  const initialShowtimeLoading = Boolean(
+    requestedTime
+    && !screeningChanged
+    && time
+    && (pricingLoading || validationLoading),
+  );
+  const bookingLoading = selectionLoading
+    || Boolean(
+      !screeningChanged
+      && selectedSelection
+      && detailMovieId != null
+      && (!currentMovieDetail || currentMovieDetail.loading),
+    )
+    || initialShowtimeLoading;
 
   useEffect(() => {
     const controller = new AbortController();
@@ -644,17 +347,48 @@ export function Booking() {
     goToStep(3);
   }
 
-  function createDemoTicket() {
+  async function createDemoTicket() {
     if (!validation?.quote) {
       setToastMessage(validation?.error || 'Your ticket choices must be validated before proceeding.');
       goToStep(0);
       return;
     }
-    setBookingRef(`BBT-${Math.floor(100000 + Math.random() * 900000)}`);
-    goToStep(4);
+
+    const currentBookingRef = bookingRefRef.current
+      || bookingRef
+      || `BBT-${Math.floor(100000 + Math.random() * 900000)}`;
+    bookingRefRef.current = currentBookingRef;
+    if (bookingRef !== currentBookingRef) setBookingRef(currentBookingRef);
+
+    const payload = createBookingConfirmationPayload({
+      bookingRef: currentBookingRef,
+      customer,
+      selectedSelection,
+      date,
+      time,
+      screen,
+      selectedSeats,
+      totalTickets,
+      totalPrice: validation.quote.total,
+    });
+
+    await submitConfirmation({
+      payload,
+      onSendingChange: setConfirmationSending,
+      onSuccess: () => goToStep(4),
+      onError: () => goToStep(4),
+    });
   }
 
   const dismissToast = useCallback(() => setToastMessage(''), []);
+
+  if (bookingLoading) {
+    return (
+      <Layout current="booking" loading>
+        <PageLoader label="Loading booking options" />
+      </Layout>
+    );
+  }
 
   return (
     <Layout current="booking">
@@ -675,7 +409,7 @@ export function Booking() {
               tickets={tickets}
               totalTickets={totalTickets}
               showtimes={showtimes}
-              dates={dates}
+              dates={availableDates}
               selectionLoading={selectionLoading}
               selectionError={selectionError}
               showtimeLoading={Boolean(detailMovieId != null && (!currentMovieDetail || currentMovieDetail.loading))}
@@ -709,7 +443,14 @@ export function Booking() {
               onContinue={continueFromGuestDetails}
             />
           )}
-          {step === 3 && <DemoPayment onBack={() => goToStep(2)} onConfirm={createDemoTicket} />}
+          {step === 3 && (
+            <DemoPayment
+              onBack={() => goToStep(2)}
+              onConfirm={createDemoTicket}
+              isSending={confirmationSending}
+              onPaymentInput={() => setToastMessage('Demo only: payment details are not processed. You can continue without entering them.')}
+            />
+          )}
           {step === 4 && (
             <BookingConfirmation
               movie={selectedSelection}
@@ -721,6 +462,7 @@ export function Booking() {
               totalPrice={validation?.quote?.total || 0}
               customer={customer}
               bookingRef={bookingRef}
+              onToast={setToastMessage}
             />
           )}
         </form>

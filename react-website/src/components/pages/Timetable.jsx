@@ -6,6 +6,7 @@ import { useMovies } from './useMovies';
 import { downloadTimetablePdf } from './timetablePdf';
 
 const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+const maxShowtimeButtons = 4;
 
 function getMovieTitle(movie) {
     return typeof movie.title === 'string' && movie.title.trim() ? movie.title : 'Untitled movie';
@@ -78,7 +79,7 @@ function TimetableControls({ day, search, onDayChange, onSearch, onDownload, dow
 }
 
 function TimetableMovie({ movie, day }) {
-    const times = getShowtimes(movie, day);
+    const times = getShowtimes(movie, day).slice(0, maxShowtimeButtons);
     if (!times.length) return null;
 
     return (
@@ -89,7 +90,7 @@ function TimetableMovie({ movie, day }) {
                     <span className="badge-genre">{ getMovieGenre(movie) }</span>
                 </div>
             </div>
-            <div className="showtimes-grid">
+            <div className="showtimes-grid" data-count={times.length}>
                 { times.map((slot) => (
                     <a
                         className="showtime-btn"

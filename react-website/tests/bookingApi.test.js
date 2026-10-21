@@ -6,6 +6,7 @@ import {
   getFilmSelections,
   getMovieDetail,
   getMovieDetailIdForSelection,
+  getSelectionShowtimeDates,
   getMovies,
   getSelectionShowtimes,
   getTicketPricing,
@@ -162,6 +163,28 @@ test('uses non-empty offer overrides authoritatively without falling back on mis
   assert.deepEqual(getSelectionShowtimes(offerWithOverrides, movieDetail, 'Tuesday'), [{ time: '13:00', screen: '4' }]);
   assert.deepEqual(getSelectionShowtimes(offerWithOverrides, movieDetail, 'Wednesday'), []);
   assert.deepEqual(getSelectionShowtimes(offerWithOverrides, movieDetail, 'Monday'), []);
+});
+
+test('lists only dates with showtimes for the selected movie or offer', () => {
+  const dates = [
+    { label: 'Mon 20 Oct 2026', weekday: 'Monday' },
+    { label: 'Tue 21 Oct 2026', weekday: 'Tuesday' },
+    { label: 'Wed 22 Oct 2026', weekday: 'Wednesday' },
+  ];
+  const movieDetail = {
+    showtimes: {
+      Tuesday: [{ time: '11:00', screen: '1' }],
+      Wednesday: [],
+    },
+  };
+  const offerWithOverrides = {
+    ...offer,
+    overrideShowtimes: { Wednesday: [{ time: '15:00', screen: '2' }] },
+  };
+
+  assert.deepEqual(getSelectionShowtimeDates(movie, movieDetail, dates), [dates[1]]);
+  assert.deepEqual(getSelectionShowtimeDates(offerWithOverrides, movieDetail, dates), [dates[2]]);
+  assert.deepEqual(getSelectionShowtimeDates(movie, null, dates), []);
 });
 
 test('uses featured movie showtimes when an offer override is empty or missing', () => {

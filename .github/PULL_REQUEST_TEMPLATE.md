@@ -1,27 +1,13 @@
-## Summary
+## Commits
 
-<!-- Describe what this pull request changes and why. -->
+<!-- pr-commits:start -->
+<!-- pr-commits:end -->
 
-## Related issue
+## Summary (optional)
 
-<!-- Link an issue, or write "N/A". -->
+<!-- Add a brief summary if useful. -->
 
-## Changes
+## Date
 
-<!-- List the key changes. -->
-
--
-
-## Testing
-
-<!-- Describe the checks you ran and their results. -->
-
-- [ ] `npm run lint` (from `react-website/`)
-- [ ] `npm test` (from `react-website/`)
-- [ ] `npm run build` (from `react-website/`)
-
-## Checklist
-
-- [ ] The change is within the scope of this pull request.
-- [ ] Documentation has been updated if needed.
-- [ ] No secrets or sensitive data are included.
+<!-- pr-date:start -->
+<!-- pr-date:end -->
