@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { asset } from '../../shared';
+import { convertGuestAccount } from '../bookingApi';
 import { StepHeader } from './BookingStepComponents';
 
 const walletPassesEnabled = import.meta.env.VITE_ENABLE_WALLET_PASSES === 'true';
@@ -7,9 +8,45 @@ const walletPassApiUrl = import.meta.env.VITE_WALLET_PASS_API_URL?.trim()
   || 'https://blockbuster-wallet-proxy.niallmclaughlin1998.workers.dev/';
 
 export function BookingConfirmation({
-  movie, date, time, screen, selectedSeats, totalTickets, totalPrice, customer, bookingRef, onToast,
+  movie, date, time, screen, totalTickets, customer, bookingDetails, onToast,
 }) {
   const [walletLoading, setWalletLoading] = useState(false);
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [convertedAccount, setConvertedAccount] = useState(null);
+  const [conversionState, setConversionState] = useState({
+    loading: false, error: '', complete: false, dismissed: false,
+  });
+  const bookingRef = bookingDetails.bookingId;
+  const selectedSeats = bookingDetails.seats;
+  const movieTitle = bookingDetails.movieTitle || movie?.title || 'Movie';
+  const customerEmail = bookingDetails.customerEmail || customer.email;
+  const totalAmount = new Intl.NumberFormat('en-GB', {
+    style: 'currency',
+    currency: bookingDetails.currency,
+  }).format(bookingDetails.totalAmount);
+
+  async function createAccount() {
+    if (password.length < 8) {
+      setConversionState((current) => ({ ...current, error: 'Use a password with at least 8 characters.' }));
+      return;
+    }
+    if (password !== confirmPassword) {
+      setConversionState((current) => ({ ...current, error: 'The passwords do not match.' }));
+      return;
+    }
+
+    setConversionState((current) => ({ ...current, loading: true, error: '' }));
+    try {
+      const account = await convertGuestAccount(bookingDetails.conversionToken, password);
+      setConvertedAccount(account);
+      setConversionState((current) => ({ ...current, loading: false, complete: true }));
+      setPassword('');
+      setConfirmPassword('');
+    } catch (error) {
+      setConversionState((current) => ({ ...current, loading: false, error: error.message }));
+    }
+  }
 
   async function createWalletPass(walletType) {
     if (!walletPassesEnabled) {
@@ -33,20 +70,20 @@ export function BookingConfirmation({
         color: '#9d243b',
         logoURL: logoUrl,
         iconURL: logoUrl,
-        primaryFields: [{ label: 'Movie', value: movie?.title || 'Movie' }],
+        primaryFields: [{ label: 'Movie', value: movieTitle }],
         secondaryFields: [
           { label: 'Date', value: date || 'Not selected' },
           { label: 'Time', value: time || 'Not selected' },
         ],
         headerFields: [
-          { label: 'Seat(s)', value: selectedSeats.join(', ') || 'General Admission' },
+          { label: 'Seat(s)', value: selectedSeats.join(', ') },
           { label: 'Screen', value: screen || 'Not selected' },
         ],
         backFields: [
-          { label: 'Demo Total', value: `£${totalPrice.toFixed(2)}` },
-          { label: 'Guest Name', value: `${customer.firstName} ${customer.surname}`.trim() || 'Guest' },
+          { label: 'Total', value: totalAmount },
+          { label: 'Guest Email', value: customerEmail },
           { label: 'Booking Ref', value: bookingRef },
-          { label: 'Status', value: 'DEMO PREVIEW - NOT VALID FOR ENTRY' },
+          { label: 'Status', value: 'BOOKING CONFIRMED' },
         ],
         locations: [{
           latitude: 55.044358,
@@ -109,7 +146,7 @@ export function BookingConfirmation({
     <fieldset className="active" data-step="4">
       <StepHeader
         title="Booking confirmed"
-        description="Your seats have been reserved. No payment was processed in this demo booking flow."
+        description="Your payment was processed and your seats are reserved."
       />
       <div className="ticket-pass">
         <div className="ticket-pass-header">
@@ -117,24 +154,89 @@ export function BookingConfirmation({
           <div className="ticket-pass-status">BOOKING CONFIRMED</div>
         </div>
         <div className="ticket-pass-body">
-          <div className="ticket-movie-title">{movie?.title || 'Movie'}</div>
+          <div className="ticket-movie-title">{movieTitle}</div>
           <div className="ticket-details-grid">
             <div className="ticket-detail-item"><span>Showtime</span><strong>{date} at {time}</strong></div>
             <div className="ticket-detail-item"><span>Screen</span><strong>Screen {screen}</strong></div>
             <div className="ticket-detail-item"><span>Seat Numbers</span><strong>{selectedSeats.join(', ')}</strong></div>
-            <div className="ticket-detail-item"><span>Demo Total</span><strong>£{totalPrice.toFixed(2)}</strong></div>
-            <div className="ticket-detail-item"><span>Guest Name</span><strong>{customer.firstName} {customer.surname}</strong></div>
+            <div className="ticket-detail-item"><span>Total</span><strong>{totalAmount}</strong></div>
+            <div className="ticket-detail-item"><span>Confirmation Email</span><strong>{customerEmail}</strong></div>
             <div className="ticket-detail-item"><span>Ticket Breakdown</span><strong>{totalTickets} Ticket{totalTickets === 1 ? '' : 's'}</strong></div>
           </div>
           <div className="ticket-perforation"><div className="ticket-perforation-line" /></div>
           <div className="ticket-barcode-area"><div className="ticket-booking-ref">REF: {bookingRef}</div></div>
         </div>
       </div>
+      {bookingDetails.conversionToken && !conversionState.dismissed && (
+        <section className="guest-conversion-card" aria-labelledby="guest-conversion-title">
+          {conversionState.complete ? (
+            <div role="status">
+              <h2 id="guest-conversion-title">Account created</h2>
+              <p>Your booking is connected to {convertedAccount.email}. You are signed in for this session.</p>
+            </div>
+          ) : (
+            <>
+              <StepHeader
+                title="Track your order easily next time!"
+                description={`Create an account for ${customerEmail} to save your booking history. This is optional.`}
+              />
+              <div className="form-group">
+                <label htmlFor="guest-account-password">Password</label>
+                <input
+                  id="guest-account-password"
+                  className="form-control"
+                  type="password"
+                  autoComplete="new-password"
+                  minLength={8}
+                  value={password}
+                  onChange={(event) => setPassword(event.target.value)}
+                  disabled={conversionState.loading}
+                />
+              </div>
+              <div className="form-group">
+                <label htmlFor="guest-account-confirm-password">Confirm Password</label>
+                <input
+                  id="guest-account-confirm-password"
+                  className="form-control"
+                  type="password"
+                  autoComplete="new-password"
+                  minLength={8}
+                  value={confirmPassword}
+                  onChange={(event) => setConfirmPassword(event.target.value)}
+                  disabled={conversionState.loading}
+                />
+              </div>
+              {confirmPassword && password !== confirmPassword && (
+                <p className="form-notice" role="alert">The passwords do not match.</p>
+              )}
+              {conversionState.error && <p className="form-notice" role="alert">{conversionState.error}</p>}
+              <div className="form-actions">
+                <button
+                  className="form-button next"
+                  type="button"
+                  onClick={createAccount}
+                  disabled={conversionState.loading || password.length < 8 || password !== confirmPassword}
+                >
+                  {conversionState.loading ? 'Creating account...' : 'Create Account'}
+                </button>
+                <button
+                  className="form-button previous"
+                  type="button"
+                  onClick={() => setConversionState((current) => ({ ...current, dismissed: true }))}
+                  disabled={conversionState.loading}
+                >
+                  Maybe later
+                </button>
+              </div>
+            </>
+          )}
+        </section>
+      )}
       <div className="wallet-pass-actions">
         <button
           className="wallet-badge-btn"
           type="button"
-          aria-label="Add demo ticket to Apple Wallet"
+          aria-label="Add booking to Apple Wallet"
           disabled={walletLoading}
           onClick={() => createWalletPass('apple')}
         >
@@ -143,7 +245,7 @@ export function BookingConfirmation({
         <button
           className="wallet-badge-btn"
           type="button"
-          aria-label="Add demo ticket to Google Wallet"
+          aria-label="Add booking to Google Wallet"
           disabled={walletLoading}
           onClick={() => createWalletPass('google')}
         >

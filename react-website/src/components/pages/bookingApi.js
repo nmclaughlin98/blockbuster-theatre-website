@@ -36,32 +36,6 @@ export function getBookingMovieId(selection) {
   throw new Error('Choose a film or special offer before booking seats.');
 }
 
-export function createSeatBookingPayload(selection, date, day, time, seats) {
-  const movieId = getBookingMovieId(selection);
-  if (movieId == null) throw new Error('The selected film does not have a valid movie ID.');
-  if (!date || getWeekdayForDate(date) !== day) {
-    throw new Error('The screening weekday does not match the selected date.');
-  }
-  if (!time) throw new Error('Choose a showtime before booking seats.');
-  if (!Array.isArray(seats) || seats.length === 0) {
-    throw new Error('Select at least one seat before booking.');
-  }
-  if (new Set(seats).size !== seats.length || seats.some((seat) => (
-    typeof seat !== 'string' || !/^[A-G](?:[1-9]|1[01])$/.test(seat)
-  ))) {
-    throw new Error('The selected seat list is invalid.');
-  }
-
-  const payload = {
-    movieId,
-    date,
-    showtime: { day, time },
-    seats: [...seats],
-  };
-  if (selection.type === 'offer') payload.offerId = selection.offerId;
-  return payload;
-}
-
 export async function getBookedSeats(movieId, date, day, time, signal) {
   if (movieId == null) throw new Error('The selected film does not have a valid movie ID.');
   if (!date || getWeekdayForDate(date) !== day) {
@@ -79,12 +53,79 @@ export async function getBookedSeats(movieId, date, day, time, signal) {
   return data.bookedSeats;
 }
 
-export async function createSeatBooking(payload) {
-  const data = await requestJson('/bookings', {
+export function createGuestBookingPayload({
+  showtimeId, seats, email, customerName, paymentToken,
+}) {
+  if (typeof showtimeId !== 'string' || !showtimeId.trim()) {
+    throw new Error('The selected showtime is missing its booking ID.');
+  }
+  if (!Array.isArray(seats) || seats.length === 0
+    || new Set(seats).size !== seats.length
+    || seats.some((seat) => typeof seat !== 'string' || !/^[A-G](?:[1-9]|1[01])$/.test(seat))) {
+    throw new Error('Select valid seats before completing your booking.');
+  }
+  if (typeof email !== 'string' || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+    throw new Error('Enter a valid email address before completing your booking.');
+  }
+  if (typeof customerName !== 'string' || !customerName.trim()) {
+    throw new Error('Enter your name before completing your booking.');
+  }
+  if (typeof paymentToken !== 'string' || !paymentToken.trim()) {
+    throw new Error('Payment could not be verified. Please try again.');
+  }
+
+  return {
+    showtimeId: showtimeId.trim(),
+    seats: [...seats],
+    email: email.trim(),
+    customerName: customerName.trim(),
+    paymentToken: paymentToken.trim(),
+  };
+}
+
+export async function createGuestBooking(payload) {
+  const data = await requestJson('/api/v1/bookings/guest', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
   });
+  if (!data || typeof data !== 'object' || Array.isArray(data)
+    || typeof data.bookingId !== 'string' || !data.bookingId
+    || typeof data.showtimeId !== 'string' || !data.showtimeId
+    || typeof data.movieTitle !== 'string' || !data.movieTitle
+    || !Array.isArray(data.seats) || data.seats.some((seat) => (
+      typeof seat !== 'string' || !/^[A-G](?:[1-9]|1[01])$/.test(seat)
+    ))
+    || typeof data.totalAmount !== 'number' || data.totalAmount < 0
+    || !Number.isFinite(data.totalAmount)
+    || typeof data.currency !== 'string' || !/^[A-Z]{3}$/.test(data.currency)
+    || typeof data.customerEmail !== 'string' || !data.customerEmail
+    || (data.conversionToken != null && typeof data.conversionToken !== 'string')) {
+    throw new Error('The booking service returned invalid guest booking details.');
+  }
+  return data;
+}
+
+export async function convertGuestAccount(conversionToken, password) {
+  if (typeof conversionToken !== 'string' || !conversionToken.trim()) {
+    throw new Error('The guest conversion token is missing.');
+  }
+  if (typeof password !== 'string' || password.length < 8) {
+    throw new Error('Use a password with at least 8 characters.');
+  }
+
+  const data = await requestJson('/api/v1/auth/convert-guest', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ conversionToken, password }),
+  });
+  if (!data || typeof data !== 'object' || Array.isArray(data)
+    || typeof data.userId !== 'string'
+    || typeof data.email !== 'string'
+    || typeof data.accessToken !== 'string'
+    || typeof data.refreshToken !== 'string') {
+    throw new Error('The account service returned invalid account details.');
+  }
   return data;
 }
 
@@ -277,59 +318,4 @@ export async function validateCheckout(payload, signal) {
     throw new Error('The booking service returned an invalid checkout total.');
   }
   return data;
-}
-
-export function createBookingConfirmationPayload({
-  bookingRef, customer, selectedSelection, date, time, screen, selectedSeats, totalTickets, totalPrice,
-}) {
-  return {
-    bookingRef,
-    customer: {
-      firstName: customer.firstName,
-      surname: customer.surname,
-      email: customer.email,
-      phone: customer.phone || '',
-    },
-    movieTitle: selectedSelection.title,
-    date,
-    time,
-    screen,
-    seats: [...selectedSeats],
-    tickets: totalTickets,
-    totalPrice,
-  };
-}
-
-export async function sendBookingConfirmation(payload) {
-  return requestJson('/booking/confirmation', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
-  });
-}
-
-export function createBookingConfirmationSubmitter(send = sendBookingConfirmation) {
-  let isSending = false;
-
-  return async function submitBookingConfirmation({
-    payload, onSendingChange, onSuccess, onError,
-  }) {
-    if (isSending) return false;
-
-    isSending = true;
-    onSendingChange(true);
-    let succeeded = false;
-    try {
-      await send(payload);
-      succeeded = true;
-    } catch (error) {
-      onError(error);
-    } finally {
-      isSending = false;
-      onSendingChange(false);
-    }
-
-    if (succeeded) onSuccess();
-    return succeeded;
-  };
 }

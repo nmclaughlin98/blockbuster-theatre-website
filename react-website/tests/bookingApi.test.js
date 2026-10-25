@@ -1,9 +1,11 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
+import { MOVIES_API_URL } from '../src/config.js';
 import {
   createCheckoutPayload,
-  createSeatBookingPayload,
-  createSeatBooking,
+  createGuestBooking,
+  createGuestBookingPayload,
+  convertGuestAccount,
   getBookedSeats,
   getBookingSelections,
   getFilmSelections,
@@ -181,55 +183,100 @@ test('loads booked seats for the selected calendar date and weekday', async () =
   }
 });
 
-test('posts movie bookings with seats and offer bookings with the featured movie and offer ID', async () => {
-  const bookingOffer = { ...offer, offerId: 'offer-42', featuredMovieId: 'movie-42' };
-  const requests = [];
+test('posts the exact guest booking payload to the versioned endpoint', async () => {
+  const bookingDetails = {
+    bookingId: 'bk_990123',
+    showtimeId: 'show_77812',
+    movieTitle: 'Inception',
+    seats: ['F10', 'F11'],
+    totalAmount: 24,
+    currency: 'GBP',
+    customerEmail: 'customer@example.com',
+    conversionToken: 'cnv_tok_9918237491823',
+  };
+  let request;
   const restoreFetch = mockFetch(async (url, options) => {
-    requests.push({ url: new URL(url), options });
-    return new Response(JSON.stringify({ bookingId: 'booking-1', seats: ['B4'] }), { status: 201 });
+    request = { url: new URL(url), options };
+    return new Response(JSON.stringify(bookingDetails), { status: 201 });
   });
 
   try {
-    const moviePayload = createSeatBookingPayload(movie, '2026-10-26', 'Monday', '19:30', ['B4']);
-    const offerPayload = createSeatBookingPayload(bookingOffer, '2026-10-26', 'Monday', '19:30', ['C5']);
-    await createSeatBooking(moviePayload);
-    const booking = await createSeatBooking(offerPayload);
+    const payload = createGuestBookingPayload({
+      showtimeId: 'show_77812',
+      seats: ['F10', 'F11'],
+      email: ' customer@example.com ',
+      customerName: ' Niall McLaughlin ',
+      paymentToken: 'tok_stripe_123456789',
+    });
+    const booking = await createGuestBooking(payload);
 
-    assert.equal(booking.bookingId, 'booking-1');
-    assert.equal(requests[0].url.pathname, '/bookings');
-    assert.equal(requests[0].options.method, 'POST');
-    assert.equal(requests[0].options.headers['Content-Type'], 'application/json');
-    assert.deepEqual(JSON.parse(requests[0].options.body), {
-      movieId: 'movie-42',
-      date: '2026-10-26',
-      showtime: { day: 'Monday', time: '19:30' },
-      seats: ['B4'],
+    assert.equal(request.url.href, `${MOVIES_API_URL}/api/v1/bookings/guest`);
+    assert.equal(request.url.pathname, '/api/v1/bookings/guest');
+    assert.equal(request.options.method, 'POST');
+    assert.equal(request.options.headers['Content-Type'], 'application/json');
+    assert.deepEqual(JSON.parse(request.options.body), {
+      showtimeId: 'show_77812',
+      seats: ['F10', 'F11'],
+      email: 'customer@example.com',
+      customerName: 'Niall McLaughlin',
+      paymentToken: 'tok_stripe_123456789',
     });
-    assert.deepEqual(JSON.parse(requests[1].options.body), {
-      movieId: 'movie-42',
-      date: '2026-10-26',
-      showtime: { day: 'Monday', time: '19:30' },
-      seats: ['C5'],
-      offerId: 'offer-42',
-    });
-    assert.equal(JSON.parse(requests[1].options.body).userId, undefined);
+    assert.equal(JSON.parse(request.options.body).userId, undefined);
+    assert.deepEqual(booking, bookingDetails);
   } finally {
     restoreFetch();
   }
 });
 
-test('preserves HTTP 409 status for a booking seat conflict', async () => {
+test('rejects an incomplete guest booking request before sending it', () => {
+  assert.throws(() => createGuestBookingPayload({
+    showtimeId: '',
+    seats: [],
+    email: 'bad-email',
+    customerName: '',
+    paymentToken: '',
+  }), /booking ID/);
+});
+
+test('preserves HTTP 409 status for a guest booking seat conflict', async () => {
   const restoreFetch = mockFetch(async () => new Response(
     JSON.stringify({ message: 'One or more seats are no longer available.' }),
     { status: 409 },
   ));
 
   try {
-    await assert.rejects(createSeatBooking({ seats: ['B4'] }), (error) => {
+    await assert.rejects(createGuestBooking({ showtimeId: 'show_77812' }), (error) => {
       assert.equal(error.status, 409);
       assert.match(error.message, /no longer available/);
       return true;
     });
+  } finally {
+    restoreFetch();
+  }
+});
+
+test('converts a guest using only the conversion token and password', async () => {
+  let request;
+  const restoreFetch = mockFetch(async (url, options) => {
+    request = { url: new URL(url), options };
+    return new Response(JSON.stringify({
+      userId: 'usr_01HJ789',
+      email: 'customer@example.com',
+      accessToken: 'access-token',
+      refreshToken: 'refresh-token',
+    }), { status: 200 });
+  });
+
+  try {
+    const account = await convertGuestAccount('cnv_tok_9918237491823', 'AValidPassword123!');
+
+    assert.equal(request.url.pathname, '/api/v1/auth/convert-guest');
+    assert.equal(request.options.method, 'POST');
+    assert.deepEqual(JSON.parse(request.options.body), {
+      conversionToken: 'cnv_tok_9918237491823',
+      password: 'AValidPassword123!',
+    });
+    assert.equal(account.userId, 'usr_01HJ789');
   } finally {
     restoreFetch();
   }

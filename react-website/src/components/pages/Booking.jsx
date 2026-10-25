@@ -5,8 +5,8 @@ import { Toast } from '../shared/Toast';
 import {
   getBookingSelections,
   createCheckoutPayload,
-  createSeatBookingPayload,
-  createSeatBooking,
+  createGuestBookingPayload,
+  createGuestBooking,
   getBookedSeats,
   getBookingMovieId,
   getMovieDetailIdForSelection,
@@ -14,15 +14,12 @@ import {
   getSelectionShowtimeDates,
   getSelectionShowtimes,
   getTicketPricing,
-  createBookingConfirmationPayload,
-  createBookingConfirmationSubmitter,
   selectionKey,
-  sendBookingConfirmation,
   validateCheckout,
 } from './bookingApi';
 import { BookingConfirmation } from './booking/BookingConfirmation';
-import { DemoPayment } from './booking/DemoPayment';
 import { GuestDetails } from './booking/GuestDetails';
+import { PaymentStep } from './booking/PaymentStep';
 import { ProgressBar } from './booking/BookingStepComponents';
 import { SeatSelection } from './booking/SeatSelection';
 import { TicketSelection } from './booking/TicketSelection';
@@ -87,21 +84,15 @@ export function Booking() {
   const [pricingState, setPricingState] = useState({ requestKey: '', pricing: null, loading: false, error: null });
   const [validationState, setValidationState] = useState({ requestKey: '', quote: null, loading: false, error: null });
   const [selectedSeats, setSelectedSeats] = useState([]);
-  const [confirmedSeats, setConfirmedSeats] = useState([]);
+  const [bookingDetails, setBookingDetails] = useState(null);
   const [bookedSeatState, setBookedSeatState] = useState({
     requestKey: '', bookedSeats: [], loading: false, error: null,
   });
   const [bookedSeatsRefresh, setBookedSeatsRefresh] = useState(0);
-  const [customer, setCustomer] = useState({ firstName: '', surname: '', email: '', phone: '' });
-  const [bookingRef, setBookingRef] = useState('');
-  const [confirmationSending, setConfirmationSending] = useState(false);
+  const [customer, setCustomer] = useState({ firstName: '', surname: '', email: '' });
   const [bookingSubmitting, setBookingSubmitting] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
-  const bookingRefRef = useRef('');
   const bookingSubmittingRef = useRef(false);
-  const [submitConfirmation] = useState(
-    () => createBookingConfirmationSubmitter(sendBookingConfirmation),
-  );
   const formRef = useRef(null);
   const dates = useMemo(() => createUpcomingDates(), []);
   const params = useMemo(() => new URLSearchParams(window.location.search), []);
@@ -140,6 +131,7 @@ export function Booking() {
   const screen = showtimes?.find((slot) => slot.time === time && slot.screen === selectedScreen)?.screen
     || showtimes?.find((slot) => slot.time === time)?.screen
     || '';
+  const selectedShowtime = showtimes?.find((slot) => slot.time === time && slot.screen === screen);
   const day = currentDate?.weekday || '';
   const bookedSeatsRequestKey = selectedSelection && date && time
     ? JSON.stringify([getBookingMovieId(selectedSelection), date, day, time])
@@ -384,6 +376,10 @@ export function Booking() {
       setToastMessage('Please choose an available showtime before selecting seats.');
       return;
     }
+    if (!selectedShowtime?.showtimeId) {
+      setToastMessage('This showtime is missing its booking ID. Please choose another screening or try again later.');
+      return;
+    }
     if (!totalTickets) {
       setToastMessage('Please select at least one ticket before choosing seats.');
       return;
@@ -423,7 +419,7 @@ export function Booking() {
     goToStep(3);
   }
 
-  async function createDemoTicket() {
+  async function completeGuestBooking(paymentToken) {
     if (bookingSubmittingRef.current) return;
     if (!validation?.quote) {
       setToastMessage(validation?.error || 'Your ticket choices must be validated before proceeding.');
@@ -445,36 +441,18 @@ export function Booking() {
     bookingSubmittingRef.current = true;
     setBookingSubmitting(true);
     try {
-      const seatBooking = createSeatBookingPayload(selectedSelection, date, day, time, selectedSeats);
-      const bookingDetails = await createSeatBooking(seatBooking);
-      const bookedSeatIds = [...selectedSeats];
-      const currentBookingRef = bookingDetails?.bookingRef
-        || bookingDetails?.bookingId
-        || bookingRefRef.current
-        || `BBT-${Math.floor(100000 + Math.random() * 900000)}`;
-      bookingRefRef.current = currentBookingRef;
-      setBookingRef(currentBookingRef);
-      setConfirmedSeats(bookedSeatIds);
+      const payload = createGuestBookingPayload({
+        showtimeId: selectedShowtime?.showtimeId,
+        seats: selectedSeats,
+        email: customer.email,
+        customerName: `${customer.firstName} ${customer.surname}`,
+        paymentToken,
+      });
+      const details = await createGuestBooking(payload);
+      setBookingDetails(details);
       setSelectedSeats([]);
       setBookedSeatsRefresh((current) => current + 1);
-
-      const payload = createBookingConfirmationPayload({
-        bookingRef: currentBookingRef,
-        customer,
-        selectedSelection,
-        date: currentDate.label,
-        time,
-        screen,
-        selectedSeats: bookedSeatIds,
-        totalTickets,
-        totalPrice: validation.quote.total,
-      });
-      await submitConfirmation({
-        payload,
-        onSendingChange: setConfirmationSending,
-        onSuccess: () => goToStep(4),
-        onError: () => goToStep(4),
-      });
+      goToStep(4);
     } catch (error) {
       if (error.status === 409) {
         setSelectedSeats([]);
@@ -560,11 +538,13 @@ export function Booking() {
             />
           )}
           {step === 3 && (
-            <DemoPayment
+            <PaymentStep
               onBack={() => goToStep(2)}
-              onConfirm={createDemoTicket}
-              isSending={confirmationSending || bookingSubmitting}
-              onPaymentInput={() => setToastMessage('Demo only: payment details are not processed. You can continue without entering them.')}
+              onConfirm={completeGuestBooking}
+              isSubmitting={bookingSubmitting}
+              movieTitle={selectedSelection?.title || 'Selected film'}
+              seats={selectedSeats}
+              totalAmount={validation?.quote?.total || 0}
             />
           )}
           {step === 4 && (
@@ -573,11 +553,9 @@ export function Booking() {
               date={currentDate?.label || date}
               time={time}
               screen={screen}
-              selectedSeats={confirmedSeats}
+              bookingDetails={bookingDetails}
               totalTickets={totalTickets}
-              totalPrice={validation?.quote?.total || 0}
               customer={customer}
-              bookingRef={bookingRef}
               onToast={setToastMessage}
             />
           )}
