@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
-import { getMovies } from './bookingApi';
+import { getMovies, getMoviesForDate } from './bookingApi';
 
-export function useMovies() {
+export function useMovies(date) {
   const [state, setState] = useState({ movies: [], loading: true, error: null });
 
   useEffect(() => {
@@ -9,7 +9,9 @@ export function useMovies() {
 
     async function loadMovies() {
       try {
-        const movies = await getMovies(controller.signal);
+        const movies = date
+          ? await getMoviesForDate(date, controller.signal)
+          : await getMovies(controller.signal);
         setState({ movies, loading: false, error: null });
       } catch (error) {
         if (controller.signal.aborted) return;
@@ -19,7 +21,7 @@ export function useMovies() {
 
     loadMovies();
     return () => controller.abort();
-  }, []);
+  }, [date]);
 
   return state;
 }

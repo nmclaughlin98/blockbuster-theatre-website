@@ -1,24 +1,24 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Layout } from '../shared';
-import { PageLoader } from '../shared/PageLoader';
 import { Toast } from '../shared/Toast';
 import {
   getBookingSelections,
   createCheckoutPayload,
+  createGuestBookingPayload,
+  createGuestBooking,
+  getBookedSeats,
   getMovieDetailIdForSelection,
   getMovieDetail,
-  getSelectionShowtimeDates,
   getSelectionShowtimes,
+  getSelectionDateAvailability,
   getTicketPricing,
-  createBookingConfirmationPayload,
-  createBookingConfirmationSubmitter,
+  isShowtimeIdForDate,
   selectionKey,
-  sendBookingConfirmation,
   validateCheckout,
 } from './bookingApi';
 import { BookingConfirmation } from './booking/BookingConfirmation';
-import { DemoPayment } from './booking/DemoPayment';
 import { GuestDetails } from './booking/GuestDetails';
+import { PaymentStep } from './booking/PaymentStep';
 import { ProgressBar } from './booking/BookingStepComponents';
 import { SeatSelection } from './booking/SeatSelection';
 import { TicketSelection } from './booking/TicketSelection';
@@ -37,76 +37,133 @@ function createUpcomingDates() {
     const date = new Date();
     date.setHours(12, 0, 0, 0);
     date.setDate(date.getDate() + offset);
-    return { label: formatter.format(date).replace(/,/g, ''), weekday: weekdayNames[date.getDay()] };
+    return {
+      isoDate: `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`,
+      label: formatter.format(date).replace(/,/g, ''),
+      weekday: weekdayNames[date.getDay()],
+    };
   });
 }
 
 function findDate(dates, dayParam) {
   const query = dayParam.trim().toLowerCase();
-  return dates.find((date) => date.label.toLowerCase() === query)
+  return dates.find((date) => date.isoDate === query)
+    || dates.find((date) => date.label.toLowerCase() === query)
     || dates.find((date) => date.weekday.toLowerCase() === query || date.weekday.slice(0, 3).toLowerCase() === query)
     || dates[0];
 }
 
+function createCalendarDate(isoDate) {
+  if (!isoDate) return null;
+  const parsedDate = new Date(`${isoDate}T00:00:00Z`);
+  if (Number.isNaN(parsedDate.getTime()) || parsedDate.toISOString().slice(0, 10) !== isoDate) return null;
+  return {
+    isoDate,
+    weekday: weekdayNames[parsedDate.getUTCDay()],
+    label: new Intl.DateTimeFormat('en-GB', {
+      weekday: 'short',
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+      timeZone: 'UTC',
+    }).format(parsedDate).replace(/,/g, ''),
+  };
+}
+
 export function Booking() {
-  const [selectionState, setSelectionState] = useState({ selections: [], loading: true, error: null });
+  const [selectionState, setSelectionState] = useState({
+    selections: [], loading: true, error: null, date: '',
+  });
   const [step, setStep] = useState(0);
   const [selectedKey, setSelectedKey] = useState('');
-  const [dateOverride, setDateOverride] = useState('');
-  const [selectedTime, setSelectedTime] = useState(() => new URLSearchParams(window.location.search).get('time') || '');
-  const [selectedScreen, setSelectedScreen] = useState('');
-  const [screeningChanged, setScreeningChanged] = useState(false);
+  const [dateOverride, setDateOverride] = useState(() => {
+    const requestedDate = new URLSearchParams(window.location.search).get('date');
+    return createCalendarDate(requestedDate)?.isoDate || createUpcomingDates()[0].isoDate;
+  });
+  const [selectedScreening, setSelectedScreening] = useState(() => {
+    const params = new URLSearchParams(window.location.search);
+    const date = params.get('date');
+    const showtimeId = params.get('showtimeId');
+    return isShowtimeIdForDate(showtimeId, date) ? { date, showtimeId } : null;
+  });
   const [tickets, setTickets] = useState({});
   const [movieDetailState, setMovieDetailState] = useState({ movie: null, loading: false, error: null });
   const [pricingState, setPricingState] = useState({ requestKey: '', pricing: null, loading: false, error: null });
   const [validationState, setValidationState] = useState({ requestKey: '', quote: null, loading: false, error: null });
   const [selectedSeats, setSelectedSeats] = useState([]);
-  const [customer, setCustomer] = useState({ firstName: '', surname: '', email: '', phone: '' });
-  const [bookingRef, setBookingRef] = useState('');
-  const [confirmationSending, setConfirmationSending] = useState(false);
+  const [bookingDetails, setBookingDetails] = useState(null);
+  const [bookedSeatState, setBookedSeatState] = useState({
+    requestKey: '', bookedSeats: [], loading: false, error: null,
+  });
+  const [bookedSeatsRefresh, setBookedSeatsRefresh] = useState(0);
+  const [calendarAvailabilityState, setCalendarAvailabilityState] = useState({
+    requestKey: '', availability: null, loading: false, error: null,
+  });
+  const [calendarAvailabilityRefresh, setCalendarAvailabilityRefresh] = useState(0);
+  const [customer, setCustomer] = useState({ firstName: '', surname: '', email: '' });
+  const [bookingSubmitting, setBookingSubmitting] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
-  const bookingRefRef = useRef('');
-  const [submitConfirmation] = useState(
-    () => createBookingConfirmationSubmitter(sendBookingConfirmation),
-  );
+  const bookingSubmittingRef = useRef(false);
+  const initialSelectionResolvedRef = useRef(false);
+  const calendarAvailabilityCacheRef = useRef(new Map());
   const formRef = useRef(null);
   const dates = useMemo(() => createUpcomingDates(), []);
   const params = useMemo(() => new URLSearchParams(window.location.search), []);
-  const { selections, loading: selectionLoading, error: selectionError } = selectionState;
+  const selectionStateMatchesDate = selectionState.date === dateOverride;
+  const selections = selectionStateMatchesDate ? selectionState.selections : [];
+  const selectionLoading = !selectionStateMatchesDate || selectionState.loading;
+  const selectionError = selectionStateMatchesDate ? selectionState.error : null;
   const selectedSelection = selections.find((item) => selectionKey(item) === selectedKey) || null;
-  const requestedTime = params.get('time') || '';
+  const calendarAvailabilityRequestKey = selectedSelection ? selectionKey(selectedSelection) : '';
+  const calendarAvailability = calendarAvailabilityState.requestKey === calendarAvailabilityRequestKey
+    ? calendarAvailabilityState.availability
+    : null;
+  const calendarAvailabilityLoading = Boolean(calendarAvailabilityRequestKey && (
+    calendarAvailabilityState.requestKey !== calendarAvailabilityRequestKey
+    || calendarAvailabilityState.loading
+  ));
+  const calendarAvailabilityError = calendarAvailabilityState.requestKey === calendarAvailabilityRequestKey
+    ? calendarAvailabilityState.error
+    : null;
   const detailMovieId = getMovieDetailIdForSelection(selectedSelection);
+  const detailRequestKey = selectedSelection
+    ? `${selectionKey(selectedSelection)}|${dateOverride}`
+    : '';
   const currentMovieDetail = detailMovieId != null
-    && movieDetailState.requestKey === selectionKey(selectedSelection)
+    && movieDetailState.requestKey === detailRequestKey
     ? movieDetailState
     : null;
-  const availableDates = selectedSelection
-    ? getSelectionShowtimeDates(selectedSelection, currentMovieDetail?.movie, dates)
-    : dates;
-  const requestedTimeDate = !params.get('day') && requestedTime && selectedSelection
-    ? availableDates.find((item) => getSelectionShowtimes(
-      selectedSelection,
-      currentMovieDetail?.movie,
-      item.weekday,
-    )?.some((slot) => slot.time === requestedTime))
-    : null;
-  const currentDate = (dateOverride && availableDates.find((item) => item.label === dateOverride))
-    || requestedTimeDate
-    || findDate(availableDates, params.get('day') || '');
-  const date = currentDate?.label || '';
+  const currentDate = createCalendarDate(dateOverride)
+    || createCalendarDate(findDate(dates, params.get('day') || '')?.isoDate)
+    || dates[0];
+  const date = currentDate?.isoDate || '';
   const showtimes = selectedSelection
-    ? getSelectionShowtimes(selectedSelection, currentMovieDetail?.movie, currentDate?.weekday)
+    ? getSelectionShowtimes(selectedSelection, currentMovieDetail?.movie, date)
     : null;
-  const time = showtimes?.some((slot) => slot.time === selectedTime)
-    ? selectedTime
-    : !screeningChanged && showtimes?.some((slot) => slot.time === requestedTime) ? requestedTime : '';
-  const screen = showtimes?.find((slot) => slot.time === time && slot.screen === selectedScreen)?.screen
-    || showtimes?.find((slot) => slot.time === time)?.screen
-    || '';
+  const selectedShowtime = selectedScreening?.date === date
+    ? showtimes?.find((slot) => slot.showtimeId === selectedScreening.showtimeId) || null
+    : null;
+  const time = selectedShowtime?.time || '';
+  const screen = selectedShowtime?.screen || '';
   const day = currentDate?.weekday || '';
+  const bookedSeatsRequestKey = selectedShowtime && date
+    ? JSON.stringify([selectedScreening.showtimeId, selectedScreening.date])
+    : '';
+  const bookedSeatsStateKey = bookedSeatsRequestKey
+    ? JSON.stringify([bookedSeatsRequestKey, bookedSeatsRefresh])
+    : '';
+  const bookedSeats = bookedSeatState.requestKey === bookedSeatsStateKey
+    ? bookedSeatState.bookedSeats
+    : [];
+  const bookedSeatsLoading = Boolean(bookedSeatsRequestKey && (
+    bookedSeatState.requestKey !== bookedSeatsStateKey || bookedSeatState.loading
+  ));
+  const bookedSeatsError = bookedSeatState.requestKey === bookedSeatsStateKey
+    ? bookedSeatState.error
+    : null;
   const totalTickets = Object.values(tickets).reduce((total, count) => total + count, 0);
   const pricingRequestKey = selectedSelection && time
-    ? `${selectionKey(selectedSelection)}|${day}|${time}`
+    ? `${selectionKey(selectedSelection)}|${date}|${day}|${time}`
     : '';
   const pricing = pricingState.requestKey === pricingRequestKey ? pricingState.pricing : null;
   const pricingLoading = Boolean(pricingRequestKey && (
@@ -122,26 +179,49 @@ export function Booking() {
   const validationLoading = Boolean(checkoutRequestKey && (
     validationState.requestKey !== checkoutRequestKey || validationState.loading
   ));
-  const initialShowtimeLoading = Boolean(
-    requestedTime
-    && !screeningChanged
-    && time
-    && (pricingLoading || validationLoading),
-  );
-  const bookingLoading = selectionLoading
-    || Boolean(
-      !screeningChanged
-      && selectedSelection
-      && detailMovieId != null
-      && (!currentMovieDetail || currentMovieDetail.loading),
-    )
-    || initialShowtimeLoading;
+  useEffect(() => {
+    if (!selectedSelection) return undefined;
 
+    const requestKey = selectionKey(selectedSelection);
+    const cachedAvailability = calendarAvailabilityCacheRef.current.get(requestKey);
+    if (cachedAvailability) {
+      setCalendarAvailabilityState({
+        requestKey, availability: cachedAvailability, loading: false, error: null,
+      });
+      return undefined;
+    }
+
+    const controller = new AbortController();
+    setCalendarAvailabilityState({
+      requestKey, availability: null, loading: true, error: null,
+    });
+    getSelectionDateAvailability(selectedSelection, dates, controller.signal)
+      .then((availability) => {
+        if (controller.signal.aborted) return;
+        calendarAvailabilityCacheRef.current.set(requestKey, availability);
+        setCalendarAvailabilityState({
+          requestKey, availability, loading: false, error: null,
+        });
+      })
+      .catch((error) => {
+        if (!controller.signal.aborted) {
+          setCalendarAvailabilityState({
+            requestKey, availability: null, loading: false, error: error.message,
+          });
+        }
+      });
+    return () => controller.abort();
+  }, [selectedSelection, dates, calendarAvailabilityRefresh]);
   useEffect(() => {
     const controller = new AbortController();
-    getBookingSelections(controller.signal)
+    getBookingSelections(controller.signal, dateOverride)
       .then(({ selections: items, error: warning }) => {
-        setSelectionState({ selections: items, loading: false, error: warning });
+        setSelectionState({
+          selections: items, loading: false, error: warning, date: dateOverride,
+        });
+        if (initialSelectionResolvedRef.current) return;
+        initialSelectionResolvedRef.current = true;
+
         const requestedOfferId = params.get('offerId');
         const requestedOffer = items.find((item) => (
           item.type === 'offer'
@@ -164,25 +244,27 @@ export function Booking() {
       })
       .catch((error) => {
         if (controller.signal.aborted) return;
-        setSelectionState({ selections: [], loading: false, error: error.message });
+        setSelectionState({
+          selections: [], loading: false, error: error.message, date: dateOverride,
+        });
       });
     return () => controller.abort();
-  }, [params]);
+  }, [params, dateOverride]);
 
   useEffect(() => {
     const movieId = getMovieDetailIdForSelection(selectedSelection);
     if (movieId == null) return undefined;
 
     const controller = new AbortController();
-    const requestKey = selectionKey(selectedSelection);
-    getMovieDetail(movieId, controller.signal)
+    const requestKey = detailRequestKey;
+    getMovieDetail(movieId, controller.signal, date)
       .then((movie) => setMovieDetailState({ requestKey, movie, loading: false, error: null }))
       .catch((error) => {
         if (controller.signal.aborted) return;
         setMovieDetailState({ requestKey, movie: null, loading: false, error: error.message });
       });
     return () => controller.abort();
-  }, [selectedSelection]);
+  }, [selectedSelection, detailRequestKey, date]);
 
   useEffect(() => {
     if (!pricingRequestKey || !selectedSelection) {
@@ -231,11 +313,28 @@ export function Booking() {
     return () => controller.abort();
   }, [checkoutRequestKey, pricing, selectedSelection, day, time, tickets]);
 
+  useEffect(() => {
+    if (!bookedSeatsRequestKey || !selectedSelection) return undefined;
+
+    const controller = new AbortController();
+    const requestKey = bookedSeatsStateKey;
+    getBookedSeats(selectedScreening.showtimeId, selectedScreening.date, controller.signal)
+      .then((items) => {
+        if (!controller.signal.aborted) {
+          setBookedSeatState({ requestKey, bookedSeats: items, loading: false, error: null });
+        }
+      })
+      .catch((error) => {
+        if (!controller.signal.aborted) {
+          setBookedSeatState({ requestKey, bookedSeats: [], loading: false, error: error.message });
+        }
+      });
+    return () => controller.abort();
+  }, [bookedSeatsRequestKey, bookedSeatsStateKey, selectedSelection, selectedScreening]);
+
   function changeSelection(value) {
     setSelectedKey(value);
-    setSelectedTime('');
-    setSelectedScreen('');
-    setScreeningChanged(true);
+    setSelectedScreening(null);
     setSelectedSeats([]);
     setTickets({});
     setMovieDetailState({ requestKey: '', movie: null, loading: false, error: null });
@@ -243,23 +342,18 @@ export function Booking() {
     setValidationState({ requestKey: '', quote: null, loading: false, error: null });
   }
 
-  function changeDate(label) {
-    setDateOverride(label);
-    setSelectedTime('');
-    setSelectedScreen('');
-    setScreeningChanged(true);
+  function changeDate(isoDate) {
+    setDateOverride(isoDate);
+    setSelectedScreening(null);
     setSelectedSeats([]);
     setPricingState({ requestKey: '', pricing: null, loading: false, error: null });
     setValidationState({ requestKey: '', quote: null, loading: false, error: null });
   }
 
   function changeTime(showtime) {
-    if (showtime.time === time && showtime.screen === screen) return;
+    if (showtime.showtimeId === selectedScreening?.showtimeId && date === selectedScreening?.date) return;
 
-    setSelectedTime(showtime.time);
-    setSelectedScreen(showtime.screen);
-    if (showtime.time === time) return;
-    setScreeningChanged(true);
+    setSelectedScreening({ date, showtimeId: showtime.showtimeId });
     setSelectedSeats([]);
     setPricingState({ requestKey: '', pricing: null, loading: false, error: null });
     setValidationState({ requestKey: '', quote: null, loading: false, error: null });
@@ -280,6 +374,7 @@ export function Booking() {
   }
 
   function toggleSeat(seatId) {
+    if (bookedSeats.includes(seatId) || bookedSeatsLoading || bookedSeatsError) return;
     if (selectedSeats.includes(seatId)) {
       setSelectedSeats((current) => current.filter((seat) => seat !== seatId));
       return;
@@ -308,7 +403,7 @@ export function Booking() {
       setToastMessage('Please choose a film or special offer before selecting seats.');
       return;
     }
-    if (!time || !showtimes?.some((slot) => slot.time === time)) {
+    if (!selectedShowtime || selectedScreening?.date !== date) {
       setToastMessage('Please choose an available showtime before selecting seats.');
       return;
     }
@@ -328,6 +423,10 @@ export function Booking() {
   }
 
   function continueFromSeats() {
+    if (bookedSeatsLoading || bookedSeatsError || !date || !selectedShowtime || selectedScreening?.date !== date) {
+      setToastMessage(bookedSeatsError || 'Please wait for seat availability to load before continuing.');
+      return;
+    }
     if (selectedSeats.length !== totalTickets) {
       setToastMessage('Please pick all seats to continue.');
       return;
@@ -347,48 +446,74 @@ export function Booking() {
     goToStep(3);
   }
 
-  async function createDemoTicket() {
+  async function completeGuestBooking() {
+    if (bookingSubmittingRef.current) return;
     if (!validation?.quote) {
-      setToastMessage(validation?.error || 'Your ticket choices must be validated before proceeding.');
       goToStep(0);
+      setToastMessage(validation?.error || 'Your ticket choices must be validated before proceeding.');
       return;
     }
 
-    const currentBookingRef = bookingRefRef.current
-      || bookingRef
-      || `BBT-${Math.floor(100000 + Math.random() * 900000)}`;
-    bookingRefRef.current = currentBookingRef;
-    if (bookingRef !== currentBookingRef) setBookingRef(currentBookingRef);
+    if (!selectedShowtime || selectedScreening?.date !== date) {
+      goToStep(0);
+      setToastMessage('Please choose the screening again before completing your booking.');
+      return;
+    }
+    if (!selectedSeats.length) {
+      goToStep(1);
+      setToastMessage('Select at least one seat before confirming your booking.');
+      return;
+    }
+    if (bookedSeatsLoading || bookedSeatsError || selectedSeats.some((seat) => bookedSeats.includes(seat))) {
+      goToStep(1);
+      setToastMessage(bookedSeatsError || 'Seat availability changed. Please choose your seats again.');
+      return;
+    }
 
-    const payload = createBookingConfirmationPayload({
-      bookingRef: currentBookingRef,
-      customer,
-      selectedSelection,
-      date,
-      time,
-      screen,
-      selectedSeats,
-      totalTickets,
-      totalPrice: validation.quote.total,
-    });
-
-    await submitConfirmation({
-      payload,
-      onSendingChange: setConfirmationSending,
-      onSuccess: () => goToStep(4),
-      onError: () => goToStep(4),
-    });
+    bookingSubmittingRef.current = true;
+    setBookingSubmitting(true);
+    try {
+      const payload = createGuestBookingPayload({
+        showtimeId: selectedScreening.showtimeId,
+        date: selectedScreening.date,
+        seats: selectedSeats,
+        email: customer.email,
+        customerName: `${customer.firstName} ${customer.surname}`,
+        tickets: Object.entries(tickets)
+          .filter(([, quantity]) => quantity > 0)
+          .map(([tierId, quantity]) => ({ tierId, quantity })),
+        ...(selectedSelection.type === 'offer' ? { offerId: selectedSelection.offerId } : {}),
+      });
+      const details = await createGuestBooking(payload);
+      if (details.showtimeId !== selectedScreening.showtimeId || details.date !== selectedScreening.date) {
+        throw new Error('The booking service returned a confirmation for a different screening. Please contact support.');
+      }
+      setBookingDetails(details);
+      setSelectedSeats([]);
+      setBookedSeatsRefresh((current) => current + 1);
+      goToStep(4);
+    } catch (error) {
+      if (error.status === 409) {
+        setSelectedSeats([]);
+        setBookedSeatsRefresh((current) => current + 1);
+        goToStep(1);
+        setToastMessage('Those seats were just booked by someone else. Availability has been refreshed; please choose again.');
+      } else if (error.status === 400) {
+        setToastMessage(error.message || 'Please check the booking details and try again.');
+      } else if (error.status === 404) {
+        setToastMessage('The selected movie, offer, or screening could not be found. Please choose another screening.');
+      } else if (error.status >= 500 || !error.status) {
+        setToastMessage('We could not reach the booking service. Your booking was not confirmed. Please retry or contact support.');
+      } else {
+        setToastMessage(`Could not complete your booking: ${error.message}`);
+      }
+    } finally {
+      bookingSubmittingRef.current = false;
+      setBookingSubmitting(false);
+    }
   }
 
   const dismissToast = useCallback(() => setToastMessage(''), []);
-
-  if (bookingLoading) {
-    return (
-      <Layout current="booking" loading>
-        <PageLoader label="Loading booking options" />
-      </Layout>
-    );
-  }
 
   return (
     <Layout current="booking">
@@ -404,12 +529,18 @@ export function Booking() {
               selections={selections}
               selection={selectedSelection}
               date={date}
+              calendarMinDate={dates[0]?.isoDate}
+              calendarMaxDate={dates.at(-1)?.isoDate}
+              calendarAvailability={calendarAvailability}
+              calendarAvailabilityLoading={calendarAvailabilityLoading}
+              calendarAvailabilityError={calendarAvailabilityError}
               time={time}
               screen={screen}
+              selectedShowtimeId={selectedShowtime?.showtimeId || ''}
               tickets={tickets}
               totalTickets={totalTickets}
               showtimes={showtimes}
-              dates={availableDates}
+              dates={dates}
               selectionLoading={selectionLoading}
               selectionError={selectionError}
               showtimeLoading={Boolean(detailMovieId != null && (!currentMovieDetail || currentMovieDetail.loading))}
@@ -421,6 +552,12 @@ export function Booking() {
               validationLoading={validationLoading}
               onSelectionChange={changeSelection}
               onDateChange={changeDate}
+              onRetryCalendarAvailability={() => {
+                if (calendarAvailabilityRequestKey) {
+                  calendarAvailabilityCacheRef.current.delete(calendarAvailabilityRequestKey);
+                }
+                setCalendarAvailabilityRefresh((current) => current + 1);
+              }}
               onTimeChange={changeTime}
               onTicketChange={changeTicketCount}
               onContinue={continueFromTickets}
@@ -430,6 +567,10 @@ export function Booking() {
             <SeatSelection
               selectedSeats={selectedSeats}
               totalTickets={totalTickets}
+              bookedSeats={bookedSeats}
+              bookedSeatsLoading={bookedSeatsLoading}
+              bookedSeatsError={bookedSeatsError}
+              onRetryBookedSeats={() => setBookedSeatsRefresh((current) => current + 1)}
               onToggleSeat={toggleSeat}
               onBack={() => goToStep(0)}
               onContinue={continueFromSeats}
@@ -444,24 +585,26 @@ export function Booking() {
             />
           )}
           {step === 3 && (
-            <DemoPayment
+            <PaymentStep
               onBack={() => goToStep(2)}
-              onConfirm={createDemoTicket}
-              isSending={confirmationSending}
-              onPaymentInput={() => setToastMessage('Demo only: payment details are not processed. You can continue without entering them.')}
+              onConfirm={completeGuestBooking}
+              isSubmitting={bookingSubmitting}
+              movieTitle={selectedSelection?.title || 'Selected film'}
+              seats={selectedSeats}
+              totalAmount={validation?.quote?.total || 0}
+              customer={customer}
+              date={date}
+              time={time}
+              screen={screen}
             />
           )}
           {step === 4 && (
             <BookingConfirmation
               movie={selectedSelection}
-              date={date}
               time={time}
               screen={screen}
-              selectedSeats={selectedSeats}
-              totalTickets={totalTickets}
-              totalPrice={validation?.quote?.total || 0}
+              bookingDetails={bookingDetails}
               customer={customer}
-              bookingRef={bookingRef}
               onToast={setToastMessage}
             />
           )}

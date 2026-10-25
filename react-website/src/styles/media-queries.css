@@ -376,10 +376,6 @@
         font-size: 1rem;
     }
 
-    .payment-methods-grid {
-        grid-template-columns: 1fr;
-    }
-
     footer {
         flex-direction: column;
     }
@@ -742,10 +738,6 @@ header {
     min-width: 0;
 }
 
-.credit-card-mockup {
-    padding: clamp(1rem, 4vw, 1.5rem);
-}
-
 .ticket-row {
     gap: 0.75rem;
 }
@@ -789,7 +781,6 @@ header {
     right: clamp(1rem, 4vw, 1.875rem);
 }
 
-.payment-methods-grid,
 .ticket-details-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
 }
@@ -957,9 +948,7 @@ header {
     }
 
     .date-time-group,
-    .guest-name-grid,
-    .payment-methods-grid,
-    .demo-payment-fields-row {
+    .guest-name-grid {
         grid-template-columns: minmax(0, 1fr);
     }
 
