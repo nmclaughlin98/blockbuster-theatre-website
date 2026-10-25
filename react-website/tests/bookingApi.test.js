@@ -206,7 +206,6 @@ test('posts the exact guest booking payload to the versioned endpoint', async ()
       seats: ['F10', 'F11'],
       email: ' customer@example.com ',
       customerName: ' Niall McLaughlin ',
-      paymentToken: 'tok_stripe_123456789',
     });
     const booking = await createGuestBooking(payload);
 
@@ -219,9 +218,9 @@ test('posts the exact guest booking payload to the versioned endpoint', async ()
       seats: ['F10', 'F11'],
       email: 'customer@example.com',
       customerName: 'Niall McLaughlin',
-      paymentToken: 'tok_stripe_123456789',
     });
     assert.equal(JSON.parse(request.options.body).userId, undefined);
+    assert.equal(JSON.parse(request.options.body).paymentToken, undefined);
     assert.deepEqual(booking, bookingDetails);
   } finally {
     restoreFetch();
@@ -234,7 +233,6 @@ test('rejects an incomplete guest booking request before sending it', () => {
     seats: [],
     email: 'bad-email',
     customerName: '',
-    paymentToken: '',
   }), /booking ID/);
 });
 

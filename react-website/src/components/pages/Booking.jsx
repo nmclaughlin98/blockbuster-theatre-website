@@ -135,6 +135,7 @@ export function Booking() {
   const day = currentDate?.weekday || '';
   const bookedSeatsRequestKey = selectedSelection && date && time
     ? JSON.stringify([getBookingMovieId(selectedSelection), date, day, time])
+    ? JSON.stringify([getBookingMovieId(selectedSelection), date, day, time])
     : '';
   const bookedSeatsStateKey = bookedSeatsRequestKey
     ? JSON.stringify([bookedSeatsRequestKey, bookedSeatsRefresh])
@@ -419,7 +420,7 @@ export function Booking() {
     goToStep(3);
   }
 
-  async function completeGuestBooking(paymentToken) {
+  async function completeGuestBooking() {
     if (bookingSubmittingRef.current) return;
     if (!validation?.quote) {
       setToastMessage(validation?.error || 'Your ticket choices must be validated before proceeding.');
@@ -446,7 +447,6 @@ export function Booking() {
         seats: selectedSeats,
         email: customer.email,
         customerName: `${customer.firstName} ${customer.surname}`,
-        paymentToken,
       });
       const details = await createGuestBooking(payload);
       setBookingDetails(details);
@@ -545,6 +545,7 @@ export function Booking() {
               movieTitle={selectedSelection?.title || 'Selected film'}
               seats={selectedSeats}
               totalAmount={validation?.quote?.total || 0}
+              customer={customer}
             />
           )}
           {step === 4 && (

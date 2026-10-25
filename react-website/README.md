@@ -4,7 +4,7 @@
 
 The movies API base URL is written to the gitignored `src/config.js` before each development server start and production build. `VITE_MOVIES_API_URL` is required; there is no hardcoded URL fallback.
 
-For local development, create `.env.local` and set `VITE_MOVIES_API_URL` to the API invoke base URL. Include a stage path if the API uses one, but do not append a route such as `/movies`. Set `VITE_STRIPE_PUBLISHABLE_KEY` to the Stripe publishable key to enable secure card tokenization; never put a Stripe secret key in frontend configuration. You can also use mode-specific `.env.development.local` and `.env.production.local` files. For GitHub Pages deployments, add repository Actions variables named `VITE_MOVIES_API_URL` and `VITE_STRIPE_PUBLISHABLE_KEY` under Settings → Secrets and variables → Actions → Variables. The deployment workflow requires both and passes them into the production build.
+For local development, create `.env.local` and set `VITE_MOVIES_API_URL` to the API invoke base URL. Include a stage path if the API uses one, but do not append a route such as `/movies`. You can also use mode-specific `.env.development.local` and `.env.production.local` files. For GitHub Pages deployments, add a repository Actions variable named `VITE_MOVIES_API_URL` under Settings → Secrets and variables → Actions → Variables. The deployment workflow requires this variable and passes it into the production build.
 
 ## Wallet passes
 
@@ -14,7 +14,7 @@ The booking flow loads typed movie and offer entries from `GET /film-selections`
 
 ### Guest booking and account conversion
 
-The booking wizard keeps selection and contact data in memory and does not require a guest session or cart. Stripe Elements tokenizes card details with the publishable key; the browser sends only the resulting `paymentToken` to `POST /api/v1/bookings/guest` with `showtimeId`, seats, email, and customer name. The API response supplies the booking summary and a `conversionToken`. Guests may skip account creation or submit a password to `POST /api/v1/auth/convert-guest`; raw card details and conversion tokens are never persisted in browser storage.
+The booking wizard keeps selection and contact data in memory and does not require a guest session or cart. This is an unpaid reservation flow: the review screen retains the server-calculated total for display, collects no card details, and sends no payment token to `POST /api/v1/bookings/guest`. The API response supplies the booking summary and an optional `conversionToken`. Guests may skip account creation or submit a password to `POST /api/v1/auth/convert-guest`; conversion tokens are never persisted in browser storage. The backend guest-booking endpoint must allow `paymentToken` to be omitted.
 
 ## Movie Collections
 

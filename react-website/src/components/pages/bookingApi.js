@@ -54,7 +54,7 @@ export async function getBookedSeats(movieId, date, day, time, signal) {
 }
 
 export function createGuestBookingPayload({
-  showtimeId, seats, email, customerName, paymentToken,
+  showtimeId, seats, email, customerName,
 }) {
   if (typeof showtimeId !== 'string' || !showtimeId.trim()) {
     throw new Error('The selected showtime is missing its booking ID.');
@@ -70,16 +70,11 @@ export function createGuestBookingPayload({
   if (typeof customerName !== 'string' || !customerName.trim()) {
     throw new Error('Enter your name before completing your booking.');
   }
-  if (typeof paymentToken !== 'string' || !paymentToken.trim()) {
-    throw new Error('Payment could not be verified. Please try again.');
-  }
-
   return {
     showtimeId: showtimeId.trim(),
     seats: [...seats],
     email: email.trim(),
     customerName: customerName.trim(),
-    paymentToken: paymentToken.trim(),
   };
 }
 

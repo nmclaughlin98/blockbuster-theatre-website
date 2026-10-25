@@ -83,7 +83,7 @@ export function BookingConfirmation({
           { label: 'Total', value: totalAmount },
           { label: 'Guest Email', value: customerEmail },
           { label: 'Booking Ref', value: bookingRef },
-          { label: 'Status', value: 'BOOKING CONFIRMED' },
+          { label: 'Status', value: 'BOOKING RESERVED - PAYMENT NOT TAKEN' },
         ],
         locations: [{
           latitude: 55.044358,
@@ -146,7 +146,7 @@ export function BookingConfirmation({
     <fieldset className="active" data-step="4">
       <StepHeader
         title="Booking confirmed"
-        description="Your payment was processed and your seats are reserved."
+        description="Your seats have been reserved. No payment was taken."
       />
       <div className="ticket-pass">
         <div className="ticket-pass-header">

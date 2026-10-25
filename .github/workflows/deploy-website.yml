@@ -45,17 +45,12 @@ jobs:
       - name: Install dependencies
         working-directory: react-website
         run: npm ci
-      - name: Validate checkout configuration
+      - name: Validate API base URL
         env:
           VITE_MOVIES_API_URL: ${{ vars.VITE_MOVIES_API_URL }}
-          VITE_STRIPE_PUBLISHABLE_KEY: ${{ vars.VITE_STRIPE_PUBLISHABLE_KEY }}
         run: |
           if [ -z "$VITE_MOVIES_API_URL" ]; then
             echo "::error::Set the VITE_MOVIES_API_URL repository variable to the deployed API base URL."
-            exit 1
-          fi
-          if [ -z "$VITE_STRIPE_PUBLISHABLE_KEY" ]; then
-            echo "::error::Set the VITE_STRIPE_PUBLISHABLE_KEY repository variable to the Stripe publishable key."
             exit 1
           fi
       - name: Build React site
@@ -63,7 +58,6 @@ jobs:
         run: npm run build
         env:
           VITE_MOVIES_API_URL: ${{ vars.VITE_MOVIES_API_URL }}
-          VITE_STRIPE_PUBLISHABLE_KEY: ${{ vars.VITE_STRIPE_PUBLISHABLE_KEY }}
       - name: Setup Pages
         uses: actions/configure-pages@v6
       - name: Upload artifact
