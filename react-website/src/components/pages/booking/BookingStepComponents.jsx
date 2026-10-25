@@ -20,11 +20,11 @@ export function StepHeader({ title, description }) {
   return <div className="step-header"><h2>{title}</h2><p>{description}</p></div>;
 }
 
-export function StepActions({ onBack, onContinue, continueLabel }) {
+export function StepActions({ onBack, onContinue, continueLabel, continueDisabled = false }) {
   return (
     <div className="form-actions">
       <button className="form-button previous" type="button" onClick={onBack}>Back</button>
-      <button className="form-button next" type="button" onClick={onContinue}>{continueLabel}</button>
+      <button className="form-button next" type="button" onClick={onContinue} disabled={continueDisabled}>{continueLabel}</button>
     </div>
   );
 }

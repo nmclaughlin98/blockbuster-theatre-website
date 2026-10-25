@@ -2,10 +2,12 @@ import { useState } from 'react';
 import { asset } from '../../shared';
 import { StepActions, StepHeader } from './BookingStepComponents';
 
-const bookedSeats = new Set(['B4', 'C2', 'C3', 'D7', 'D8', 'E3', 'E4', 'E9', 'F9', 'F10', 'G3', 'G4', 'G9']);
 const accessibleSeats = new Set(['A1', 'A5', 'A6', 'A10']);
 
-export function SeatSelection({ selectedSeats, totalTickets, onToggleSeat, onBack, onContinue }) {
+export function SeatSelection({
+  selectedSeats, totalTickets, bookedSeats, bookedSeatsLoading, bookedSeatsError,
+  onRetryBookedSeats, onToggleSeat, onBack, onContinue,
+}) {
   const [hoveredSeat, setHoveredSeat] = useState(null);
 
   function updateSeatTooltip(seatId, x, y) {
@@ -42,6 +44,13 @@ export function SeatSelection({ selectedSeats, totalTickets, onToggleSeat, onBac
         title="Step 2: Reserve Your Seats"
         description={`Please choose exactly ${totalTickets} seat${totalTickets === 1 ? '' : 's'} on the map below.`}
       />
+      {bookedSeatsLoading && <p className="showtime-placeholder" role="status">Checking seat availability...</p>}
+      {bookedSeatsError && (
+        <div className="form-notice" role="alert">
+          <p>Could not load seat availability: {bookedSeatsError}</p>
+          <button className="form-button previous" type="button" onClick={onRetryBookedSeats}>Retry</button>
+        </div>
+      )}
       <div className="seating-plan">
         <div className="screen-container"><div className="screen" /><div className="screen-text">MAIN CINEMA SCREEN (CURVED)</div></div>
         <div className="seat-legend-container">
@@ -65,7 +74,7 @@ export function SeatSelection({ selectedSeats, totalTickets, onToggleSeat, onBac
                 <span className="row-label">{row}</span>
                 {Array.from({ length: row === 'G' ? 11 : 10 }, (_, seatIndex) => {
                   const seatId = `${row}${seatIndex + 1}`;
-                  const isBooked = bookedSeats.has(seatId);
+                  const isBooked = bookedSeats.includes(seatId);
                   const isAccessible = accessibleSeats.has(seatId);
                   const isSelected = selectedSeats.includes(seatId);
                   return (
@@ -80,7 +89,7 @@ export function SeatSelection({ selectedSeats, totalTickets, onToggleSeat, onBac
                       <button
                         className={`seat ${isAccessible ? 'seat-accessible' : ''} ${isBooked ? 'booked-seat' : ''} ${isSelected ? 'selected-seat' : ''}`}
                         type="button"
-                        disabled={isBooked}
+                        disabled={isBooked || bookedSeatsLoading || Boolean(bookedSeatsError)}
                         aria-label={`Seat ${seatId}${isAccessible ? ', accessible' : ''}${isBooked ? ', booked' : ''}${isSelected ? ', selected' : ''}`}
                         aria-pressed={isSelected}
                         onClick={() => onToggleSeat(seatId)}
@@ -112,7 +121,12 @@ export function SeatSelection({ selectedSeats, totalTickets, onToggleSeat, onBac
           Selected Seats: <strong>{selectedSeats.length ? selectedSeats.join(', ') : 'None selected yet'}</strong>
         </div>
       </div>
-      <StepActions onBack={onBack} onContinue={onContinue} continueLabel="Guest Info" />
+      <StepActions
+        onBack={onBack}
+        onContinue={onContinue}
+        continueLabel="Guest Info"
+        continueDisabled={bookedSeatsLoading || Boolean(bookedSeatsError) || selectedSeats.length !== totalTickets}
+      />
     </fieldset>
   );
 }

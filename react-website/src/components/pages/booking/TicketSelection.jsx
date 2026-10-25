@@ -5,7 +5,7 @@ import {
 import { StepHeader } from './BookingStepComponents';
 
 export function TicketSelection({
-  selections, selection, date, time, screen, tickets, totalTickets, showtimes, dates, pricing,
+  selections, selection, date, calendarMinDate, calendarMaxDate, time, screen, tickets, totalTickets, showtimes, dates, pricing,
   selectionLoading, selectionError, showtimeLoading, showtimeError, pricingLoading, pricingError,
   validation, validationLoading, onSelectionChange, onDateChange, onTimeChange, onTicketChange,
   onContinue,
@@ -41,15 +41,22 @@ export function TicketSelection({
       </div>
       <div className="date-time-group">
         <div className="form-group">
-          <label htmlFor="booking-date">Day of Screening</label>
-          <select id="booking-date" className="form-control" value={date} onChange={(event) => onDateChange(event.target.value)}>
-            {!dates.length && (
-              <option value="" disabled>
-                {showtimeLoading ? 'Loading screening dates...' : 'No screening dates available'}
-              </option>
-            )}
-            {dates.map((item) => <option value={item.label} key={item.label}>{item.label}</option>)}
-          </select>
+          <label htmlFor="booking-date">Screening Date</label>
+          <input
+            id="booking-date"
+            className="form-control"
+            type="date"
+            value={date}
+            min={calendarMinDate}
+            max={calendarMaxDate}
+            onChange={(event) => onDateChange(event.target.value)}
+            required
+          />
+          {!dates.length && (
+            <span className="showtime-placeholder" role="status">
+              {showtimeLoading ? 'Loading screening dates...' : 'No screening dates available'}
+            </span>
+          )}
         </div>
         <div className="form-group">
           <label>Select Showtime</label>

@@ -108,13 +108,13 @@ export function BookingConfirmation({
   return (
     <fieldset className="active" data-step="4">
       <StepHeader
-        title="Demo booking confirmation"
-        description="This summary is shown even if the confirmation email could not be sent. No payment was processed, and no valid ticket or seat reservation was issued."
+        title="Booking confirmed"
+        description="Your seats have been reserved. No payment was processed in this demo booking flow."
       />
       <div className="ticket-pass">
         <div className="ticket-pass-header">
           <div className="ticket-pass-brand">BLOCKBUSTER THEATRE</div>
-          <div className="ticket-pass-status">DEMO PREVIEW</div>
+          <div className="ticket-pass-status">BOOKING CONFIRMED</div>
         </div>
         <div className="ticket-pass-body">
           <div className="ticket-movie-title">{movie?.title || 'Movie'}</div>

@@ -7,13 +7,84 @@ async function requestJson(path, options = {}) {
   try {
     data = await response.json();
   } catch {
-    throw new Error('The booking service returned an invalid response.');
+    if (response.ok) throw new Error('The booking service returned an invalid response.');
   }
 
   if (!response.ok) {
-    throw new Error(data?.message || `Booking request failed (${response.status}).`);
+    const error = new Error(data?.message || `Booking request failed (${response.status}).`);
+    error.status = response.status;
+    throw error;
   }
 
+  return data;
+}
+
+export function getWeekdayForDate(date) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+    throw new Error('Choose a valid screening date.');
+  }
+  const parsedDate = new Date(`${date}T00:00:00Z`);
+  if (Number.isNaN(parsedDate.getTime()) || parsedDate.toISOString().slice(0, 10) !== date) {
+    throw new Error('Choose a valid screening date.');
+  }
+  return ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][parsedDate.getUTCDay()];
+}
+
+export function getBookingMovieId(selection) {
+  if (selection?.type === 'movie') return selection.movieId;
+  if (selection?.type === 'offer') return selection.featuredMovieId;
+  throw new Error('Choose a film or special offer before booking seats.');
+}
+
+export function createSeatBookingPayload(selection, date, day, time, seats) {
+  const movieId = getBookingMovieId(selection);
+  if (movieId == null) throw new Error('The selected film does not have a valid movie ID.');
+  if (!date || getWeekdayForDate(date) !== day) {
+    throw new Error('The screening weekday does not match the selected date.');
+  }
+  if (!time) throw new Error('Choose a showtime before booking seats.');
+  if (!Array.isArray(seats) || seats.length === 0) {
+    throw new Error('Select at least one seat before booking.');
+  }
+  if (new Set(seats).size !== seats.length || seats.some((seat) => (
+    typeof seat !== 'string' || !/^[A-G](?:[1-9]|1[01])$/.test(seat)
+  ))) {
+    throw new Error('The selected seat list is invalid.');
+  }
+
+  const payload = {
+    movieId,
+    date,
+    showtime: { day, time },
+    seats: [...seats],
+  };
+  if (selection.type === 'offer') payload.offerId = selection.offerId;
+  return payload;
+}
+
+export async function getBookedSeats(movieId, date, day, time, signal) {
+  if (movieId == null) throw new Error('The selected film does not have a valid movie ID.');
+  if (!date || getWeekdayForDate(date) !== day) {
+    throw new Error('The screening weekday does not match the selected date.');
+  }
+  if (!time) throw new Error('Choose a showtime to load booked seats.');
+
+  const query = new URLSearchParams({ movieId, date, day, time });
+  const data = await requestJson(`/bookings?${query.toString()}`, { signal });
+  if (!Array.isArray(data.bookedSeats) || data.bookedSeats.some((seat) => (
+    typeof seat !== 'string' || !/^[A-G](?:[1-9]|1[01])$/.test(seat)
+  ))) {
+    throw new Error('The booking service returned an invalid booked seat list.');
+  }
+  return data.bookedSeats;
+}
+
+export async function createSeatBooking(payload) {
+  const data = await requestJson('/bookings', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
   return data;
 }
 

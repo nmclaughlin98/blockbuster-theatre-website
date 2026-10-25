@@ -20,7 +20,7 @@ export function DemoPayment({ onBack, onConfirm, onPaymentInput, isSending = fal
     <fieldset className="active" data-step="3">
       <StepHeader
         title="Step 4: Payment"
-        description="This is a demo only. No payment is processed, and no valid ticket or seat reservation is issued."
+        description="This is a demo only. No payment is processed; completing this step reserves your selected seats."
       />
       {paymentMethod === 'card' && (
         <div className="card-preview-container" aria-label="Sample payment card preview">
@@ -112,7 +112,7 @@ export function DemoPayment({ onBack, onConfirm, onPaymentInput, isSending = fal
           disabled={isSending}
           aria-live="polite"
         >
-          {isSending ? 'Sending confirmation...' : 'Complete booking'}
+          {isSending ? 'Completing booking...' : 'Complete booking'}
         </button>
       </div>
     </fieldset>

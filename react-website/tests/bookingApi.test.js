@@ -2,6 +2,9 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import {
   createCheckoutPayload,
+  createSeatBookingPayload,
+  createSeatBooking,
+  getBookedSeats,
   getBookingSelections,
   getFilmSelections,
   getMovieDetail,
@@ -10,6 +13,7 @@ import {
   getMovies,
   getSelectionShowtimes,
   getTicketPricing,
+  getWeekdayForDate,
   hasOfferShowtimeOverrides,
   selectionApiId,
   selectionDisplayLabel,
@@ -146,6 +150,86 @@ test('follows movie catalogue pagination tokens', async () => {
     assert.equal(requestedUrls.length, 2);
     assert.equal(requestedUrls[0].searchParams.has('nextToken'), false);
     assert.equal(requestedUrls[1].searchParams.get('nextToken'), 'next-page-token');
+  } finally {
+    restoreFetch();
+  }
+});
+
+test('loads booked seats for the selected calendar date and weekday', async () => {
+  const requestedUrls = [];
+  const responses = [
+    new Response(JSON.stringify({ bookedSeats: ['B4', 'C2'] })),
+    new Response(JSON.stringify({ bookedSeats: [] })),
+  ];
+  const restoreFetch = mockFetch(async (url) => {
+    requestedUrls.push(new URL(url));
+    return responses.shift();
+  });
+
+  try {
+    assert.equal(getWeekdayForDate('2026-10-26'), 'Monday');
+    assert.deepEqual(await getBookedSeats('movie-42', '2026-10-26', 'Monday', '19:30'), ['B4', 'C2']);
+    assert.deepEqual(await getBookedSeats('movie-42', '2026-10-27', 'Tuesday', '19:30'), []);
+    assert.equal(requestedUrls[0].pathname, '/bookings');
+    assert.deepEqual(Object.fromEntries(requestedUrls[0].searchParams), {
+      movieId: 'movie-42', date: '2026-10-26', day: 'Monday', time: '19:30',
+    });
+    assert.equal(requestedUrls[1].searchParams.get('date'), '2026-10-27');
+    await assert.rejects(getBookedSeats('movie-42', '2026-10-27', 'Monday', '19:30'), /weekday does not match/);
+  } finally {
+    restoreFetch();
+  }
+});
+
+test('posts movie bookings with seats and offer bookings with the featured movie and offer ID', async () => {
+  const bookingOffer = { ...offer, offerId: 'offer-42', featuredMovieId: 'movie-42' };
+  const requests = [];
+  const restoreFetch = mockFetch(async (url, options) => {
+    requests.push({ url: new URL(url), options });
+    return new Response(JSON.stringify({ bookingId: 'booking-1', seats: ['B4'] }), { status: 201 });
+  });
+
+  try {
+    const moviePayload = createSeatBookingPayload(movie, '2026-10-26', 'Monday', '19:30', ['B4']);
+    const offerPayload = createSeatBookingPayload(bookingOffer, '2026-10-26', 'Monday', '19:30', ['C5']);
+    await createSeatBooking(moviePayload);
+    const booking = await createSeatBooking(offerPayload);
+
+    assert.equal(booking.bookingId, 'booking-1');
+    assert.equal(requests[0].url.pathname, '/bookings');
+    assert.equal(requests[0].options.method, 'POST');
+    assert.equal(requests[0].options.headers['Content-Type'], 'application/json');
+    assert.deepEqual(JSON.parse(requests[0].options.body), {
+      movieId: 'movie-42',
+      date: '2026-10-26',
+      showtime: { day: 'Monday', time: '19:30' },
+      seats: ['B4'],
+    });
+    assert.deepEqual(JSON.parse(requests[1].options.body), {
+      movieId: 'movie-42',
+      date: '2026-10-26',
+      showtime: { day: 'Monday', time: '19:30' },
+      seats: ['C5'],
+      offerId: 'offer-42',
+    });
+    assert.equal(JSON.parse(requests[1].options.body).userId, undefined);
+  } finally {
+    restoreFetch();
+  }
+});
+
+test('preserves HTTP 409 status for a booking seat conflict', async () => {
+  const restoreFetch = mockFetch(async () => new Response(
+    JSON.stringify({ message: 'One or more seats are no longer available.' }),
+    { status: 409 },
+  ));
+
+  try {
+    await assert.rejects(createSeatBooking({ seats: ['B4'] }), (error) => {
+      assert.equal(error.status, 409);
+      assert.match(error.message, /no longer available/);
+      return true;
+    });
   } finally {
     restoreFetch();
   }
