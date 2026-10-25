@@ -1,6 +1,8 @@
 import { MOVIES_API_URL } from '../../config.js';
 
-async function requestJson(path, options = {}) {
+export const CINEMA_SEAT_CAPACITY = 71;
+
+async function requestJson(path, options = {}, expectedStatus) {
   const response = await fetch(`${MOVIES_API_URL}${path}`, options);
   let data;
 
@@ -10,7 +12,7 @@ async function requestJson(path, options = {}) {
     if (response.ok) throw new Error('The booking service returned an invalid response.');
   }
 
-  if (!response.ok) {
+  if (!response.ok || (expectedStatus && response.status !== expectedStatus)) {
     const error = new Error(data?.message || `Booking request failed (${response.status}).`);
     error.status = response.status;
     throw error;
@@ -30,21 +32,42 @@ export function getWeekdayForDate(date) {
   return ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][parsedDate.getUTCDay()];
 }
 
+export function getUpcomingScreeningDates() {
+  const today = new Date();
+  today.setHours(12, 0, 0, 0);
+  return Array.from({ length: 7 }, (_, offset) => {
+    const date = new Date(today);
+    date.setDate(today.getDate() + offset);
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+  });
+}
+
 export function getBookingMovieId(selection) {
   if (selection?.type === 'movie') return selection.movieId;
   if (selection?.type === 'offer') return selection.featuredMovieId;
   throw new Error('Choose a film or special offer before booking seats.');
 }
 
-export async function getBookedSeats(movieId, date, day, time, signal) {
-  if (movieId == null) throw new Error('The selected film does not have a valid movie ID.');
-  if (!date || getWeekdayForDate(date) !== day) {
-    throw new Error('The screening weekday does not match the selected date.');
-  }
-  if (!time) throw new Error('Choose a showtime to load booked seats.');
+export function isShowtimeIdForDate(showtimeId, date) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date || '')) return false;
+  const parsedDate = new Date(`${date}T00:00:00Z`);
+  return typeof showtimeId === 'string'
+    && /^\d{6}_\d{4}-\d{2}-\d{2}_\d{4}$/.test(showtimeId)
+    && !Number.isNaN(parsedDate.getTime())
+    && parsedDate.toISOString().slice(0, 10) === date
+    && showtimeId.slice(7, 17) === date;
+}
 
-  const query = new URLSearchParams({ movieId, date, day, time });
-  const data = await requestJson(`/bookings?${query.toString()}`, { signal });
+export async function getBookedSeats(showtimeId, date, signal) {
+  if (!isShowtimeIdForDate(showtimeId, date)) {
+    throw new Error('The selected showtime ID does not match the screening date.');
+  }
+
+  const query = new URLSearchParams({ showtimeId, date });
+  const data = await requestJson(`/api/v1/bookings/guest?${query.toString()}`, { signal });
+  if (data.showtimeId !== showtimeId || data.date !== date) {
+    throw new Error('The booking service returned seat availability for a different screening.');
+  }
   if (!Array.isArray(data.bookedSeats) || data.bookedSeats.some((seat) => (
     typeof seat !== 'string' || !/^[A-G](?:[1-9]|1[01])$/.test(seat)
   ))) {
@@ -54,15 +77,15 @@ export async function getBookedSeats(movieId, date, day, time, signal) {
 }
 
 export function createGuestBookingPayload({
-  showtimeId, seats, email, customerName,
+  showtimeId, date, seats, email, customerName, tickets, offerId,
 }) {
-  if (typeof showtimeId !== 'string' || !showtimeId.trim()) {
-    throw new Error('The selected showtime is missing its booking ID.');
+  if (!isShowtimeIdForDate(showtimeId, date)) {
+    throw new Error('Choose a valid screening with a showtime ID for the selected date.');
   }
-  if (!Array.isArray(seats) || seats.length === 0
+  if (!Array.isArray(seats) || seats.length === 0 || seats.length > 10
     || new Set(seats).size !== seats.length
     || seats.some((seat) => typeof seat !== 'string' || !/^[A-G](?:[1-9]|1[01])$/.test(seat))) {
-    throw new Error('Select valid seats before completing your booking.');
+    throw new Error('Select between 1 and 10 unique valid seats before completing your booking.');
   }
   if (typeof email !== 'string' || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
     throw new Error('Enter a valid email address before completing your booking.');
@@ -70,12 +93,25 @@ export function createGuestBookingPayload({
   if (typeof customerName !== 'string' || !customerName.trim()) {
     throw new Error('Enter your name before completing your booking.');
   }
-  return {
-    showtimeId: showtimeId.trim(),
+  if (!Array.isArray(tickets) || tickets.some((ticket) => (
+    !ticket
+    || typeof ticket.tierId !== 'string'
+    || !Number.isInteger(ticket.quantity)
+    || ticket.quantity < 1
+  )) || tickets.reduce((total, ticket) => total + ticket.quantity, 0) !== seats.length) {
+    throw new Error('Ticket quantities must match the number of selected seats.');
+  }
+
+  const payload = {
+    showtimeId,
+    date,
     seats: [...seats],
     email: email.trim(),
     customerName: customerName.trim(),
+    tickets: tickets.map(({ tierId, quantity }) => ({ tierId, quantity })),
   };
+  if (offerId != null) payload.offerId = offerId;
+  return payload;
 }
 
 export async function createGuestBooking(payload) {
@@ -83,19 +119,35 @@ export async function createGuestBooking(payload) {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
-  });
+  }, 201);
   if (!data || typeof data !== 'object' || Array.isArray(data)
     || typeof data.bookingId !== 'string' || !data.bookingId
-    || typeof data.showtimeId !== 'string' || !data.showtimeId
+    || typeof data.bookingRef !== 'string' || !data.bookingRef
+    || data.showtimeId !== payload.showtimeId
+    || !isShowtimeIdForDate(data.showtimeId, payload.date)
+    || typeof data.date !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(data.date)
+    || data.date !== payload.date
     || typeof data.movieTitle !== 'string' || !data.movieTitle
-    || !Array.isArray(data.seats) || data.seats.some((seat) => (
+    || !Array.isArray(data.seats) || data.seats.length !== payload.seats.length
+    || new Set(data.seats).size !== data.seats.length
+    || data.seats.some((seat) => (
       typeof seat !== 'string' || !/^[A-G](?:[1-9]|1[01])$/.test(seat)
     ))
+    || data.seats.some((seat) => !payload.seats.includes(seat))
+    || !Array.isArray(data.tickets) || data.tickets.some((ticket) => (
+      !ticket
+      || typeof ticket.tierId !== 'string'
+      || !Number.isInteger(ticket.quantity)
+      || ticket.quantity < 1
+    ))
+    || data.tickets.reduce((total, ticket) => total + ticket.quantity, 0) !== data.seats.length
     || typeof data.totalAmount !== 'number' || data.totalAmount < 0
     || !Number.isFinite(data.totalAmount)
     || typeof data.currency !== 'string' || !/^[A-Z]{3}$/.test(data.currency)
     || typeof data.customerEmail !== 'string' || !data.customerEmail
-    || (data.conversionToken != null && typeof data.conversionToken !== 'string')) {
+    || typeof data.confirmationEmailSent !== 'boolean'
+    || (data.conversionToken != null && typeof data.conversionToken !== 'string')
+    || (data.conversionTokenExpiresAt != null && typeof data.conversionTokenExpiresAt !== 'string')) {
     throw new Error('The booking service returned invalid guest booking details.');
   }
   return data;
@@ -158,21 +210,41 @@ export function getMovieDetailIdForSelection(selection) {
   return null;
 }
 
-export function getSelectionShowtimes(selection, movieDetail, day) {
+export function getShowtimesForDate(schedule, date) {
+  if (!schedule || typeof schedule !== 'object') return [];
+  const slots = Array.isArray(schedule)
+    ? schedule
+    : Object.values(schedule).filter(Array.isArray).flat();
+
+  return slots.filter((showtime) => (
+    showtime?.date === date
+    && isShowtimeIdForDate(showtime.showtimeId, date)
+  ));
+}
+
+export function getSelectionShowtimes(selection, movieDetail, date) {
   const schedule = hasOfferShowtimeOverrides(selection)
     ? selection.overrideShowtimes
     : movieDetail?.showtimes;
 
   if (!schedule || typeof schedule !== 'object' || Array.isArray(schedule)) return null;
-  return Array.isArray(schedule[day]) ? schedule[day] : [];
+  return getShowtimesForDate(schedule, date);
 }
 
 export function getSelectionShowtimeDates(selection, movieDetail, dates) {
-  return dates.filter(({ weekday }) => getSelectionShowtimes(selection, movieDetail, weekday)?.length > 0);
+  return dates.filter(({ isoDate }) => (
+    getSelectionShowtimes(selection, movieDetail, isoDate)?.length > 0
+  ));
 }
 
-export async function getFilmSelections(signal) {
-  const data = await requestJson('/film-selections', { signal });
+function withDate(path, date) {
+  if (!date) return path;
+  const query = new URLSearchParams({ date });
+  return `${path}?${query.toString()}`;
+}
+
+export async function getFilmSelections(signal, date) {
+  const data = await requestJson(withDate('/film-selections', date), { signal });
   if (!Array.isArray(data.selections)) {
     throw new Error('The booking service returned an invalid film selection list.');
   }
@@ -207,7 +279,7 @@ export async function getFilmSelections(signal) {
   ));
 }
 
-export async function getMovies(signal) {
+export async function getMovies(signal, date) {
   const movies = [];
   const seenTokens = new Set();
   let nextToken = null;
@@ -215,6 +287,7 @@ export async function getMovies(signal) {
   do {
     const query = new URLSearchParams();
     if (nextToken) query.set('nextToken', nextToken);
+    if (date) query.set('date', date);
     const suffix = query.size ? `?${query.toString()}` : '';
     const data = await requestJson(`/movies${suffix}`, { signal });
     if (!Array.isArray(data.movies)) {
@@ -236,14 +309,47 @@ export async function getMovies(signal) {
   return movies;
 }
 
-export async function getBookingSelections(signal) {
+export async function getMoviesForDate(date, signal) {
+  const weekday = getWeekdayForDate(date);
+  const movies = await getMovies(signal);
+  const candidates = movies.filter((movie) => (
+    movie?.visible !== false
+    && movie?.isComingSoon !== true
+    && movie?.movieId != null
+    && (
+      (Array.isArray(movie.showtimes?.[weekday]) && movie.showtimes[weekday].length > 0)
+      || getShowtimesForDate(movie.showtimes, date).length > 0
+    )
+  ));
+
+  const scheduledMovies = new Array(candidates.length);
+  let nextCandidateIndex = 0;
+  const loadNextCandidate = async () => {
+    while (nextCandidateIndex < candidates.length) {
+      const index = nextCandidateIndex;
+      nextCandidateIndex += 1;
+      const movie = candidates[index];
+      const details = await getMovieDetail(movie.movieId, signal, date);
+      scheduledMovies[index] = {
+        ...movie,
+        showtimes: { [date]: getShowtimesForDate(details.showtimes, date) },
+      };
+    }
+  };
+  const workerCount = Math.min(4, candidates.length);
+  await Promise.all(Array.from({ length: workerCount }, () => loadNextCandidate()));
+
+  return scheduledMovies;
+}
+
+export async function getBookingSelections(signal, date) {
   try {
-    return { selections: await getFilmSelections(signal), error: null };
+    return { selections: await getFilmSelections(signal, date), error: null };
   } catch (selectionError) {
     if (signal?.aborted) throw selectionError;
 
     try {
-      const movies = await getMovies(signal);
+      const movies = await getMovies(signal, date);
       const selections = movies
         .filter((movie) => movie.visible !== false && movie.isComingSoon !== true && movie.movieId != null)
         .map((movie) => ({
@@ -266,12 +372,74 @@ export async function getBookingSelections(signal) {
   }
 }
 
-export async function getMovieDetail(movieId, signal) {
-  const data = await requestJson(`/movies/${encodeURIComponent(movieId)}`, { signal });
+export async function getMovieDetail(movieId, signal, date) {
+  const path = withDate(`/movies/${encodeURIComponent(movieId)}`, date);
+  const data = await requestJson(path, { signal });
   if (!data || typeof data !== 'object' || Array.isArray(data)) {
     throw new Error('The booking service returned invalid movie details.');
   }
   return data;
+}
+
+export async function getSelectionDateAvailability(selection, dates, signal) {
+  const schedules = new Array(dates.length);
+  let nextDateIndex = 0;
+  const loadDateSchedule = async () => {
+    while (nextDateIndex < dates.length) {
+      const index = nextDateIndex;
+      nextDateIndex += 1;
+      const date = dates[index].isoDate;
+      let dateSelection = selection;
+      if (selection.type === 'offer') {
+        const selections = await getFilmSelections(signal, date);
+        dateSelection = selections.find((item) => selectionKey(item) === selectionKey(selection));
+        if (!dateSelection) {
+          schedules[index] = [];
+          continue;
+        }
+      }
+      const movieId = getMovieDetailIdForSelection(dateSelection);
+      const movieDetail = movieId == null ? null : await getMovieDetail(movieId, signal, date);
+      schedules[index] = getSelectionShowtimes(dateSelection, movieDetail, date) || [];
+    }
+  };
+
+  await Promise.all(Array.from(
+    { length: Math.min(4, dates.length) },
+    () => loadDateSchedule(),
+  ));
+
+  const availability = Object.fromEntries(dates.map(({ isoDate }) => [
+    isoDate,
+    { showtimesCount: 0, averageAvailableSeats: null },
+  ]));
+  const screenings = schedules.flatMap((showtimes, dateIndex) => (
+    showtimes.map((showtime) => ({ date: dates[dateIndex].isoDate, showtime }))
+  ));
+  let nextScreeningIndex = 0;
+  const loadScreeningAvailability = async () => {
+    while (nextScreeningIndex < screenings.length) {
+      const index = nextScreeningIndex;
+      nextScreeningIndex += 1;
+      const { date, showtime } = screenings[index];
+      const bookedSeats = await getBookedSeats(showtime.showtimeId, date, signal);
+      const dateAvailability = availability[date];
+      dateAvailability.showtimesCount += 1;
+      dateAvailability.averageAvailableSeats += CINEMA_SEAT_CAPACITY - bookedSeats.length;
+    }
+  };
+
+  await Promise.all(Array.from(
+    { length: Math.min(4, screenings.length) },
+    () => loadScreeningAvailability(),
+  ));
+
+  for (const dateAvailability of Object.values(availability)) {
+    if (dateAvailability.showtimesCount) {
+      dateAvailability.averageAvailableSeats /= dateAvailability.showtimesCount;
+    }
+  }
+  return availability;
 }
 
 export async function getTicketPricing(selection, day, time, signal) {

@@ -1,7 +1,23 @@
 import { StepHeader } from './BookingStepComponents';
 
+function formatScreeningDate(date, time) {
+  const parsedDate = new Date(`${date}T00:00:00Z`);
+  const formattedDate = !Number.isNaN(parsedDate.getTime())
+    && parsedDate.toISOString().slice(0, 10) === date
+    ? new Intl.DateTimeFormat('en-GB', {
+      weekday: 'short',
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+      timeZone: 'UTC',
+    }).format(parsedDate).replace(',', '').replace(/^Thu(?=\s)/, 'Thurs')
+    : date;
+
+  return `${formattedDate} - ${time}`;
+}
+
 export function PaymentStep({
-  onBack, onConfirm, isSubmitting, movieTitle, seats, totalAmount, customer,
+  onBack, onConfirm, isSubmitting, movieTitle, seats, totalAmount, customer, date, time, screen,
 }) {
   return (
     <fieldset className="active" data-step="3">
@@ -11,6 +27,8 @@ export function PaymentStep({
       />
       <div className="ticket-details-grid">
         <div className="ticket-detail-item"><span>Film</span><strong>{movieTitle}</strong></div>
+        <div className="ticket-detail-item"><span>Showtime</span><strong>{formatScreeningDate(date, time)}</strong></div>
+        <div className="ticket-detail-item"><span>Screen</span><strong>Screen {screen}</strong></div>
         <div className="ticket-detail-item"><span>Guest</span><strong>{customer.firstName} {customer.surname}</strong></div>
         <div className="ticket-detail-item"><span>Email</span><strong>{customer.email}</strong></div>
         <div className="ticket-detail-item"><span>Seats</span><strong>{seats.join(', ')}</strong></div>

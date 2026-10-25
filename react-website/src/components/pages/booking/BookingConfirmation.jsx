@@ -3,12 +3,28 @@ import { asset } from '../../shared';
 import { convertGuestAccount } from '../bookingApi';
 import { StepHeader } from './BookingStepComponents';
 
+function formatScreeningDate(date, time) {
+  const parsedDate = new Date(`${date}T00:00:00Z`);
+  const formattedDate = !Number.isNaN(parsedDate.getTime())
+    && parsedDate.toISOString().slice(0, 10) === date
+    ? new Intl.DateTimeFormat('en-GB', {
+      weekday: 'short',
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+      timeZone: 'UTC',
+    }).format(parsedDate).replace(',', '').replace(/^Thu(?=\s)/, 'Thurs')
+    : date;
+
+  return `${formattedDate} - ${time}`;
+}
+
 const walletPassesEnabled = import.meta.env.VITE_ENABLE_WALLET_PASSES === 'true';
 const walletPassApiUrl = import.meta.env.VITE_WALLET_PASS_API_URL?.trim()
   || 'https://blockbuster-wallet-proxy.niallmclaughlin1998.workers.dev/';
 
 export function BookingConfirmation({
-  movie, date, time, screen, totalTickets, customer, bookingDetails, onToast,
+  movie, time, screen, customer, bookingDetails, onToast,
 }) {
   const [walletLoading, setWalletLoading] = useState(false);
   const [password, setPassword] = useState('');
@@ -17,14 +33,20 @@ export function BookingConfirmation({
   const [conversionState, setConversionState] = useState({
     loading: false, error: '', complete: false, dismissed: false,
   });
-  const bookingRef = bookingDetails.bookingId;
+  const bookingRef = bookingDetails.bookingRef;
   const selectedSeats = bookingDetails.seats;
   const movieTitle = bookingDetails.movieTitle || movie?.title || 'Movie';
   const customerEmail = bookingDetails.customerEmail || customer.email;
+  const ticketCount = bookingDetails.tickets.reduce((total, ticket) => total + ticket.quantity, 0);
   const totalAmount = new Intl.NumberFormat('en-GB', {
     style: 'currency',
     currency: bookingDetails.currency,
   }).format(bookingDetails.totalAmount);
+  const conversionTokenAvailable = Boolean(
+    bookingDetails.conversionToken
+    && (!bookingDetails.conversionTokenExpiresAt
+      || new Date(bookingDetails.conversionTokenExpiresAt).getTime() > Date.now()),
+  );
 
   async function createAccount() {
     if (password.length < 8) {
@@ -39,7 +61,7 @@ export function BookingConfirmation({
     setConversionState((current) => ({ ...current, loading: true, error: '' }));
     try {
       const account = await convertGuestAccount(bookingDetails.conversionToken, password);
-      setConvertedAccount(account);
+      setConvertedAccount({ userId: account.userId, email: account.email });
       setConversionState((current) => ({ ...current, loading: false, complete: true }));
       setPassword('');
       setConfirmPassword('');
@@ -72,7 +94,7 @@ export function BookingConfirmation({
         iconURL: logoUrl,
         primaryFields: [{ label: 'Movie', value: movieTitle }],
         secondaryFields: [
-          { label: 'Date', value: date || 'Not selected' },
+          { label: 'Date', value: bookingDetails.date },
           { label: 'Time', value: time || 'Not selected' },
         ],
         headerFields: [
@@ -83,7 +105,11 @@ export function BookingConfirmation({
           { label: 'Total', value: totalAmount },
           { label: 'Guest Email', value: customerEmail },
           { label: 'Booking Ref', value: bookingRef },
-          { label: 'Status', value: 'BOOKING RESERVED - PAYMENT NOT TAKEN' },
+          {
+            label: 'Status', value: bookingDetails.confirmationEmailSent
+              ? 'BOOKING RESERVED - PAYMENT NOT TAKEN'
+              : 'BOOKING RESERVED - CONFIRMATION EMAIL NOT SENT'
+          },
         ],
         locations: [{
           latitude: 55.044358,
@@ -146,7 +172,9 @@ export function BookingConfirmation({
     <fieldset className="active" data-step="4">
       <StepHeader
         title="Booking confirmed"
-        description="Your seats have been reserved. No payment was taken."
+        description={bookingDetails.confirmationEmailSent
+          ? 'Your seats have been reserved. No payment was taken.'
+          : 'Your reservation succeeded, but we could not send the confirmation email. No payment was taken.'}
       />
       <div className="ticket-pass">
         <div className="ticket-pass-header">
@@ -156,23 +184,23 @@ export function BookingConfirmation({
         <div className="ticket-pass-body">
           <div className="ticket-movie-title">{movieTitle}</div>
           <div className="ticket-details-grid">
-            <div className="ticket-detail-item"><span>Showtime</span><strong>{date} at {time}</strong></div>
+            <div className="ticket-detail-item"><span>Showtime</span><strong>{formatScreeningDate(bookingDetails.date, time)}</strong></div>
             <div className="ticket-detail-item"><span>Screen</span><strong>Screen {screen}</strong></div>
             <div className="ticket-detail-item"><span>Seat Numbers</span><strong>{selectedSeats.join(', ')}</strong></div>
             <div className="ticket-detail-item"><span>Total</span><strong>{totalAmount}</strong></div>
-            <div className="ticket-detail-item"><span>Confirmation Email</span><strong>{customerEmail}</strong></div>
-            <div className="ticket-detail-item"><span>Ticket Breakdown</span><strong>{totalTickets} Ticket{totalTickets === 1 ? '' : 's'}</strong></div>
+            <div className="ticket-detail-item"><span>Guest Name</span><strong>{customer.firstName} {customer.surname}</strong></div>
+            <div className="ticket-detail-item"><span>Ticket Breakdown</span><strong>{ticketCount} Ticket{ticketCount === 1 ? '' : 's'}</strong></div>
           </div>
           <div className="ticket-perforation"><div className="ticket-perforation-line" /></div>
           <div className="ticket-barcode-area"><div className="ticket-booking-ref">REF: {bookingRef}</div></div>
         </div>
       </div>
-      {bookingDetails.conversionToken && !conversionState.dismissed && (
+      {conversionTokenAvailable && !conversionState.dismissed && (
         <section className="guest-conversion-card" aria-labelledby="guest-conversion-title">
           {conversionState.complete ? (
             <div role="status">
               <h2 id="guest-conversion-title">Account created</h2>
-              <p>Your booking is connected to {convertedAccount.email}. You are signed in for this session.</p>
+              <p>Your booking is now connected to the account for {convertedAccount.email}.</p>
             </div>
           ) : (
             <>

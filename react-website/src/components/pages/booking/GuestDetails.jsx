@@ -60,7 +60,7 @@ export function GuestDetails({ customer, onChange, onBack, onContinue }) {
       <StepActions
         onBack={onBack}
         onContinue={onContinue}
-        continueLabel="Continue to Payment"
+        continueLabel="Review Booking"
         continueDisabled={!firstNameValid || !surnameValid || !emailValid}
       />
     </fieldset>

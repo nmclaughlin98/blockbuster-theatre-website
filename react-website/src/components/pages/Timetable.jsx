@@ -1,7 +1,9 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { movieId } from '../movies';
 import { Layout } from '../shared';
 import { PageLoader } from '../shared/PageLoader';
+import { getUpcomingScreeningDates, getWeekdayForDate, isShowtimeIdForDate } from './bookingApi';
+import { createBookingHref } from './showtimeNavigation';
 import { useMovies } from './useMovies';
 import { downloadTimetablePdf } from './timetablePdf';
 
@@ -19,8 +21,16 @@ function getMovieGenre(movie) {
 }
 
 function getShowtimes(movie, day) {
-    const slots = movie.showtimes?.[day];
-    return Array.isArray(slots) ? slots : [];
+    const schedule = movie.showtimes;
+    if (!schedule || typeof schedule !== 'object') return [];
+    const slots = Array.isArray(schedule)
+        ? schedule
+        : Object.values(schedule).filter(Array.isArray).flat();
+
+    return slots.filter((slot) => (
+        isShowtimeIdForDate(slot?.showtimeId, slot?.date)
+        && getWeekdayForDate(slot.date) === day
+    ));
 }
 
 function getWeekCommencing() {
@@ -94,8 +104,13 @@ function TimetableMovie({ movie, day }) {
                 { times.map((slot) => (
                     <a
                         className="showtime-btn"
-                        href={ `./bookNow.html?movie=${ encodeURIComponent(getMovieTitle(movie)) }&time=${ encodeURIComponent(slot.time) }&day=${ encodeURIComponent(day) }` }
-                        key={ `${ slot.time }-${ slot.screen }` }
+                        href={createBookingHref(
+                            './bookNow.html',
+                            movie.movieId ?? movie.slug ?? getMovieTitle(movie),
+                            slot.date,
+                            slot,
+                        )}
+                        key={slot.showtimeId}
                     >
                         { slot.time }<span>Screen { slot.screen }</span>
                     </a>
@@ -106,8 +121,10 @@ function TimetableMovie({ movie, day }) {
 }
 
 export function Timetable() {
-    const { movies, loading, error } = useMovies();
     const [day, setDay] = useState('Monday');
+    const screeningDates = useMemo(() => getUpcomingScreeningDates(), []);
+    const screeningDate = screeningDates.find((date) => getWeekdayForDate(date) === day);
+    const { movies, loading, error } = useMovies(screeningDate);
     const [search, setSearch] = useState('');
     const [downloadMessage, setDownloadMessage] = useState('');
     const [downloading, setDownloading] = useState(false);

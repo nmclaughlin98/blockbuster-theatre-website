@@ -1,17 +1,48 @@
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
 import {
+  CINEMA_SEAT_CAPACITY,
   selectionDisplayLabel,
   selectionKey,
 } from '../bookingApi';
 import { StepHeader } from './BookingStepComponents';
 
+function toCalendarDate(isoDate) {
+  if (!isoDate) return null;
+  const [year, month, day] = isoDate.split('-').map(Number);
+  return new Date(year, month - 1, day, 12);
+}
+
+function toIsoDate(date) {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+}
+
+function getAvailabilityLevel(availability) {
+  if (!availability?.showtimesCount) return 'none';
+  const remainingPercent = availability.averageAvailableSeats / CINEMA_SEAT_CAPACITY;
+  if (remainingPercent >= 0.6) return 'high';
+  if (remainingPercent >= 0.25) return 'medium';
+  return 'low';
+}
+
 export function TicketSelection({
-  selections, selection, date, calendarMinDate, calendarMaxDate, time, screen, tickets, totalTickets, showtimes, dates, pricing,
+  selections, selection, date, calendarMinDate, calendarMaxDate, time, selectedShowtimeId,
+  tickets, totalTickets, showtimes, dates, pricing, calendarAvailability,
+  calendarAvailabilityLoading, calendarAvailabilityError, onRetryCalendarAvailability,
   selectionLoading, selectionError, showtimeLoading, showtimeError, pricingLoading, pricingError,
   validation, validationLoading, onSelectionChange, onDateChange, onTimeChange, onTicketChange,
   onContinue,
 }) {
   const movieSelections = selections.filter((item) => item.type === 'movie');
   const offerSelections = selections.filter((item) => item.type === 'offer');
+  const calendarAvailabilityReady = Boolean(calendarAvailability)
+    && !calendarAvailabilityLoading
+    && !calendarAvailabilityError;
+  const enabledCalendarDates = calendarAvailabilityReady
+    ? dates
+      .filter(({ isoDate }) => calendarAvailability[isoDate]?.showtimesCount > 0)
+      .map(({ isoDate }) => toCalendarDate(isoDate))
+    : dates.map(({ isoDate }) => toCalendarDate(isoDate));
 
   return (
     <fieldset className="active" data-step="0">
@@ -42,16 +73,69 @@ export function TicketSelection({
       <div className="date-time-group">
         <div className="form-group">
           <label htmlFor="booking-date">Screening Date</label>
-          <input
+          <DatePicker
             id="booking-date"
             className="form-control"
-            type="date"
-            value={date}
-            min={calendarMinDate}
-            max={calendarMaxDate}
-            onChange={(event) => onDateChange(event.target.value)}
+            selected={toCalendarDate(date)}
+            minDate={toCalendarDate(calendarMinDate)}
+            maxDate={toCalendarDate(calendarMaxDate)}
+            includeDates={enabledCalendarDates}
+            dateFormat="EEE d MMM yyyy"
+            calendarClassName="booking-date-calendar"
+            dayClassName={(calendarDate) => {
+              const availability = calendarAvailability?.[toIsoDate(calendarDate)];
+              return calendarAvailabilityReady
+                ? `booking-calendar-day--${getAvailabilityLevel(availability)}`
+                : '';
+            }}
+            renderDayContents={(dayNumber, calendarDate) => {
+              const availability = calendarAvailability?.[toIsoDate(calendarDate)];
+              const level = getAvailabilityLevel(availability);
+              const tooltip = level === 'none'
+                ? 'No showings'
+                : `${level[0].toUpperCase()}${level.slice(1)} availability: ${Math.round(availability.averageAvailableSeats)} average seats left across ${availability.showtimesCount} showing${availability.showtimesCount === 1 ? '' : 's'}`;
+              return (
+                <span className="booking-calendar-day-content" title={tooltip}>
+                  {dayNumber}
+                  {calendarAvailabilityReady && level !== 'none' && (
+                    <span className={`booking-calendar-availability-dot booking-calendar-availability-dot--${level}`} aria-hidden="true" />
+                  )}
+                </span>
+              );
+            }}
+            onChange={(selectedDate) => {
+              if (selectedDate) onDateChange(toIsoDate(selectedDate));
+            }}
+            disabled={!selection}
             required
           />
+          {calendarAvailabilityLoading && (
+            <span className="showtime-placeholder" role="status">Checking showtimes and seat availability...</span>
+          )}
+          {calendarAvailabilityError && (
+            <p className="form-notice" role="alert">
+              Could not load date availability: {calendarAvailabilityError}{' '}
+              <button
+                className="booking-calendar-retry"
+                type="button"
+                onClick={onRetryCalendarAvailability}
+              >
+                Retry
+              </button>
+            </p>
+          )}
+          {calendarAvailabilityReady && (
+            <>
+              <p className="booking-calendar-availability-note">
+                Average seats remaining across showtimes for that date.
+              </p>
+              <div className="booking-calendar-legend" aria-label="Screening availability legend">
+                <span><i className="booking-calendar-availability-dot booking-calendar-availability-dot--high" />High (&gt;60%)</span>
+                <span><i className="booking-calendar-availability-dot booking-calendar-availability-dot--medium" />Medium (25-60%)</span>
+                <span><i className="booking-calendar-availability-dot booking-calendar-availability-dot--low" />Low (&lt;25%)</span>
+              </div>
+            </>
+          )}
           {!dates.length && (
             <span className="showtime-placeholder" role="status">
               {showtimeLoading ? 'Loading screening dates...' : 'No screening dates available'}
@@ -64,16 +148,21 @@ export function TicketSelection({
             {!selection
               ? <span className="showtime-placeholder">Select a film or offer to see available showtimes.</span>
               : showtimeLoading
-                ? <span role="status">Loading showtimes...</span>
+                ? (
+                  <span className="showtime-loading" role="status">
+                    <span className="loader" aria-hidden="true" />
+                    <span>Loading showtimes...</span>
+                  </span>
+                )
                 : showtimeError
                   ? <span className="form-notice" role="alert">{showtimeError}</span>
                   : showtimes?.length
                     ? showtimes.map((showtime) => (
                       <button
-                        className={`time-chip ${time === showtime.time && screen === showtime.screen ? 'active' : ''}`}
+                        className={`time-chip ${selectedShowtimeId === showtime.showtimeId ? 'active' : ''}`}
                         type="button"
-                        aria-pressed={time === showtime.time && screen === showtime.screen}
-                        key={`${showtime.time}-${showtime.screen}`}
+                        aria-pressed={selectedShowtimeId === showtime.showtimeId}
+                        key={showtime.showtimeId}
                         onClick={() => onTimeChange(showtime)}
                       >
                         <span className="time-chip-time">{showtime.time}</span>

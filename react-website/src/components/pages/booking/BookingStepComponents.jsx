@@ -1,4 +1,4 @@
-const steps = ['Tickets', 'Select Seats', 'Guest Info', 'Payment', 'Confirmed'];
+const steps = ['Tickets', 'Select Seats', 'Guest Info', 'Review', 'Confirmed'];
 
 export function ProgressBar({ currentStep }) {
   return (

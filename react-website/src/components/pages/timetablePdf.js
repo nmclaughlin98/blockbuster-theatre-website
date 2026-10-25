@@ -1,3 +1,6 @@
+import { jsPDF } from 'jspdf';
+import { getWeekdayForDate, isShowtimeIdForDate } from './bookingApi';
+
 const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 const COLORS = {
   red: [179, 30, 53],
@@ -19,8 +22,16 @@ function getMovieGenre(movie) {
 }
 
 function getShowtimes(movie, day) {
-  const slots = movie.showtimes?.[day];
-  return Array.isArray(slots) ? slots : [];
+  const schedule = movie.showtimes;
+  if (!schedule || typeof schedule !== 'object') return [];
+  const slots = Array.isArray(schedule)
+    ? schedule
+    : Object.values(schedule).filter(Array.isArray).flat();
+
+  return slots.filter((slot) => (
+    isShowtimeIdForDate(slot?.showtimeId, slot?.date)
+    && getWeekdayForDate(slot.date) === day
+  ));
 }
 
 function addPageHeader(pdf, weekCommencing, layout) {
@@ -154,8 +165,7 @@ function drawMovieTable(pdf, movie, y, layout) {
   return y + 16;
 }
 
-export async function downloadTimetablePdf(movies, weekCommencing) {
-  const { jsPDF } = await import('jspdf');
+export function downloadTimetablePdf(movies, weekCommencing) {
   const pdf = new jsPDF({ orientation: 'landscape', unit: 'pt', format: 'a4', compress: true });
   const pageWidth = pdf.internal.pageSize.getWidth();
   const pageHeight = pdf.internal.pageSize.getHeight();
@@ -192,5 +202,14 @@ export async function downloadTimetablePdf(movies, weekCommencing) {
     addPageFooter(pdf, layout, page, totalPages);
   }
 
-  pdf.save(`blockbuster-timetable-week-commencing-${weekCommencing.replaceAll('/', '-')}.pdf`);
+  const filename = `blockbuster-timetable-week-commencing-${weekCommencing.replaceAll('/', '-')}.pdf`;
+  const objectUrl = URL.createObjectURL(pdf.output('blob'));
+  const downloadLink = document.createElement('a');
+  downloadLink.href = objectUrl;
+  downloadLink.download = filename;
+  downloadLink.style.display = 'none';
+  document.body.appendChild(downloadLink);
+  downloadLink.click();
+  downloadLink.remove();
+  setTimeout(() => URL.revokeObjectURL(objectUrl), 40_000);
 }

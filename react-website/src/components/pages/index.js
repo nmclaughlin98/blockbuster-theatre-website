@@ -1,5 +1,5 @@
 export { About } from './About';
-export { Booking } from './Booking';
+export { Booking } from './BookingPage';
 export { CollectionDetail } from './CollectionDetail';
 export { ComingSoon } from './ComingSoon';
 export { Detail } from './Detail';

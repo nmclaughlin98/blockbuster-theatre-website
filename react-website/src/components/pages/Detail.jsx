@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import { Countdown } from '../movies/index.js';
 import { asset, Layout } from '../shared';
 import { PageLoader } from '../shared/PageLoader';
+import { createBookingHref } from './showtimeNavigation';
+import { getUpcomingScreeningDates } from './bookingApi';
 import { useMovieDetail } from './useMovieDetail';
 
 function formatPeople(people) {
@@ -102,7 +104,7 @@ function ShowtimeSchedule({ movie, selectedDay, selectedTime, onSelectTime, book
                                 type="button"
                                 aria-pressed={selectedDay === day && selectedTime === slot.time}
                                 key={`${slot.time}-${slot.screen}`}
-                                onClick={() => onSelectTime(day, slot.time)}
+                                onClick={() => onSelectTime(day, slot.time, slot)}
                             >
                                 {slot.time}
                             </button>
@@ -118,6 +120,8 @@ function ShowtimeSchedule({ movie, selectedDay, selectedTime, onSelectTime, book
 
 function MovieContent({ movie, comingSoon }) {
     const query = new URLSearchParams(window.location.search);
+    const [selectedDate, setSelectedDate] = useState(() => query.get('date') || '');
+    const [selectedShowtimeId, setSelectedShowtimeId] = useState(() => query.get('showtimeId') || '');
     const [selectedTime, setSelectedTime] = useState(
         () => query.get('time') || '',
     );
@@ -132,8 +136,22 @@ function MovieContent({ movie, comingSoon }) {
         ))?.[0] || '';
     });
     const movieBookingUrl = `../bookNow.html?movie=${encodeURIComponent(movie.title)}`;
-    const bookingHref = selectedDay && selectedTime
-        ? `${movieBookingUrl}&day=${encodeURIComponent(selectedDay)}&time=${encodeURIComponent(selectedTime)}`
+    const selectedShowtime = Object.entries(movie.showtimes || {}).flatMap(([day, slots]) => (
+        (Array.isArray(slots) ? slots : []).map((slot) => ({ ...slot, day }))
+    )).find((slot) => (
+        selectedShowtimeId
+            ? slot.showtimeId === selectedShowtimeId
+            : slot.time === selectedTime
+                && slot.day === selectedDay
+                && (!selectedDate || slot.date === selectedDate)
+    ));
+    const bookingHref = selectedShowtime
+        ? createBookingHref(
+            '../bookNow.html',
+            movie.movieId ?? movie.title,
+            selectedShowtime.date,
+            selectedShowtime,
+        )
         : movieBookingUrl;
     const synopsis = typeof movie.synopsis === 'string' ? movie.synopsis.split('\n').filter(Boolean) : [];
 
@@ -141,9 +159,11 @@ function MovieContent({ movie, comingSoon }) {
         document.title = `Blockbuster Theatre - ${movie.title}`;
     }, [movie.title]);
 
-    function selectTime(day, time) {
+    function selectTime(day, time, showtime) {
         setSelectedDay(day);
         setSelectedTime(time);
+        setSelectedDate(showtime.date);
+        setSelectedShowtimeId(showtime.showtimeId);
     }
 
     return (
@@ -199,7 +219,8 @@ function MovieContent({ movie, comingSoon }) {
 
 export function Detail({ comingSoon = false }) {
     const id = new URLSearchParams(window.location.search).get('movie') || '';
-    const { movie, loading, error } = useMovieDetail(id);
+    const [screeningDates] = useState(() => getUpcomingScreeningDates());
+    const { movie, loading, error } = useMovieDetail(id, screeningDates);
 
     if (loading) {
         return (
