@@ -2,8 +2,8 @@ import { useEffect, useState } from 'react';
 import { asset } from '../../shared';
 import { getPosterSrc, getPosterSrcSet } from '../../../utils/posterImages';
 import { useNetworkSpeed } from '../../../utils/useNetworkSpeed';
-import { getFilmSelections } from '../bookingApi';
-import { useMovies } from '../useMovies';
+import { getFilmSelections } from '../shared/bookingApi';
+import { useMovies } from '../shared/useMovies';
 
 export function Offers() {
   const { movies } = useMovies();

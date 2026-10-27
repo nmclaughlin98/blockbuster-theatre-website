@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
-import { Countdown } from '../movies/index.js';
-import { asset, Layout } from '../shared';
-import { PageLoader } from '../shared/PageLoader';
-import { createBookingHref } from './showtimeNavigation';
-import { getUpcomingScreeningDates } from './bookingApi';
+import { Countdown } from '../../movies/index.js';
+import { asset, Layout } from '../../shared';
+import { PageLoader } from '../../shared/PageLoader';
+import { createBookingHref } from '../shared/showtimeNavigation';
+import { getUpcomingScreeningDates } from '../shared/bookingApi';
 import { useMovieDetail } from './useMovieDetail';
 
 function formatPeople(people) {

@@ -1,7 +1,7 @@
-import { MovieGrid } from '../movies';
-import { Layout } from '../shared';
-import { PageLoader } from '../shared/PageLoader';
-import { useMovies } from './useMovies';
+import { MovieGrid } from '../../movies';
+import { Layout } from '../../shared';
+import { PageLoader } from '../../shared/PageLoader';
+import { useMovies } from '../shared/useMovies';
 
 export function ComingSoon() {
   const { movies, loading, error } = useMovies();

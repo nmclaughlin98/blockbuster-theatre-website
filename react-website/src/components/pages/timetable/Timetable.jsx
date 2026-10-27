@@ -1,10 +1,10 @@
 import { useMemo, useState } from 'react';
-import { movieId } from '../movies';
-import { Layout } from '../shared';
-import { PageLoader } from '../shared/PageLoader';
-import { getUpcomingScreeningDates, getWeekdayForDate, isShowtimeIdForDate } from './bookingApi';
-import { createBookingHref } from './showtimeNavigation';
-import { useMovies } from './useMovies';
+import { movieId } from '../../movies';
+import { Layout } from '../../shared';
+import { PageLoader } from '../../shared/PageLoader';
+import { getUpcomingScreeningDates, getWeekdayForDate, isShowtimeIdForDate } from '../shared/bookingApi';
+import { createBookingHref } from '../shared/showtimeNavigation';
+import { useMovies } from '../shared/useMovies';
 import { downloadTimetablePdf } from './timetablePdf';
 
 const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];

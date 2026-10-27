@@ -1,5 +1,5 @@
 import { jsPDF } from 'jspdf';
-import { getWeekdayForDate, isShowtimeIdForDate } from './bookingApi';
+import { getWeekdayForDate, isShowtimeIdForDate } from '../shared/bookingApi';
 
 const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 const COLORS = {

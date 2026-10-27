@@ -30,7 +30,7 @@ test('creates a PDF blob and triggers a download with the timetable filename', a
 
   try {
     const { downloadTimetablePdf } = await vite.ssrLoadModule(
-      '/src/components/pages/timetablePdf.js',
+      '/src/components/pages/timetable/timetablePdf.js',
     );
     URL.createObjectURL = (blob) => {
       createdBlob = blob;

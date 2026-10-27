@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { asset } from '../../shared';
-import { convertGuestAccount } from '../bookingApi';
+import { convertGuestAccount } from '../shared/bookingApi';
 import { StepHeader } from './BookingStepComponents';
 
 function formatScreeningDate(date, time) {

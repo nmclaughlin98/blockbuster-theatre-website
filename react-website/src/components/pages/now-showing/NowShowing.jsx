@@ -1,11 +1,11 @@
 import { useMemo, useState } from 'react';
-import { MovieGrid } from '../movies';
-import { Layout } from '../shared';
-import { PageLoader } from '../shared/PageLoader';
-import { CollectionsView } from './Collections';
+import { MovieGrid } from '../../movies';
+import { Layout } from '../../shared';
+import { PageLoader } from '../../shared/PageLoader';
+import { CollectionsView } from '../collections/Collections';
 import { NowShowingSwitch } from './NowShowingSwitch';
-import { useCollections } from './useCollections';
-import { useMovies } from './useMovies';
+import { useCollections } from '../collections/useCollections';
+import { useMovies } from '../shared/useMovies';
 
 function getMovieGenres(movie) {
     return [...(Array.isArray(movie.genres) ? movie.genres : []), movie.genre]

@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
-import { MOVIES_API_URL } from '../../config';
+import { MOVIES_API_URL } from '../../../config';
 import {
   getMovieDetail,
   getShowtimesForDate,
   getWeekdayForDate,
-} from './bookingApi';
+} from '../shared/bookingApi';
 
 function slugify(value) {
   return value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');

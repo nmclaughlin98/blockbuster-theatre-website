@@ -4,7 +4,7 @@ import {
   CINEMA_SEAT_CAPACITY,
   selectionDisplayLabel,
   selectionKey,
-} from '../bookingApi';
+} from '../shared/bookingApi';
 import { StepHeader } from './BookingStepComponents';
 
 function toCalendarDate(isoDate) {

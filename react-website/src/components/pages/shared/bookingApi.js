@@ -1,4 +1,4 @@
-import { MOVIES_API_URL } from '../../config.js';
+import { MOVIES_API_URL } from '../../../config.js';
 
 export const CINEMA_SEAT_CAPACITY = 71;
 

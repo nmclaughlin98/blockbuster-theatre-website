@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Layout, asset } from '../shared';
+import { Layout, asset } from '../../shared';
 
 const faqs = [
   {

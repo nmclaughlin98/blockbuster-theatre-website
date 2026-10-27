@@ -1,10 +1,10 @@
-import { Layout } from '../shared';
-import { PageLoader } from '../shared/PageLoader';
-import { useMovies } from './useMovies';
-import { HeroCarousel } from './home/HeroCarousel';
-import { MovieSection } from './home/MovieSection';
-import { Offers } from './home/Offers';
-import { useCollection } from './useCollection';
+import { Layout } from '../../shared';
+import { PageLoader } from '../../shared/PageLoader';
+import { useMovies } from '../shared/useMovies';
+import { HeroCarousel } from './HeroCarousel';
+import { MovieSection } from './MovieSection';
+import { Offers } from './Offers';
+import { useCollection } from '../collections/useCollection';
 
 const SEASONAL_PICKS_COLLECTION_ID = '8706566';
 

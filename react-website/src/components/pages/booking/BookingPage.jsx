@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Layout } from '../shared';
-import { Toast } from '../shared/Toast';
+import { Layout } from '../../shared';
+import { Toast } from '../../shared/Toast';
 import {
   getBookingSelections,
   createCheckoutPayload,
@@ -15,13 +15,13 @@ import {
   isShowtimeIdForDate,
   selectionKey,
   validateCheckout,
-} from './bookingApi';
-import { BookingConfirmation } from './booking/BookingConfirmation';
-import { GuestDetails } from './booking/GuestDetails';
-import { PaymentStep } from './booking/PaymentStep';
-import { ProgressBar } from './booking/BookingStepComponents';
-import { SeatSelection } from './booking/SeatSelection';
-import { TicketSelection } from './booking/TicketSelection';
+} from '../shared/bookingApi';
+import { BookingConfirmation } from './BookingConfirmation';
+import { GuestDetails } from './GuestDetails';
+import { PaymentStep } from './PaymentStep';
+import { ProgressBar } from './BookingStepComponents';
+import { SeatSelection } from './SeatSelection';
+import { TicketSelection } from './TicketSelection';
 
 const weekdayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 

@@ -25,7 +25,7 @@ import {
   selectionDisplayLabel,
   selectionKey,
   validateCheckout,
-} from '../src/components/pages/bookingApi.js';
+} from '../src/components/pages/shared/bookingApi.js';
 
 const movie = {
   type: 'movie',

@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { getCollection, getCollections } from '../src/components/pages/collectionApi.js';
+import { getCollection, getCollections } from '../src/components/pages/collections/collectionApi.js';
 
 function mockFetch(handler) {
   const originalFetch = globalThis.fetch;

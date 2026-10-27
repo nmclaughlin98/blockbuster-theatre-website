@@ -1,10 +1,10 @@
 import { useEffect, useMemo } from 'react';
-import { MovieGrid } from '../movies';
-import { Layout } from '../shared';
-import { PageLoader } from '../shared/PageLoader';
-import { CollectionArtwork } from './CollectionArtwork';
-import { sortMoviesByReleaseDate } from './collectionSort';
-import { useCollection } from './useCollection';
+import { MovieGrid } from '../../movies';
+import { Layout } from '../../shared';
+import { PageLoader } from '../../shared/PageLoader';
+import { CollectionArtwork } from '../collections/CollectionArtwork';
+import { sortMoviesByReleaseDate } from '../collections/collectionSort';
+import { useCollection } from '../collections/useCollection';
 
 export function CollectionDetail() {
   const collectionId = new URLSearchParams(window.location.search).get('collection') || '';
