@@ -1,11 +1,24 @@
 import { useState } from 'react';
 import { StepActions, StepHeader } from './BookingStepComponents';
 
-export function GuestDetails({ customer, onChange, onBack, onContinue }) {
+const emptyCustomer = { firstName: '', surname: '', email: '' };
+
+export function GuestDetails({ initialData, onBack, onNext }) {
+  const [customer, setCustomer] = useState(() => ({ ...emptyCustomer, ...initialData }));
   const [touched, setTouched] = useState({});
   const firstNameValid = Boolean(customer.firstName.trim());
   const surnameValid = Boolean(customer.surname.trim());
   const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(customer.email.trim());
+
+  function updateCustomer(field, value) {
+    setCustomer((current) => ({ ...current, [field]: value }));
+  }
+
+  function continueToReview() {
+    setTouched({ firstName: true, surname: true, email: true });
+    if (!firstNameValid || !surnameValid || !emailValid) return;
+    onNext(customer);
+  }
 
   return (
     <fieldset className="active" data-step="2">
@@ -17,7 +30,7 @@ export function GuestDetails({ customer, onChange, onBack, onContinue }) {
             type="text"
             id="guest-first-name"
             value={customer.firstName}
-            onChange={(event) => onChange('firstName', event.target.value)}
+            onChange={(event) => updateCustomer('firstName', event.target.value)}
             onBlur={() => setTouched((current) => ({ ...current, firstName: true }))}
             aria-invalid={touched.firstName && !firstNameValid}
             aria-describedby={touched.firstName && !firstNameValid ? 'guest-first-name-error' : undefined}
@@ -32,7 +45,7 @@ export function GuestDetails({ customer, onChange, onBack, onContinue }) {
             type="text"
             id="guest-surname"
             value={customer.surname}
-            onChange={(event) => onChange('surname', event.target.value)}
+            onChange={(event) => updateCustomer('surname', event.target.value)}
             onBlur={() => setTouched((current) => ({ ...current, surname: true }))}
             aria-invalid={touched.surname && !surnameValid}
             aria-describedby={touched.surname && !surnameValid ? 'guest-surname-error' : undefined}
@@ -48,7 +61,7 @@ export function GuestDetails({ customer, onChange, onBack, onContinue }) {
           id="guest-email"
           type="email"
           value={customer.email}
-          onChange={(event) => onChange('email', event.target.value)}
+          onChange={(event) => updateCustomer('email', event.target.value)}
           onBlur={() => setTouched((current) => ({ ...current, email: true }))}
           aria-invalid={touched.email && !emailValid}
           aria-describedby={touched.email && !emailValid ? 'guest-email-error' : undefined}
@@ -59,7 +72,7 @@ export function GuestDetails({ customer, onChange, onBack, onContinue }) {
       </div>
       <StepActions
         onBack={onBack}
-        onContinue={onContinue}
+        onContinue={continueToReview}
         continueLabel="Review Booking"
         continueDisabled={!firstNameValid || !surnameValid || !emailValid}
       />
