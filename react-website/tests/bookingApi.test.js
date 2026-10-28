@@ -515,6 +515,7 @@ test('uses featured movie showtimes when an offer override is empty or missing',
 
 test('loads date-specific showings and averages available seats for calendar dates', async () => {
   const dates = [{ isoDate: '2026-10-25' }, { isoDate: '2026-10-26' }];
+  let showtimesReady = false;
   const restoreFetch = mockFetch(async (input) => {
     const url = new URL(input);
     if (url.pathname === '/movies/movie-42') {
@@ -530,6 +531,7 @@ test('loads date-specific showings and averages available seats for calendar dat
       return new Response(JSON.stringify({ showtimes: { [date]: showtimes } }));
     }
     if (url.pathname === '/api/v1/bookings/guest') {
+      assert.equal(showtimesReady, true);
       return new Response(JSON.stringify({
         showtimeId: url.searchParams.get('showtimeId'),
         date: url.searchParams.get('date'),
@@ -542,10 +544,28 @@ test('loads date-specific showings and averages available seats for calendar dat
   });
 
   try {
-    const availability = await getSelectionDateAvailability(movie, dates);
+    let showtimesByDate;
+    const availability = await getSelectionDateAvailability(
+      movie,
+      dates,
+      undefined,
+      (showtimes) => {
+        showtimesByDate = showtimes;
+        showtimesReady = true;
+      },
+    );
     assert.deepEqual(availability, {
       '2026-10-25': { showtimesCount: 1, averageAvailableSeats: 11 },
       '2026-10-26': { showtimesCount: 0, averageAvailableSeats: null },
+    });
+    assert.deepEqual(showtimesByDate, {
+      '2026-10-25': [{
+        showtimeId: '559924_2026-10-25_1215',
+        date: '2026-10-25',
+        time: '12:15',
+        screen: '5',
+      }],
+      '2026-10-26': [],
     });
   } finally {
     restoreFetch();

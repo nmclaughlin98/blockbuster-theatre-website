@@ -195,6 +195,26 @@ export function BookingConfirmation({
           <div className="ticket-barcode-area"><div className="ticket-booking-ref">REF: {bookingRef}</div></div>
         </div>
       </div>
+      <div className="wallet-pass-actions">
+        <button
+          className="wallet-badge-btn"
+          type="button"
+          aria-label="Add booking to Apple Wallet"
+          disabled={walletLoading}
+          onClick={() => createWalletPass('apple')}
+        >
+          <img src={asset('assets/images/icons/add-to-apple-wallet.svg')} alt="Add to Apple Wallet" />
+        </button>
+        <button
+          className="wallet-badge-btn"
+          type="button"
+          aria-label="Add booking to Google Wallet"
+          disabled={walletLoading}
+          onClick={() => createWalletPass('google')}
+        >
+          <img src={asset('assets/images/icons/add-to-google-wallet.svg')} alt="Add to Google Wallet" />
+        </button>
+      </div>
       {conversionTokenAvailable && !conversionState.dismissed && (
         <section className="guest-conversion-card" aria-labelledby="guest-conversion-title">
           {conversionState.complete ? (
@@ -240,14 +260,6 @@ export function BookingConfirmation({
               {conversionState.error && <p className="form-notice" role="alert">{conversionState.error}</p>}
               <div className="form-actions">
                 <button
-                  className="form-button next"
-                  type="button"
-                  onClick={createAccount}
-                  disabled={conversionState.loading || password.length < 8 || password !== confirmPassword}
-                >
-                  {conversionState.loading ? 'Creating account...' : 'Create Account'}
-                </button>
-                <button
                   className="form-button previous"
                   type="button"
                   onClick={() => setConversionState((current) => ({ ...current, dismissed: true }))}
@@ -255,31 +267,19 @@ export function BookingConfirmation({
                 >
                   Maybe later
                 </button>
+                <button
+                  className="form-button next"
+                  type="button"
+                  onClick={createAccount}
+                  disabled={conversionState.loading || password.length < 8 || password !== confirmPassword}
+                >
+                  {conversionState.loading ? 'Creating account...' : 'Create Account'}
+                </button>
               </div>
             </>
           )}
         </section>
       )}
-      <div className="wallet-pass-actions">
-        <button
-          className="wallet-badge-btn"
-          type="button"
-          aria-label="Add booking to Apple Wallet"
-          disabled={walletLoading}
-          onClick={() => createWalletPass('apple')}
-        >
-          <img src={asset('assets/images/icons/add-to-apple-wallet.svg')} alt="Add to Apple Wallet" />
-        </button>
-        <button
-          className="wallet-badge-btn"
-          type="button"
-          aria-label="Add booking to Google Wallet"
-          disabled={walletLoading}
-          onClick={() => createWalletPass('google')}
-        >
-          <img src={asset('assets/images/icons/add-to-google-wallet.svg')} alt="Add to Google Wallet" />
-        </button>
-      </div>
       <a className="form-button previous home" href="./index.html">Back to Home</a>
     </fieldset>
   );

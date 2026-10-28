@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Layout } from '../../shared';
 import { Toast } from '../../shared/Toast';
 import { BookingConfirmation } from './BookingConfirmation';
@@ -23,6 +23,10 @@ export function Booking() {
   const [step, setStep] = useState(0);
   const [booking, setBooking] = useState(initialBooking);
   const [toastMessage, setToastMessage] = useState('');
+
+  useEffect(() => {
+    document.title = 'Blockbuster Theatre - Book Now';
+  }, []);
 
   function navigateToStep(nextStep, updates = {}) {
     setBooking((current) => ({ ...current, ...updates }));

@@ -2096,6 +2096,7 @@ section {
     border-radius: 12px;
     background: #171923;
     color: #f3f4f6;
+    font-size: 0.95rem;
     overflow: hidden;
 }
 
@@ -2109,9 +2110,18 @@ section {
     color: #f3f4f6;
 }
 
+.booking-date-calendar .react-datepicker__day,
+.booking-date-calendar .react-datepicker__day-name {
+    width: 2rem;
+    line-height: 2rem;
+    margin: 0.18rem;
+}
+
 .booking-date-calendar .react-datepicker__day {
     color: #f3f4f6;
     border-radius: 8px;
+    background: #484a51;
+    font-weight: 600;
 }
 
 .booking-date-calendar .react-datepicker__day:hover,
@@ -2129,8 +2139,9 @@ section {
 .booking-date-calendar .booking-calendar-day--none,
 .booking-date-calendar .booking-calendar-day--none:hover {
     color: #737783;
-    background: #292b35;
-    opacity: 0.64;
+    background: #171923;
+    opacity: 0.4;
+    font-weight: 400;
     cursor: not-allowed;
 }
 
@@ -2140,8 +2151,8 @@ section {
 
 .booking-calendar-day-content {
     display: inline-flex;
-    min-width: 1.55rem;
-    min-height: 1.55rem;
+    min-width: 2rem;
+    min-height: 2rem;
     align-items: center;
     justify-content: center;
     position: relative;
@@ -2149,8 +2160,8 @@ section {
 
 .booking-calendar-availability-dot {
     display: inline-block;
-    width: 0.4rem;
-    height: 0.4rem;
+    width: 0.6rem;
+    height: 0.6rem;
     border-radius: 50%;
 }
 
@@ -2314,6 +2325,17 @@ select option {
     --size: 0.5px;
 }
 
+.booking-loading {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.65rem;
+    min-height: 2rem;
+}
+
+.booking-loading .loader {
+    --size: 0.4px;
+}
+
 .time-chip {
     box-sizing: border-box;
     min-height: 60px;
@@ -2375,7 +2397,7 @@ select option {
 }
 
 .ticket-info h4 {
-    font-size: 1.1rem;
+    font-size: 1.3rem;
     color: #fff;
     font-weight: 600;
 }

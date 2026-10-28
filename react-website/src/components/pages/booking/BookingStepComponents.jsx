@@ -20,6 +20,15 @@ export function StepHeader({ title, description }) {
   return <div className="step-header"><h2>{title}</h2><p>{description}</p></div>;
 }
 
+export function BookingLoader({ children, className = 'booking-loading' }) {
+  return (
+    <span className={className} role="status" aria-live="polite">
+      <span className="loader" aria-hidden="true" />
+      <span>{children}</span>
+    </span>
+  );
+}
+
 export function StepActions({ onBack, onContinue, continueLabel, continueDisabled = false }) {
   return (
     <div className="form-actions">

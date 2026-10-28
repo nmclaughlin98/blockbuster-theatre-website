@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { movieId } from '../../movies';
+import { movieId, movieSlug } from '../../movies';
 
 function withAutoplay(url) {
     if (/[?&]autoplay=1(?:&|$)/.test(url)) return url;
@@ -126,7 +126,7 @@ export function HeroCarousel({ movies }) {
                                 <div className="hero-actions">
                                     <a
                                         className="button"
-                                        href={`./bookNow.html?movie=${encodeURIComponent(movie.title)}`}
+                                        href={`./bookNow.html?movie=${encodeURIComponent(movieSlug(movie))}`}
                                         onClick={(e) => e.currentTarget.blur()}
                                     >
                                         Book Tickets
@@ -142,7 +142,7 @@ export function HeroCarousel({ movies }) {
                                     )}
                                     <a
                                         className="button btn-glass"
-                                        href={`./templates/movie-detail.html?movie=${movieId(movie)}`}
+                                        href={`./templates/movie-detail.html?movie=${encodeURIComponent(movieSlug(movie))}`}
                                         onClick={(e) => e.currentTarget.blur()}
                                     >
                                         More Info

@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { Layout } from '../../shared';
 import { PageLoader } from '../../shared/PageLoader';
 import { useMovies } from '../shared/useMovies';
@@ -9,6 +10,10 @@ import { useCollection } from '../collections/useCollection';
 const SEASONAL_PICKS_COLLECTION_ID = '8706566';
 
 export function Home() {
+  useEffect(() => {
+    document.title = 'Blockbuster Theatre';
+  }, []);
+
   const { movies, loading, error } = useMovies();
   const {
     collection: seasonalCollection,

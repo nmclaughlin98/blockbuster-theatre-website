@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Layout, asset } from '../../shared';
 
 const faqs = [
@@ -138,6 +138,10 @@ function BoxOfficeLocation() {
 }
 
 export function About() {
+  useEffect(() => {
+    document.title = 'Blockbuster Theatre - About';
+  }, []);
+
   return (
     <Layout current="about">
       <CinemaHero />

@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { MovieGrid } from '../../movies';
 import { Layout } from '../../shared';
 import { PageLoader } from '../../shared/PageLoader';
@@ -5,6 +6,10 @@ import { useMovies } from '../shared/useMovies';
 
 export function ComingSoon() {
   const { movies, loading, error } = useMovies();
+  useEffect(() => {
+    document.title = 'Blockbuster Theatre - Coming Soon';
+  }, []);
+
   const upcoming = movies
     .filter((movie) => movie.visible !== false && movie.isComingSoon === true)
     .sort((a, b) => new Date(a.countdownTarget || a.releaseDate || 0) - new Date(b.countdownTarget || b.releaseDate || 0));

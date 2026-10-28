@@ -381,7 +381,7 @@ export async function getMovieDetail(movieId, signal, date) {
   return data;
 }
 
-export async function getSelectionDateAvailability(selection, dates, signal) {
+export async function getSelectionDateAvailability(selection, dates, signal, onShowtimesReady) {
   const schedules = new Array(dates.length);
   let nextDateIndex = 0;
   const loadDateSchedule = async () => {
@@ -408,6 +408,12 @@ export async function getSelectionDateAvailability(selection, dates, signal) {
     { length: Math.min(4, dates.length) },
     () => loadDateSchedule(),
   ));
+
+  const showtimesByDate = Object.fromEntries(dates.map(({ isoDate }, index) => [
+    isoDate,
+    schedules[index] || [],
+  ]));
+  onShowtimesReady?.(showtimesByDate);
 
   const availability = Object.fromEntries(dates.map(({ isoDate }) => [
     isoDate,

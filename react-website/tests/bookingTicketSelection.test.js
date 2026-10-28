@@ -4,6 +4,26 @@ import test from 'node:test';
 import { createElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { createServer } from 'vite';
+import { getFirstAvailableDate } from '../src/components/pages/booking/bookingDates.js';
+
+test('finds the first available screening date', () => {
+  const dates = [
+    { isoDate: '2026-10-25' },
+    { isoDate: '2026-10-26' },
+    { isoDate: '2026-10-27' },
+  ];
+
+  assert.equal(getFirstAvailableDate(dates, {
+    '2026-10-25': [],
+    '2026-10-26': [{ showtimeId: 'showtime-1' }],
+    '2026-10-27': [{ showtimeId: 'showtime-2' }],
+  }), '2026-10-26');
+  assert.equal(getFirstAvailableDate(dates, {
+    '2026-10-25': [],
+    '2026-10-26': [],
+    '2026-10-27': [],
+  }), '');
+});
 
 test('shows the showtime spinner without hiding the rest of ticket selection', async () => {
   const vite = await createServer({

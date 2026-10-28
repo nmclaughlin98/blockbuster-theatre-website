@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { MovieGrid } from '../../movies';
 import { Layout } from '../../shared';
 import { PageLoader } from '../../shared/PageLoader';
@@ -65,6 +65,10 @@ function MovieFilters({ genres, search, sort, genre, onSearch, onSort, onGenre }
 export function NowShowing({ initialView }) {
     const requestedView = initialView || new URLSearchParams(window.location.search).get('view');
     const [view, setView] = useState(requestedView === 'collections' ? 'collections' : 'movies');
+    useEffect(() => {
+      document.title = `Blockbuster Theatre - ${view === 'collections' ? 'Collections' : 'Now Showing'}`;
+    }, [view]);
+
     const { movies, loading, error } = useMovies();
     const collectionState = useCollections(view === 'collections');
     const [search, setSearch] = useState('');

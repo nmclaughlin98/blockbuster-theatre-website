@@ -5,17 +5,16 @@ import {
   CINEMA_SEAT_CAPACITY,
   createCheckoutPayload,
   getBookingSelections,
-  getMovieDetail,
-  getMovieDetailIdForSelection,
   getSelectionDateAvailability,
-  getSelectionShowtimes,
   getTicketPricing,
   isShowtimeIdForDate,
   selectionDisplayLabel,
   selectionKey,
   validateCheckout,
 } from '../shared/bookingApi';
-import { StepHeader } from './BookingStepComponents';
+import { movieSlug } from '../../movies';
+import { getFirstAvailableDate } from './bookingDates';
+import { BookingLoader, StepHeader } from './BookingStepComponents';
 
 const weekdayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
@@ -105,6 +104,7 @@ export function TicketSelection({ initialData = {}, onNext, onToast }) {
     || createCalendarDate(params.get('date'))?.isoDate
     || createUpcomingDates()[0].isoDate
   ));
+  const dateOverrideRef = useRef(dateOverride);
   const [selectionState, setSelectionState] = useState(() => ({
     selections: initialData.selection ? [initialData.selection] : [],
     loading: true,
@@ -116,8 +116,8 @@ export function TicketSelection({ initialData = {}, onNext, onToast }) {
   ));
   const [selectedScreening, setSelectedScreening] = useState(() => getInitialScreening(initialData, params));
   const [tickets, setTickets] = useState(() => initialData.tickets || {});
-  const [movieDetailState, setMovieDetailState] = useState({
-    requestKey: '', movie: null, loading: false, error: null,
+  const [showtimeState, setShowtimeState] = useState({
+    requestKey: '', showtimesByDate: {}, error: null,
   });
   const [pricingState, setPricingState] = useState({
     requestKey: '', pricing: null, loading: false, error: null,
@@ -131,12 +131,14 @@ export function TicketSelection({ initialData = {}, onNext, onToast }) {
   const [calendarAvailabilityRefresh, setCalendarAvailabilityRefresh] = useState(0);
   const initialSelectionResolvedRef = useRef(Boolean(initialData.selection));
   const calendarAvailabilityCacheRef = useRef(new Map());
+  const pendingFirstAvailableDateRef = useRef('');
 
   const selectionStateMatchesDate = selectionState.date === dateOverride;
-  const selections = selectionStateMatchesDate ? selectionState.selections : [];
+  const selections = selectionState.selections;
   const selectionLoading = !selectionStateMatchesDate || selectionState.loading;
   const selectionError = selectionStateMatchesDate ? selectionState.error : null;
   const selectedSelection = selections.find((item) => selectionKey(item) === selectedKey) || null;
+  const selectedSelectionRef = useRef(selectedSelection);
   const calendarAvailabilityRequestKey = selectedSelection ? selectionKey(selectedSelection) : '';
   const calendarAvailability = calendarAvailabilityState.requestKey === calendarAvailabilityRequestKey
     ? calendarAvailabilityState.availability
@@ -148,22 +150,18 @@ export function TicketSelection({ initialData = {}, onNext, onToast }) {
   const calendarAvailabilityError = calendarAvailabilityState.requestKey === calendarAvailabilityRequestKey
     ? calendarAvailabilityState.error
     : null;
-  const detailMovieId = getMovieDetailIdForSelection(selectedSelection);
-  const detailRequestKey = selectedSelection
-    ? `${selectionKey(selectedSelection)}|${dateOverride}`
-    : '';
-  const currentMovieDetail = detailMovieId != null
-    && movieDetailState.requestKey === detailRequestKey
-    ? movieDetailState
+  const currentShowtimeState = showtimeState.requestKey === calendarAvailabilityRequestKey
+    ? showtimeState
     : null;
+  const showtimesByDate = currentShowtimeState?.showtimesByDate || {};
+  const showtimeLoading = Boolean(selectedSelection && !currentShowtimeState);
+  const showtimeError = currentShowtimeState?.error || null;
   const currentDate = createCalendarDate(dateOverride)
     || createCalendarDate(findDate(dates, params.get('day') || '')?.isoDate)
     || dates[0];
   const date = currentDate?.isoDate || '';
   const day = currentDate?.weekday || '';
-  const showtimes = selectedSelection
-    ? getSelectionShowtimes(selectedSelection, currentMovieDetail?.movie, date)
-    : null;
+  const showtimes = selectedSelection ? showtimesByDate[date] || [] : [];
   const selectedShowtime = selectedScreening?.date === date
     ? showtimes?.find((slot) => slot.showtimeId === selectedScreening.showtimeId) || null
     : null;
@@ -186,36 +184,76 @@ export function TicketSelection({ initialData = {}, onNext, onToast }) {
   const validationLoading = Boolean(checkoutRequestKey && (
     validationState.requestKey !== checkoutRequestKey || validationState.loading
   ));
+  const ticketTotal = pricing?.ticketTiers.reduce(
+    (total, tier) => total + tier.price * (tickets[tier.id] || 0),
+    0,
+  ) || 0;
+  const displayedTotal = validation?.quote?.total ?? ticketTotal;
 
   useEffect(() => {
-    if (!selectedSelection) return undefined;
+    selectedSelectionRef.current = selectedSelection;
+  }, [selectedSelection]);
 
-    const requestKey = selectionKey(selectedSelection);
+  useEffect(() => {
+    const selection = selectedSelectionRef.current;
+    if (!selection || !calendarAvailabilityRequestKey) return undefined;
+
+    const requestKey = calendarAvailabilityRequestKey;
+    const applyFirstAvailableDate = (availableShowtimes) => {
+      if (pendingFirstAvailableDateRef.current !== requestKey) return;
+      pendingFirstAvailableDateRef.current = '';
+
+      const firstAvailableDate = getFirstAvailableDate(dates, availableShowtimes);
+      if (!firstAvailableDate || firstAvailableDate === dateOverrideRef.current) return;
+
+      dateOverrideRef.current = firstAvailableDate;
+      setDateOverride(firstAvailableDate);
+      setSelectedScreening(null);
+      setPricingState({ requestKey: '', pricing: null, loading: false, error: null });
+      setValidationState({ requestKey: '', quote: null, loading: false, error: null });
+    };
+
     const cachedAvailability = calendarAvailabilityCacheRef.current.get(requestKey);
     if (cachedAvailability) {
       setCalendarAvailabilityState({
-        requestKey, availability: cachedAvailability, loading: false, error: null,
+        requestKey, availability: cachedAvailability.availability, loading: false, error: null,
       });
+      setShowtimeState({
+        requestKey, showtimesByDate: cachedAvailability.showtimesByDate, error: null,
+      });
+      applyFirstAvailableDate(cachedAvailability.showtimesByDate);
       return undefined;
     }
 
     const controller = new AbortController();
     setCalendarAvailabilityState({ requestKey, availability: null, loading: true, error: null });
-    getSelectionDateAvailability(selectedSelection, dates, controller.signal)
+    let showtimesReady = false;
+    let availableShowtimes = {};
+    getSelectionDateAvailability(selection, dates, controller.signal, (showtimesByDate) => {
+      if (controller.signal.aborted) return;
+      showtimesReady = true;
+      availableShowtimes = showtimesByDate;
+      setShowtimeState({ requestKey, showtimesByDate, error: null });
+      applyFirstAvailableDate(showtimesByDate);
+    })
       .then((availability) => {
         if (controller.signal.aborted) return;
-        calendarAvailabilityCacheRef.current.set(requestKey, availability);
+        const result = { availability, showtimesByDate: availableShowtimes };
+        calendarAvailabilityCacheRef.current.set(requestKey, result);
         setCalendarAvailabilityState({ requestKey, availability, loading: false, error: null });
       })
       .catch((error) => {
         if (!controller.signal.aborted) {
+          if (!showtimesReady) {
+            setShowtimeState({ requestKey, showtimesByDate: {}, error: error.message });
+          }
           setCalendarAvailabilityState({
             requestKey, availability: null, loading: false, error: error.message,
           });
         }
       });
     return () => controller.abort();
-  }, [selectedSelection, dates, calendarAvailabilityRefresh]);
+  }, [calendarAvailabilityRequestKey, dates, calendarAvailabilityRefresh]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -242,7 +280,7 @@ export function TicketSelection({ initialData = {}, onNext, onToast }) {
         const requested = items.find((item) => (
           item.type === 'movie'
           && requestedMovie
-          && [item.title, item.slug, item.id, item.movieId]
+          && [item.title, item.slug, item.id, item.movieId, movieSlug(item)]
             .some((value) => String(value).toLowerCase() === requestedMovie)
         ));
         if (requested) setSelectedKey(selectionKey(requested));
@@ -255,43 +293,20 @@ export function TicketSelection({ initialData = {}, onNext, onToast }) {
   }, [params, dateOverride]);
 
   useEffect(() => {
-    if (detailMovieId == null) return undefined;
-
-    const controller = new AbortController();
-    getMovieDetail(detailMovieId, controller.signal, date)
-      .then((movie) => {
-        if (!controller.signal.aborted) {
-          setMovieDetailState({ requestKey: detailRequestKey, movie, loading: false, error: null });
-        }
-      })
-      .catch((error) => {
-        if (!controller.signal.aborted) {
-          setMovieDetailState({
-            requestKey: detailRequestKey, movie: null, loading: false, error: error.message,
-          });
-        }
-      });
-    return () => controller.abort();
-  }, [detailMovieId, detailRequestKey, date]);
-
-  useEffect(() => {
-    if (!pricingRequestKey || !selectedSelection) return undefined;
+    const selection = selectedSelectionRef.current;
+    if (!pricingRequestKey || !selection) return undefined;
 
     const controller = new AbortController();
     const requestKey = pricingRequestKey;
-    getTicketPricing(selectedSelection, day, time, controller.signal)
+    getTicketPricing(selection, day, time, controller.signal)
       .then((nextPricing) => {
         if (controller.signal.aborted) return;
         setPricingState({ requestKey, pricing: nextPricing, loading: false, error: null });
         setTickets((current) => {
           const tierIds = new Set(nextPricing.ticketTiers.map((tier) => String(tier.id)));
-          const next = Object.fromEntries(
+          return Object.fromEntries(
             Object.entries(current).filter(([tierId]) => tierIds.has(tierId)),
           );
-          if (!Object.values(next).some((quantity) => quantity > 0) && nextPricing.ticketTiers[0]) {
-            next[nextPricing.ticketTiers[0].id] = 1;
-          }
-          return next;
         });
       })
       .catch((error) => {
@@ -300,14 +315,15 @@ export function TicketSelection({ initialData = {}, onNext, onToast }) {
         }
       });
     return () => controller.abort();
-  }, [pricingRequestKey, selectedSelection, day, time]);
+  }, [pricingRequestKey, day, time]);
 
   useEffect(() => {
-    if (!checkoutRequestKey || !pricing || !selectedSelection) return undefined;
+    const selection = selectedSelectionRef.current;
+    if (!checkoutRequestKey || !pricing || !selection) return undefined;
 
     const controller = new AbortController();
     const requestKey = checkoutRequestKey;
-    const payload = createCheckoutPayload(selectedSelection, day, time, tickets);
+    const payload = createCheckoutPayload(selection, day, time, tickets);
     validateCheckout(payload, controller.signal)
       .then((quote) => {
         if (!controller.signal.aborted) {
@@ -320,18 +336,20 @@ export function TicketSelection({ initialData = {}, onNext, onToast }) {
         }
       });
     return () => controller.abort();
-  }, [checkoutRequestKey, pricing, selectedSelection, day, time, tickets]);
+  }, [checkoutRequestKey, pricing, day, time, tickets]);
 
   function changeSelection(value) {
     setSelectedKey(value);
+    pendingFirstAvailableDateRef.current = value;
     setSelectedScreening(null);
     setTickets({});
-    setMovieDetailState({ requestKey: '', movie: null, loading: false, error: null });
     setPricingState({ requestKey: '', pricing: null, loading: false, error: null });
     setValidationState({ requestKey: '', quote: null, loading: false, error: null });
   }
 
   function changeDate(isoDate) {
+    pendingFirstAvailableDateRef.current = '';
+    dateOverrideRef.current = isoDate;
     setDateOverride(isoDate);
     setSelectedScreening(null);
     setPricingState({ requestKey: '', pricing: null, loading: false, error: null });
@@ -342,6 +360,7 @@ export function TicketSelection({ initialData = {}, onNext, onToast }) {
     if (showtime.showtimeId === selectedScreening?.showtimeId && date === selectedScreening?.date) return;
 
     setSelectedScreening({ date, showtimeId: showtime.showtimeId });
+    setTickets({});
     setPricingState({ requestKey: '', pricing: null, loading: false, error: null });
     setValidationState({ requestKey: '', quote: null, loading: false, error: null });
   }
@@ -428,7 +447,7 @@ export function TicketSelection({ initialData = {}, onNext, onToast }) {
             ))}
           </optgroup>
         </select>
-        {selectionLoading && <span className="showtime-placeholder" role="status">Loading films and special offers...</span>}
+        {selectionLoading && <BookingLoader>Loading films and special offers...</BookingLoader>}
         {selectionError && <p className="form-notice" role="alert">{selectionError}</p>}
         {!selectionLoading && !selectionError && !selections.length
           && <p className="form-notice" role="status">No films or special offers are currently available.</p>}
@@ -473,7 +492,7 @@ export function TicketSelection({ initialData = {}, onNext, onToast }) {
             required
           />
           {calendarAvailabilityLoading && (
-            <span className="showtime-placeholder" role="status">Checking showtimes and seat availability...</span>
+            <BookingLoader>Checking showtimes and seat availability...</BookingLoader>
           )}
           {calendarAvailabilityError && (
             <p className="form-notice" role="alert">
@@ -492,21 +511,9 @@ export function TicketSelection({ initialData = {}, onNext, onToast }) {
               </button>
             </p>
           )}
-          {calendarAvailabilityReady && (
-            <>
-              <p className="booking-calendar-availability-note">
-                Average seats remaining across showtimes for that date.
-              </p>
-              <div className="booking-calendar-legend" aria-label="Screening availability legend">
-                <span><i className="booking-calendar-availability-dot booking-calendar-availability-dot--high" />High (&gt;60%)</span>
-                <span><i className="booking-calendar-availability-dot booking-calendar-availability-dot--medium" />Medium (25-60%)</span>
-                <span><i className="booking-calendar-availability-dot booking-calendar-availability-dot--low" />Low (&lt;25%)</span>
-              </div>
-            </>
-          )}
           {!dates.length && (
             <span className="showtime-placeholder" role="status">
-              {currentMovieDetail?.loading ? 'Loading screening dates...' : 'No screening dates available'}
+              {showtimeLoading ? 'Loading screening dates...' : 'No screening dates available'}
             </span>
           )}
         </div>
@@ -515,15 +522,10 @@ export function TicketSelection({ initialData = {}, onNext, onToast }) {
           <div className="showtime-chips" aria-label="Available showtimes">
             {!selectedSelection
               ? <span className="showtime-placeholder">Select a film or offer to see available showtimes.</span>
-              : detailMovieId != null && (!currentMovieDetail || currentMovieDetail.loading)
-                ? (
-                  <span className="showtime-loading" role="status">
-                    <span className="loader" aria-hidden="true" />
-                    <span>Loading showtimes...</span>
-                  </span>
-                )
-                : currentMovieDetail?.error
-                  ? <span className="form-notice" role="alert">{currentMovieDetail.error}</span>
+              : showtimeLoading
+                ? <BookingLoader className="showtime-loading">Loading showtimes...</BookingLoader>
+                : showtimeError
+                  ? <span className="form-notice" role="alert">{showtimeError}</span>
                   : showtimes?.length
                     ? showtimes.map((showtime) => (
                       <button
@@ -548,8 +550,8 @@ export function TicketSelection({ initialData = {}, onNext, onToast }) {
       <div className="form-group ticket-type-list">
         <label>Select Ticket Types</label>
         {!selectionLoading
-          && !(detailMovieId != null && (!currentMovieDetail || currentMovieDetail.loading))
-          && !currentMovieDetail?.error
+          && !showtimeLoading
+          && !showtimeError
           && !pricingLoading
           && !pricingError
           && !time
@@ -561,7 +563,7 @@ export function TicketSelection({ initialData = {}, onNext, onToast }) {
                 : 'Choose a film and showtime to view ticket types and prices.'}
             </p>
           )}
-        {pricingLoading && <p role="status">Loading ticket prices...</p>}
+        {pricingLoading && <BookingLoader>Loading ticket prices...</BookingLoader>}
         {pricingError && <p className="form-notice" role="alert">{pricingError}</p>}
         {!pricingLoading && !pricingError && selectedSelection && time && !pricing?.ticketTiers.length
           && <p className="form-notice" role="status">No ticket types are available for this showtime.</p>}
@@ -577,7 +579,7 @@ export function TicketSelection({ initialData = {}, onNext, onToast }) {
           </div>
         ))}
         {validation?.error && <p className="form-notice" role="alert">{validation.error}</p>}
-        {validationLoading && <p role="status"></p>}
+        {validationLoading && <BookingLoader>Checking ticket total...</BookingLoader>}
       </div>
       <div className="booking-subtotal-bar">
         <div className="subtotal-item booking-subtotal-values">
@@ -587,7 +589,7 @@ export function TicketSelection({ initialData = {}, onNext, onToast }) {
           </div>
           <div className="subtotal-metric">
             <span>Total:</span>
-            <strong>{new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP' }).format(validation?.quote?.total || 0)}</strong>
+            <strong>{new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP' }).format(displayedTotal)}</strong>
           </div>
         </div>
       </div>

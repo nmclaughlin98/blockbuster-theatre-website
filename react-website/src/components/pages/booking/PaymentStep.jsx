@@ -4,7 +4,7 @@ import {
   createGuestBookingPayload,
   getBookedSeats,
 } from '../shared/bookingApi';
-import { StepHeader } from './BookingStepComponents';
+import { BookingLoader, StepHeader } from './BookingStepComponents';
 
 function formatScreeningDate(date, time) {
   const parsedDate = new Date(`${date}T00:00:00Z`);
@@ -26,6 +26,7 @@ export function PaymentStep({
   initialData, onBack, onNext, onSeatConflict, onTicketIssue, onToast,
 }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submissionStatus, setSubmissionStatus] = useState('');
   const submittingRef = useRef(false);
   const showtime = initialData.showtime;
   const customer = initialData.customer;
@@ -50,21 +51,24 @@ export function PaymentStep({
       return;
     }
 
-    let bookedSeats;
-    try {
-      bookedSeats = await getBookedSeats(showtime.showtimeId, showtime.date);
-    } catch (error) {
-      onSeatConflict(error.message || 'Seat availability could not be verified. Please try again.');
-      return;
-    }
-    if (seats.some((seat) => bookedSeats.includes(seat))) {
-      onSeatConflict('Seat availability changed. Please choose your seats again.');
-      return;
-    }
-
     submittingRef.current = true;
     setIsSubmitting(true);
+    setSubmissionStatus('Checking seat availability...');
+
     try {
+      let bookedSeats;
+      try {
+        bookedSeats = await getBookedSeats(showtime.showtimeId, showtime.date);
+      } catch (error) {
+        onSeatConflict(error.message || 'Seat availability could not be verified. Please try again.');
+        return;
+      }
+      if (seats.some((seat) => bookedSeats.includes(seat))) {
+        onSeatConflict('Seat availability changed. Please choose your seats again.');
+        return;
+      }
+
+      setSubmissionStatus('Confirming booking...');
       const payload = createGuestBookingPayload({
         showtimeId: showtime.showtimeId,
         date: showtime.date,
@@ -96,6 +100,7 @@ export function PaymentStep({
     } finally {
       submittingRef.current = false;
       setIsSubmitting(false);
+      setSubmissionStatus('');
     }
   }
 
@@ -117,6 +122,7 @@ export function PaymentStep({
       <p className="form-notice" role="status">
         This flow records a booking reservation only. The displayed total is retained for your reference; payment is not taken.
       </p>
+      {isSubmitting && <BookingLoader>{submissionStatus}</BookingLoader>}
       <div className="form-actions">
         <button className="form-button previous" type="button" onClick={onBack} disabled={isSubmitting}>Back</button>
         <button

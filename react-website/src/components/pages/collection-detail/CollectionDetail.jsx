@@ -12,8 +12,8 @@ export function CollectionDetail() {
   const orderedMovies = useMemo(() => sortMoviesByReleaseDate(movies), [movies]);
 
   useEffect(() => {
-    document.title = collection ? `${collection.name} - Blockbuster Theatre` : 'Collections - Blockbuster Theatre';
-  }, [collection]);
+    document.title = `Blockbuster Theatre - ${collection?.name || 'Collections'}`;
+  }, [collection?.name]);
 
   if (loading) {
     return (

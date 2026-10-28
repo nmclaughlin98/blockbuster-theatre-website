@@ -1,5 +1,5 @@
-import { useMemo, useState } from 'react';
-import { movieId } from '../../movies';
+import { useEffect, useMemo, useState } from 'react';
+import { movieId, movieSlug } from '../../movies';
 import { Layout } from '../../shared';
 import { PageLoader } from '../../shared/PageLoader';
 import { getUpcomingScreeningDates, getWeekdayForDate, isShowtimeIdForDate } from '../shared/bookingApi';
@@ -106,7 +106,7 @@ function TimetableMovie({ movie, day }) {
                         className="showtime-btn"
                         href={createBookingHref(
                             './bookNow.html',
-                            movie.movieId ?? movie.slug ?? getMovieTitle(movie),
+                            movieSlug(movie) || getMovieTitle(movie),
                             slot.date,
                             slot,
                         )}
@@ -121,6 +121,10 @@ function TimetableMovie({ movie, day }) {
 }
 
 export function Timetable() {
+    useEffect(() => {
+        document.title = 'Blockbuster Theatre - Timetable';
+    }, []);
+
     const [day, setDay] = useState('Monday');
     const screeningDates = useMemo(() => getUpcomingScreeningDates(), []);
     const screeningDate = screeningDates.find((date) => getWeekdayForDate(date) === day);

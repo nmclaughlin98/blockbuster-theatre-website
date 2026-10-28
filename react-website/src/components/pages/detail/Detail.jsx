@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Countdown } from '../../movies/index.js';
+import { Countdown, movieSlug } from '../../movies/index.js';
 import { asset, Layout } from '../../shared';
 import { PageLoader } from '../../shared/PageLoader';
 import { createBookingHref } from '../shared/showtimeNavigation';
@@ -135,7 +135,8 @@ function MovieContent({ movie, comingSoon }) {
             Array.isArray(times) && times.some((slot) => slot.time === requestedTime)
         ))?.[0] || '';
     });
-    const movieBookingUrl = `../bookNow.html?movie=${encodeURIComponent(movie.title)}`;
+    const movieIdentifier = movieSlug(movie);
+    const movieBookingUrl = `../bookNow.html?movie=${encodeURIComponent(movieIdentifier)}`;
     const selectedShowtime = Object.entries(movie.showtimes || {}).flatMap(([day, slots]) => (
         (Array.isArray(slots) ? slots : []).map((slot) => ({ ...slot, day }))
     )).find((slot) => (
@@ -148,7 +149,7 @@ function MovieContent({ movie, comingSoon }) {
     const bookingHref = selectedShowtime
         ? createBookingHref(
             '../bookNow.html',
-            movie.movieId ?? movie.title,
+            movieIdentifier,
             selectedShowtime.date,
             selectedShowtime,
         )

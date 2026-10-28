@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { asset } from '../../shared';
 import { getBookedSeats } from '../shared/bookingApi';
-import { StepActions, StepHeader } from './BookingStepComponents';
+import { BookingLoader, StepActions, StepHeader } from './BookingStepComponents';
 
 const accessibleSeats = new Set(['A1', 'A5', 'A6', 'A10']);
 
@@ -105,7 +105,7 @@ export function SeatSelection({ initialData, onBack, onNext, onToast }) {
         title="Step 2: Reserve Your Seats"
         description={`Please choose exactly ${totalTickets} seat${totalTickets === 1 ? '' : 's'} on the map below.`}
       />
-      {bookedSeatsLoading && <p className="showtime-placeholder" role="status">Checking seat availability...</p>}
+      {bookedSeatsLoading && <BookingLoader>Checking seat availability...</BookingLoader>}
       {bookedSeatsError && (
         <div className="form-notice" role="alert">
           <p>Could not load seat availability: {bookedSeatsError}</p>
@@ -192,7 +192,6 @@ export function SeatSelection({ initialData, onBack, onNext, onToast }) {
         onBack={onBack}
         onContinue={continueToGuestDetails}
         continueLabel="Guest Info"
-        continueDisabled={!requestKey || bookedSeatsLoading || Boolean(bookedSeatsError) || selectedSeats.length !== totalTickets}
       />
     </fieldset>
   );
