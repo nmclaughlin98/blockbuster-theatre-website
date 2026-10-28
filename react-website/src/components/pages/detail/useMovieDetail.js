@@ -1,28 +1,20 @@
 import { useEffect, useState } from 'react';
-import { MOVIES_API_URL } from '../../../config';
+import { movieSlug } from '../../movies/movieId.js';
 import {
   getMovieDetail,
+  getMovies,
   getShowtimesForDate,
   getWeekdayForDate,
-} from '../shared/bookingApi';
+} from '../shared/bookingApi.js';
 
-function slugify(value) {
-  return value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-}
-
-async function resolveMovieId(identifier, signal) {
+export async function resolveMovieId(identifier, signal) {
   if (/^\d+$/.test(identifier)) return identifier;
 
-  const response = await fetch(`${MOVIES_API_URL}/movies`, { signal });
-  if (!response.ok) throw new Error('Unable to load movie list');
-
-  const data = await response.json();
-  if (!Array.isArray(data.movies)) throw new Error('Invalid movie list response');
-
-  const movie = data.movies.find((item) => {
-    const slug = item.slug || (typeof item.title === 'string' ? slugify(item.title) : '');
-    return slug.toLowerCase() === identifier.toLowerCase();
-  });
+  const movies = await getMovies(signal);
+  const normalizedIdentifier = identifier.trim().toLowerCase();
+  const movie = movies.find((item) => (
+    movieSlug(item).toLowerCase() === normalizedIdentifier
+  ));
 
   return movie?.movieId == null ? null : String(movie.movieId);
 }

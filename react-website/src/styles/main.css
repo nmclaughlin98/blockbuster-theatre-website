@@ -3494,6 +3494,7 @@ select option {
 
 .show-time-list {
     display: flex;
+    justify-content: center;
     gap: clamp(8px, 1vw, 16px);
     flex-wrap: wrap;
     margin-top: 6px;
