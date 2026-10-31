@@ -92,7 +92,7 @@ function ShowtimeSchedule({ movie, selectedDay, selectedTime, onSelectTime, book
         .filter(([, slots]) => Array.isArray(slots) && slots.length > 0);
 
     return (
-        <aside className="col col-1-3">
+        <aside className="col col-1-3 showtimes-schedule">
             <h1>Show Times:</h1>
             {showtimes.length > 0 ? showtimes.map(([day, times]) => (
                 <div className="showtime-day" key={day}>
@@ -100,17 +100,17 @@ function ShowtimeSchedule({ movie, selectedDay, selectedTime, onSelectTime, book
                     <div className="show-time-list">
                         {(Array.isArray(times) ? times : []).map((slot) => (
                             <button
-                                className={`show-time ${selectedDay === day && selectedTime === slot.time ? 'active' : ''}`}
+                                className={`time-chip ${selectedDay === day && selectedTime === slot.time ? 'active' : ''}`}
                                 type="button"
                                 aria-pressed={selectedDay === day && selectedTime === slot.time}
                                 key={`${slot.time}-${slot.screen}`}
                                 onClick={() => onSelectTime(day, slot.time, slot)}
                             >
-                                {slot.time}
+                                <span className="time-chip-time">{slot.time}</span>
+                                <span className="time-chip-screen">Screen {slot.screen}</span>
                             </button>
                         ))}
                     </div>
-                    <hr />
                 </div>
             )) : <p>No showtimes available.</p>}
             <a className="form-button" href={bookingHref}>Book Now</a>

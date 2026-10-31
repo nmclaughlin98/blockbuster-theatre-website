@@ -180,24 +180,18 @@
         grid-template-columns: 1fr;
     }
 
-    .showtime-day {
-        margin-bottom: 24px;
+    .showtimes-schedule .showtime-day {
+        grid-template-columns: 6rem minmax(0, 1fr);
+        gap: 8px;
+        padding: 12px 0;
     }
 
-    .showtime-day .day-of-week {
-        margin-top: 18px;
-        margin-bottom: 16px;
+    .showtimes-schedule .day-of-week {
+        font-size: clamp(0.8rem, 4vw, 1rem);
     }
 
-    .showtime-day .show-time-list {
-        gap: 12px;
-        row-gap: 12px;
-        margin-top: 10px;
-        margin-bottom: 16px;
-    }
-
-    .showtime-day .show-time {
-        padding: 9px 16px;
+    .showtimes-schedule .show-time-list {
+        gap: 8px;
     }
 
     .about-grid-layout {
@@ -346,6 +340,10 @@ header {
     grid-template-columns: repeat(auto-fill, minmax(max(7.5rem, calc((100% - 36px) / 4)), 1fr));
 }
 
+.showtimes-schedule {
+    width: 100%;
+}
+
 .booking-section {
     padding: clamp(1.5rem, 4vw, 2.5rem) var(--page-gutter) clamp(3rem, 7vw, 5rem);
 }
@@ -473,6 +471,10 @@ header {
     .movie-body-layout {
         gap: clamp(1.5rem, 4vw, 2.5rem);
     }
+
+    .showtimes-schedule .showtime-day {
+        width: min(100%, clamp(18rem, 50vw, 42rem));
+    }
 }
 
 @media (min-width: 651px) and (max-width: 965px) {
@@ -599,11 +601,6 @@ header {
     .col-no-border.col-2-3 h2,
     .col.col-1-3 h1 {
         font-size: 22px;
-    }
-
-    .show-time {
-        font-size: 14px;
-        padding: 8px 14px;
     }
 
     .genre-filter-container {
@@ -858,7 +855,7 @@ header {
 }
 
 @media (max-width: 480px) {
-        .hero-actions button {
+    .hero-actions button {
         display: none;
     }
 

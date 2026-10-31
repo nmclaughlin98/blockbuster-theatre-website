@@ -2229,6 +2229,7 @@ select option {
     box-sizing: border-box;
     min-height: 60px;
     padding: 8px 20px;
+    padding: clamp(6px, 1vw, 8px) clamp(16px, 1vw, 20px);
     background: var(--bg-surface-elevated);
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-md);
@@ -2246,7 +2247,7 @@ select option {
 }
 
 .time-chip-time {
-    font-size: clamp(0.9rem, 1.7vw, 1.2rem);
+    font-size: clamp(0.9rem, 1.2vw, 1.1rem);
     font-weight: 700;
     line-height: 1.1;
     letter-spacing: 0.03em;
@@ -2255,10 +2256,9 @@ select option {
 }
 
 .time-chip-screen {
-    font-size: clamp(0.6rem, 1.7vw, 0.8rem);
+    font-size: clamp(0.6rem, 1.2vw, 0.8rem);
     font-weight: 700;
     line-height: 1.2;
-    opacity: 0.85;
 }
 
 .time-chip:hover {
@@ -3408,47 +3408,34 @@ select option {
     font-weight: 600;
     color: #fff;
     font-size: clamp(0.8rem, 6vw, 1.2rem);
-    margin-top: 10px;
-    display: block;
-    margin-bottom: clamp(7px, 1vw, 20px);
+}
+
+.showtimes-schedule .showtime-day {
+    display: grid;
+    grid-template-columns: 6.5rem minmax(0, 1fr);
+    align-items: center;
+    gap: clamp(0.5rem, 1.5vw, 1rem);
+    width: 100%;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--border-subtle);
+    text-align: left;
+}
+
+.showtimes-schedule .showtime-day:last-of-type {
+    padding-bottom: 0;
+    border-bottom: 0;
+}
+
+.showtimes-schedule .day-of-week {
+    margin: 0;
 }
 
 .show-time-list {
     display: flex;
-    justify-content: center;
+    justify-content: flex-start;
     gap: clamp(8px, 1vw, 16px);
     flex-wrap: wrap;
-    margin-top: 6px;
-    margin-bottom: 10px;
-}
-
-.show-time {
-    padding: 6px 14px;
-    background: var(--bg-surface-elevated);
-    border: 1px solid var(--border-subtle);
-    border-radius: var(--radius-sm);
-    font-size: clamp(0.9rem, 1.5vw, 1rem);
-    font-weight: 600;
-    color: var(--text-secondary);
-    cursor: pointer;
-    transition: all var(--transition);
-    list-style: none;
-    display: inline-block;
-    text-decoration: none;
-}
-
-.show-time:hover {
-    background: var(--accent-red);
-    border-color: var(--accent-red);
-    color: #fff;
-    transform: translateY(-2px);
-}
-
-.show-time.active {
-    background: var(--accent-red);
-    border-color: var(--accent-red);
-    color: #fff;
-    box-shadow: 0 0 0 2px rgba(157, 36, 59, 0.25);
+    min-width: 0;
 }
 
 hr {
