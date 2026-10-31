@@ -16,17 +16,16 @@ export function GuestDetails({ initialData, onBack, onNext, onToast }) {
 
   function continueToReview() {
     const issues = [];
-    if (!firstNameValid) issues.push('your first name');
-    if (!surnameValid) issues.push('your surname');
-    if (!emailValid) issues.push('a valid email address');
+    if (!firstNameValid) issues.push('Please enter your first name.');
+    if (!surnameValid) issues.push('Please enter your surname.');
+    if (!emailValid) issues.push('Please enter a valid email address.');
 
     if (issues.length) {
       setShowErrors(true);
-      const lastIssue = issues.pop();
-      const issueList = issues.length
-        ? `${issues.join(', ')}${issues.length > 1 ? ',' : ''} and ${lastIssue}`
-        : lastIssue;
-      onToast?.(`Please enter ${issueList}.`);
+      const toastMessage = issues.length > 1
+        ? `Action required:\n\n${issues.map((issue) => `• ${issue}`).join('\n')}`
+        : issues[0];
+      onToast?.(toastMessage);
       return;
     }
 
@@ -49,7 +48,7 @@ export function GuestDetails({ initialData, onBack, onNext, onToast }) {
             autoComplete="given-name"
             required
           />
-          {showErrors && !firstNameValid && <p id="guest-first-name-error" className="guest-details-error" role="alert">Enter your first name.</p>}
+          {showErrors && !firstNameValid && <p id="guest-first-name-error" className="guest-details-error" role="alert">Please enter your first name.</p>}
         </div>
         <div className="form-group">
           <label htmlFor="guest-surname">Surname</label>
@@ -63,7 +62,7 @@ export function GuestDetails({ initialData, onBack, onNext, onToast }) {
             autoComplete="family-name"
             required
           />
-          {showErrors && !surnameValid && <p id="guest-surname-error" className="guest-details-error" role="alert">Enter your surname.</p>}
+          {showErrors && !surnameValid && <p id="guest-surname-error" className="guest-details-error" role="alert">Please enter your surname.</p>}
         </div>
       </div>
       <div className="form-group">
@@ -78,7 +77,7 @@ export function GuestDetails({ initialData, onBack, onNext, onToast }) {
           autoComplete="email"
           required
         />
-        {showErrors && !emailValid && <p id="guest-email-error" className="guest-details-error" role="alert">Enter a valid email address.</p>}
+        {showErrors && !emailValid && <p id="guest-email-error" className="guest-details-error" role="alert">Please enter a valid email address.</p>}
       </div>
       <StepActions
         onBack={onBack}

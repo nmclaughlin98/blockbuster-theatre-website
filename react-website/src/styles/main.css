@@ -2338,6 +2338,7 @@ select option {
 /* Live Booking Subtotal summary */
 .booking-subtotal-bar {
     margin-top: 24px;
+    margin-bottom: 24px;
     padding: 16px 24px;
     background: rgba(255, 51, 75, 0.08);
     border: 1px solid var(--border-accent);
@@ -3055,6 +3056,7 @@ select option {
 .toast-notification span {
     display: inline-block;
     font-size: clamp(1.0rem, 1vw, 1.1rem);
+    white-space: pre-line;
 }
 
 .toast-notification::before {

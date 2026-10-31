@@ -43,6 +43,7 @@
     color: #858a97;
     opacity: 0.7;
     pointer-events: none;
+    margin-right: 0.4rem;
 }
 
 .react-datepicker.date-picker__calendar {
