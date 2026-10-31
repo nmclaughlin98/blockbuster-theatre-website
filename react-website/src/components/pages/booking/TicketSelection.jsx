@@ -593,7 +593,7 @@ export function TicketSelection({ initialData = {}, onNext, onToast }) {
           </div>
         </div>
       </div>
-      <button type="button" className="form-button next booking-continue-button" onClick={continueToSeats}>Select Seats</button>
+      <button type="button" className="form-button booking-continue-button" onClick={continueToSeats}>Select Seats</button>
     </fieldset>
   );
 }

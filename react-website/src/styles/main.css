@@ -717,10 +717,32 @@ carous
     touch-action: manipulation;
 }
 
+.booking-form .form-button {
+    min-height: 3.5rem;
+    line-height: 1;
+}
+
+.previous:not(.home)::before,
+.next-button:not(.finish-step)::after,
+.booking-continue-button::after,
+.movie-section-header .material-symbols-outlined {
+    display: inline-block;
+    font-family: 'Material Symbols Outlined';
+    font-size: 24px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 1;
+    letter-spacing: normal;
+    text-transform: none;
+    white-space: nowrap;
+    font-feature-settings: 'liga';
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    -webkit-font-feature-settings: 'liga';
+    -webkit-font-smoothing: antialiased;
+}
+
 .previous::before {
     content: '\e5cb';
-    font-family: 'Material Symbols Outlined';
-    font-size: 1.2rem;
 }
 
 .previous.home::before {
@@ -733,7 +755,6 @@ carous
 .booking-continue-button::after {
     content: '\e5cc';
     font-family: 'Material Symbols Outlined';
-    font-size: clamp(0.9rem, 1.2vw, 1.1rem);
 }
 
 .next-button.finish-step::after {
@@ -2489,7 +2510,8 @@ select option {
 }
 
 .booking-continue-button {
-    display: block;
+    display: flex;
+    width: fit-content;
     margin: 16px 0 0 auto;
 }
 
