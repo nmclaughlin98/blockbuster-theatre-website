@@ -28,8 +28,18 @@ export function SeatSelection({ initialData, onBack, onNext, onToast }) {
   const bookedSeatsError = bookedSeatState.requestKey === requestKey
     ? bookedSeatState.error
     : null;
-  const totalTickets = Object.values(initialData.tickets || {})
+  const maxSeats = Object.values(initialData.tickets || {})
     .reduce((total, count) => total + count, 0);
+  const seatsRemaining = Math.max(maxSeats - selectedSeats.length, 0);
+  const seatsComplete = maxSeats > 0 && selectedSeats.length === maxSeats;
+  const seatsOverLimit = selectedSeats.length > maxSeats;
+  const selectionStatus = maxSeats === 0
+    ? 'Choose ticket quantities before selecting seats.'
+    : seatsOverLimit
+      ? `Remove ${selectedSeats.length - maxSeats} seat${selectedSeats.length - maxSeats === 1 ? '' : 's'} to continue.`
+      : seatsComplete
+        ? `✓ ${selectedSeats.length} of ${maxSeats} seat${maxSeats === 1 ? '' : 's'} selected`
+        : `Please select ${seatsRemaining} more seat${seatsRemaining === 1 ? '' : 's'}`;
 
   useEffect(() => {
     if (!requestKey) return undefined;
@@ -80,8 +90,8 @@ export function SeatSelection({ initialData, onBack, onNext, onToast }) {
       setSelectedSeats((current) => current.filter((seat) => seat !== seatId));
       return;
     }
-    if (selectedSeats.length >= totalTickets) {
-      onToast(`You can select up to ${totalTickets} seat${totalTickets === 1 ? '' : 's'}.`);
+    if (selectedSeats.length >= maxSeats) {
+      onToast(`Maximum number of seats selected.`);
       return;
     }
     setSelectedSeats((current) => [...current, seatId]);
@@ -92,8 +102,8 @@ export function SeatSelection({ initialData, onBack, onNext, onToast }) {
       onToast(bookedSeatsError || 'Please wait for seat availability to load before continuing.');
       return;
     }
-    if (selectedSeats.length !== totalTickets) {
-      onToast('Please pick all seats to continue.');
+    if (selectedSeats.length !== maxSeats) {
+      onToast('Please select all seats to continue.');
       return;
     }
     onNext(selectedSeats);
@@ -103,7 +113,15 @@ export function SeatSelection({ initialData, onBack, onNext, onToast }) {
     <fieldset className="active" data-step="1">
       <StepHeader
         title="Step 2: Reserve Your Seats"
-        description={`Please choose exactly ${totalTickets} seat${totalTickets === 1 ? '' : 's'} on the map below.`}
+        description={(
+          <span
+            className={`seat-selection-status${seatsComplete ? ' seat-selection-status--complete' : ''}${seatsOverLimit ? ' seat-selection-status--warning' : ''}`}
+            role="status"
+            aria-live="polite"
+          >
+            {selectionStatus}
+          </span>
+        )}
       />
       {bookedSeatsLoading && <BookingLoader>Checking seat availability...</BookingLoader>}
       {bookedSeatsError && (
