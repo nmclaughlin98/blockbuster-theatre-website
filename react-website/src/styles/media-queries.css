@@ -857,6 +857,21 @@ header {
     }
 }
 
+@media (max-width: 480px) {
+    .hero-actions button {
+        display: none;
+    }
+
+    .carousel-indicators li {
+        width: 23px;
+    }
+
+    .carousel-indicators li.active {
+        width: 44px;
+        box-shadow: 0 0 12px var(--accent-glow);
+    }
+}
+
 @media (max-width: 390px) {
 
     .ticket-row {
