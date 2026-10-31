@@ -3665,6 +3665,166 @@ footer small {
     display: none;
 }
 
+/* ==========================================================================
+   Home Skeleton
+   ========================================================================== */
+
+.home-skeleton-page {
+    overflow: hidden;
+    scroll-behavior: none;
+}
+
+.home-skeleton-page>.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    clip-path: inset(50%);
+}
+
+.home-skeleton {
+    position: relative;
+    display: block;
+    overflow: hidden;
+    background: #292a31;
+    border-radius: var(--radius-full);
+}
+
+.home-skeleton::after {
+    position: absolute;
+    inset: 0;
+    content: "";
+    transform: translateX(-100%);
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.14), transparent);
+    animation: home-skeleton-shimmer 1.5s ease-in-out infinite;
+}
+
+.home-skeleton-hero {
+    position: relative;
+    height: clamp(21rem, 58svh, 38rem);
+    background: linear-gradient(180deg, #292a30 0%, #17181d 66%, var(--bg-main) 100%);
+}
+
+.home-skeleton-hero-caption {
+    position: absolute;
+    right: clamp(20px, 6vw, 80px);
+    bottom: 50px;
+    left: clamp(20px, 6vw, 80px);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+}
+
+.home-skeleton-title {
+    width: min(42vw, 26rem);
+    height: clamp(2rem, 5vw, 3.75rem);
+}
+
+.home-skeleton-tagline {
+    width: min(26vw, 13rem);
+    height: 0.9rem;
+}
+
+.home-skeleton-hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+.home-skeleton-action {
+    width: 7rem;
+    height: 2.5rem;
+}
+
+.home-skeleton-action-secondary {
+    width: 7.5rem;
+}
+
+.home-skeleton-action-short {
+    width: 4.5rem;
+}
+
+.home-skeleton-carousel-control {
+    position: absolute;
+    top: 50%;
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 50%;
+}
+
+.home-skeleton-carousel-control-left {
+    left: 0.75rem;
+}
+
+.home-skeleton-carousel-control-right {
+    right: 0.75rem;
+}
+
+.home-skeleton-indicators {
+    position: absolute;
+    bottom: 1.5rem;
+    left: 50%;
+    display: flex;
+    gap: 0.5rem;
+    transform: translateX(-50%);
+}
+
+.home-skeleton-indicators .home-skeleton {
+    width: 1.5rem;
+    height: 0.25rem;
+}
+
+.home-skeleton-section {
+    padding: var(--section-space) var(--page-gutter);
+}
+
+.home-skeleton-section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    border-bottom: 1px solid var(--border-subtle);
+    padding-bottom: 1rem;
+}
+
+.home-skeleton-heading {
+    width: clamp(8rem, 17vw, 13rem);
+    height: clamp(1.5rem, 3.5vw, 2.3rem);
+}
+
+.home-skeleton-link {
+    width: 8rem;
+    height: 2.5rem;
+}
+
+.home-skeleton-movies {
+    /* TODO */
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, clamp(8.125rem, 38vw, 12.5rem)), 1fr));
+    gap: clamp(0.8rem, 1.5vw, 0.9rem);
+}
+
+.home-skeleton-poster {
+    aspect-ratio: 2 / 3;
+    border-radius: var(--radius-md);
+}
+
+@keyframes home-skeleton-shimmer {
+    100% {
+        transform: translateX(100%);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .home-skeleton::after {
+        animation: none;
+    }
+}
+
 .movie-detail-content[hidden] {
     display: none;
 }

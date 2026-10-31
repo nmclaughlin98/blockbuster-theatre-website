@@ -1,8 +1,8 @@
 import { useEffect } from 'react';
 import { Layout } from '../../shared';
-import { PageLoader } from '../../shared/PageLoader';
 import { useMovies } from '../shared/useMovies';
 import { HeroCarousel } from './HeroCarousel';
+import { HomeSkeleton } from './HomeSkeleton';
 import { MovieSection } from './MovieSection';
 import { Offers } from './Offers';
 import { useCollection } from '../collections/useCollection';
@@ -26,7 +26,7 @@ export function Home() {
   if (loading) {
     return (
       <Layout current="home" loading>
-        <PageLoader label="Loading home page" />
+        <HomeSkeleton />
       </Layout>
     );
   }

@@ -9,7 +9,8 @@
 
     .poster-section,
     .grid,
-    .collection-card-grid {
+    .collection-card-grid,
+    .home-skeleton-movies {
         grid-template-columns: repeat(7, minmax(0, 1fr));
     }
 
