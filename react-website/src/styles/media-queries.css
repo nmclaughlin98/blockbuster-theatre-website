@@ -858,7 +858,7 @@ header {
 }
 
 @media (max-width: 480px) {
-    .hero-actions button {
+        .hero-actions button {
         display: none;
     }
 

@@ -126,7 +126,7 @@ export function PaymentStep({
       <div className="form-actions">
         <button className="form-button previous" type="button" onClick={onBack} disabled={isSubmitting}>Back</button>
         <button
-          className="form-button next"
+          className="form-button next-button"
           type="button"
           onClick={confirmBooking}
           disabled={isSubmitting}

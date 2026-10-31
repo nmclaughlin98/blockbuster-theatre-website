@@ -66,7 +66,7 @@ export function NowShowing({ initialView }) {
     const requestedView = initialView || new URLSearchParams(window.location.search).get('view');
     const [view, setView] = useState(requestedView === 'collections' ? 'collections' : 'movies');
     useEffect(() => {
-      document.title = `Blockbuster Theatre - ${view === 'collections' ? 'Collections' : 'Now Showing'}`;
+        document.title = `Blockbuster Theatre - ${view === 'collections' ? 'Collections' : 'Now Showing'}`;
     }, [view]);
 
     const { movies, loading, error } = useMovies();
@@ -136,7 +136,7 @@ export function NowShowing({ initialView }) {
                                 : 'Discover connected stories and films gathered together.'}
                         </p>
                     </div>
-                    {view === 'movies' && <a className="button btn-glass" href="./timetable.html">View Timetable</a>}
+                    {view === 'movies' && <a className="button btn-glass next-button" href="./timetable.html">View Timetable</a>}
                 </div>
                 <NowShowingSwitch current={view} onChange={changeView} />
                 <div

@@ -729,13 +729,14 @@ carous
     font-size: 1.2rem;
 }
 
-.next::after {
+.next-button::after,
+.booking-continue-button::after {
     content: '\e5cc';
     font-family: 'Material Symbols Outlined';
-    font-size: 1.2rem;
+    font-size: clamp(0.9rem, 1.2vw, 1.1rem);
 }
 
-.next.finish-step::after {
+.next-button.finish-step::after {
     content: '\e86c';
     font-family: 'Material Symbols Outlined';
     font-size: 1.2rem;
@@ -3671,9 +3672,9 @@ footer small {
    Home Skeleton
    ========================================================================== */
 
-html:not(.home-route) #root > header,
-html:not(.home-route) #root > .ham-overlay,
-html:not(.home-route) #root > .home-skeleton-page {
+html:not(.home-route) #root>header,
+html:not(.home-route) #root>.ham-overlay,
+html:not(.home-route) #root>.home-skeleton-page {
     display: none;
 }
 

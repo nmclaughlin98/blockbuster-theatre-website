@@ -268,7 +268,7 @@ export function BookingConfirmation({
                   Maybe later
                 </button>
                 <button
-                  className="form-button next"
+                  className="form-button next-button"
                   type="button"
                   onClick={createAccount}
                   disabled={conversionState.loading || password.length < 8 || password !== confirmPassword}
