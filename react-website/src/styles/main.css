@@ -722,49 +722,9 @@ carous
     line-height: 1;
 }
 
-.previous:not(.home)::before,
-.next-button:not(.finish-step)::after,
-.booking-continue-button::after,
-.movie-section-header .material-symbols-outlined {
-    display: inline-block;
-    font-family: 'Material Symbols Outlined';
-    font-size: 24px;
-    font-style: normal;
-    font-weight: 400;
-    line-height: 1;
-    letter-spacing: normal;
-    text-transform: none;
-    white-space: nowrap;
-    font-feature-settings: 'liga';
-    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-    -webkit-font-feature-settings: 'liga';
-    -webkit-font-smoothing: antialiased;
-}
-
-.previous::before {
-    content: '\e5cb';
-}
-
-.previous.home::before {
-    content: '\e88a';
-    font-family: 'Material Symbols Outlined';
-    font-size: 1.2rem;
-}
-
-.next-button::after,
-.booking-continue-button::after {
-    content: '\e5cc';
-    font-family: 'Material Symbols Outlined';
-}
-
-.next-button.finish-step::after {
-    content: '\e86c';
-    font-family: 'Material Symbols Outlined';
-    font-size: 1.2rem;
-}
-
-.button-no-gap {
-    gap: 0 !important;
+.button-no-gap,
+:is(.btn, .button, .form-button):has(.material-symbols-outlined) {
+    gap: 0 clamp(5px, 2vw, 5px) !important;
     padding: 12px 10px 12px 18px !important;
     touch-action: manipulation;
 }
@@ -799,6 +759,35 @@ carous
     background: rgba(255, 255, 255, 0.16);
     border-color: rgba(255, 255, 255, 0.3);
     transform: translateY(-2px);
+}
+
+.directional-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    padding: 12px 10px 12px 18px;
+}
+
+.directional-button--previous {
+    padding: 12px 18px 12px 10px;
+}
+
+.directional-button--icon-only {
+    display: flex;
+    gap: 0;
+    padding: 0;
+}
+
+.directional-button__icon {
+    display: block;
+    flex: 0 0 auto;
+    width: 1.5rem;
+    height: 1.5rem;
+}
+
+.directional-button__icon--previous {
+    transform: rotate(180deg);
 }
 
 .wallet-badge-btn {
@@ -2113,130 +2102,6 @@ section {
 .date-time-group .react-datepicker__input-container input {
     box-sizing: border-box;
     width: 100%;
-}
-
-.booking-date-calendar {
-    border: 1px solid rgba(255, 255, 255, 0.14);
-    border-radius: 12px;
-    background: #171923;
-    color: #f3f4f6;
-    font-size: 0.95rem;
-    overflow: hidden;
-}
-
-.booking-date-calendar .react-datepicker__header {
-    background: #20222e;
-    border-bottom-color: rgba(255, 255, 255, 0.12);
-}
-
-.booking-date-calendar .react-datepicker__current-month,
-.booking-date-calendar .react-datepicker__day-name {
-    color: #f3f4f6;
-}
-
-.booking-date-calendar .react-datepicker__day,
-.booking-date-calendar .react-datepicker__day-name {
-    width: 2rem;
-    line-height: 2rem;
-    margin: 0.18rem;
-}
-
-.booking-date-calendar .react-datepicker__day {
-    color: #f3f4f6;
-    border-radius: 8px;
-    background: #484a51;
-    font-weight: 600;
-}
-
-.booking-date-calendar .react-datepicker__day:hover,
-.booking-date-calendar .react-datepicker__day--keyboard-selected {
-    background: rgba(255, 255, 255, 0.12);
-}
-
-.booking-date-calendar .react-datepicker__day--selected,
-.booking-date-calendar .react-datepicker__day--selected:hover {
-    background: var(--accent-red);
-    color: #fff;
-}
-
-.booking-date-calendar .react-datepicker__day--disabled,
-.booking-date-calendar .booking-calendar-day--none,
-.booking-date-calendar .booking-calendar-day--none:hover {
-    color: #737783;
-    background: #171923;
-    opacity: 0.4;
-    font-weight: 400;
-    cursor: not-allowed;
-}
-
-.booking-date-calendar .react-datepicker__navigation-icon::before {
-    border-color: #d1d5db;
-}
-
-.booking-calendar-day-content {
-    display: inline-flex;
-    min-width: 2rem;
-    min-height: 2rem;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-}
-
-.booking-calendar-availability-dot {
-    display: inline-block;
-    width: 0.6rem;
-    height: 0.6rem;
-    border-radius: 50%;
-}
-
-.booking-calendar-day-content .booking-calendar-availability-dot {
-    position: absolute;
-    right: -0.16rem;
-    bottom: -0.08rem;
-    border: 1px solid #171923;
-}
-
-.booking-calendar-availability-dot--high {
-    background: #22c55e;
-}
-
-.booking-calendar-availability-dot--medium {
-    background: #f59e0b;
-}
-
-.booking-calendar-availability-dot--low {
-    background: #ef4444;
-}
-
-.booking-calendar-legend {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.8rem;
-    margin-top: 0.65rem;
-    color: #d1d5db;
-    font-size: 0.8rem;
-}
-
-.booking-calendar-availability-note {
-    margin: 0.65rem 0 0;
-    color: #b8bbc5;
-    font-size: 0.78rem;
-}
-
-.booking-calendar-legend span {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.35rem;
-}
-
-.booking-calendar-retry {
-    padding: 0;
-    border: 0;
-    background: none;
-    color: var(--accent-red);
-    font: inherit;
-    text-decoration: underline;
-    cursor: pointer;
 }
 
 fieldset {
@@ -3937,6 +3802,23 @@ html:not(.home-route) #root>.home-skeleton-page {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: var(--layout-gap);
+}
+
+.guest-details-error {
+    margin: 0.5rem 0 0;
+    color: #ff6b78;
+    font-size: clamp(0.85rem, 3vw, 1rem);
+    line-height: 1.5;
+}
+
+.guest-details-form input[aria-invalid="true"] {
+    border-color: #ff4558;
+    box-shadow: 0 0 0 1px rgba(255, 69, 88, 0.7);
+}
+
+.guest-details-form input[aria-invalid="true"]:focus {
+    border-color: #ff4558;
+    box-shadow: 0 0 0 2px rgba(255, 69, 88, 0.45), 0 0 16px rgba(255, 69, 88, 0.3);
 }
 
 .seat-cell {

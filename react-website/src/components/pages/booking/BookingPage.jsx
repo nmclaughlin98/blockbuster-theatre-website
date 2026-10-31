@@ -82,6 +82,7 @@ export function Booking() {
               initialData={booking.customer}
               onBack={goBack}
               onNext={(customer) => navigateToStep(3, { customer })}
+              onToast={setToastMessage}
             />
           )}
           {step === 3 && (

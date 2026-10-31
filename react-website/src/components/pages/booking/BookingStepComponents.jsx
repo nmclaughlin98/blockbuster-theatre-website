@@ -1,3 +1,5 @@
+import { DirectionalButton } from '../../shared';
+
 const steps = ['Tickets', 'Select Seats', 'Guest Info', 'Review', 'Confirmed'];
 
 export function ProgressBar({ currentStep }) {
@@ -32,8 +34,8 @@ export function BookingLoader({ children, className = 'booking-loading' }) {
 export function StepActions({ onBack, onContinue, continueLabel, continueDisabled = false }) {
   return (
     <div className="form-actions">
-      <button className="form-button previous" type="button" onClick={onBack}>Back</button>
-      <button className="form-button next-button" type="button" onClick={onContinue} disabled={continueDisabled}>{continueLabel}</button>
+      <DirectionalButton className="form-button previous" direction="previous" onClick={onBack}>Back</DirectionalButton>
+      <DirectionalButton className="form-button" direction="next" onClick={onContinue} disabled={continueDisabled}>{continueLabel}</DirectionalButton>
     </div>
   );
 }

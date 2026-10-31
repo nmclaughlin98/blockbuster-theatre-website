@@ -1,0 +1,200 @@
+.date-picker__calendar {
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 12px;
+    background: #171923;
+    color: #f3f4f6;
+    font-size: 0.95rem;
+    overflow: hidden;
+}
+
+.date-picker__wrapper .react-datepicker__input-container {
+    position: relative;
+}
+
+.date-picker__wrapper .react-datepicker__input-container input.date-picker__input {
+    padding-left: 1.125rem;
+    padding-right: 2.5rem;
+}
+
+.date-picker__wrapper .date-picker__calendar-icon {
+    position: absolute;
+    top: 50%;
+    right: 0.7rem;
+    left: auto;
+    box-sizing: border-box;
+    width: 1.15rem;
+    height: 1.15rem;
+    padding: 0;
+    transform: translateY(-50%);
+    color: #fff;
+    fill: currentColor;
+    cursor: default;
+}
+
+.date-picker__wrapper--disabled .react-datepicker__input-container input.date-picker__input {
+    background: #282a35;
+    border-color: #3a3d49;
+    color: #858a97;
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+.date-picker__wrapper--disabled .date-picker__calendar-icon {
+    color: #858a97;
+    opacity: 0.7;
+    pointer-events: none;
+}
+
+.react-datepicker.date-picker__calendar {
+    background: #171923;
+}
+
+.date-picker__calendar .react-datepicker__header {
+    background: #20222e;
+    border-bottom-color: rgba(255, 255, 255, 0.12);
+}
+
+.date-picker__calendar .react-datepicker__day-name {
+    color: #f3f4f6;
+    font-family: var(--font-heading);
+    letter-spacing: 0.05em;
+    font-weight: 600;
+}
+
+.date-picker__calendar .react-datepicker__current-month {
+    color: #f3f4f6;
+    font-size: clamp(1rem, 1vw, 1.1rem);
+}
+
+.date-picker__calendar .react-datepicker__day,
+.date-picker__calendar .react-datepicker__day-name {
+    width: 2rem;
+    line-height: 2rem;
+    margin: 0.18rem;
+}
+
+.date-picker__calendar .react-datepicker__day {
+    color: #f3f4f6;
+    border-radius: 8px;
+    background: #484a51;
+    font-weight: 600;
+}
+
+.date-picker__calendar .react-datepicker__day:hover,
+.date-picker__calendar .react-datepicker__day--keyboard-selected {
+    background: rgba(255, 255, 255, 0.12);
+}
+
+.date-picker__calendar .react-datepicker__day--selected,
+.date-picker__calendar .react-datepicker__day--selected:hover {
+    background: var(--accent-red);
+    color: #fff;
+}
+
+.date-picker__calendar .react-datepicker__day--disabled,
+.date-picker__calendar .booking-calendar-day--none,
+.date-picker__calendar .booking-calendar-day--none:hover {
+    color: #737783;
+    background: #171923;
+    opacity: 0.4;
+    font-weight: 400;
+    cursor: not-allowed;
+}
+
+.date-picker__calendar .react-datepicker__navigation-icon::before {
+    border-color: #d1d5db;
+}
+
+.date-picker__calendar .react-datepicker__navigation {
+    top: 2px;
+}
+
+.date-picker__calendar .react-datepicker__navigation-icon {
+    top: 0;
+}
+
+.date-picker__calendar .react-datepicker__navigation-icon--next {
+    left: 0;
+}
+
+.date-picker__calendar .react-datepicker__navigation-icon--previous {
+    right: 0;
+}
+
+.date-picker__calendar .react-datepicker__navigation-icon--next::before {
+    top: 50%;
+    left: -4.5px;
+    transform: translateY(-50%) rotate(45deg);
+}
+
+.date-picker__calendar .react-datepicker__navigation-icon--previous::before {
+    top: 50%;
+    right: -4.5px;
+    transform: translateY(-50%) rotate(225deg);
+}
+
+.booking-calendar-day-content {
+    display: inline-flex;
+    min-width: 2rem;
+    min-height: 2rem;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.booking-calendar-availability-dot {
+    display: inline-block;
+    width: 0.6rem;
+    height: 0.6rem;
+    border-radius: 50%;
+}
+
+.booking-calendar-day-content .booking-calendar-availability-dot {
+    position: absolute;
+    right: -0.16rem;
+    bottom: -0.08rem;
+    border: 1px solid #171923;
+}
+
+.booking-calendar-availability-dot--high {
+    background: #22c55e;
+}
+
+.booking-calendar-availability-dot--medium {
+    background: #f59e0b;
+}
+
+.booking-calendar-availability-dot--low {
+    background: #ef4444;
+}
+
+.booking-calendar-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.8rem;
+    margin-top: 0.65rem;
+    color: #d1d5db;
+    font-size: 0.8rem;
+}
+
+.booking-calendar-availability-note {
+    margin: 0.65rem 0 0;
+    color: #b8bbc5;
+    font-size: 0.78rem;
+}
+
+.booking-calendar-legend span {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.booking-calendar-retry {
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--accent-red);
+    font: inherit;
+    text-decoration: underline;
+    cursor: pointer;
+}

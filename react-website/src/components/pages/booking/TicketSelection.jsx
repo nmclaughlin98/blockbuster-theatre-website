@@ -1,6 +1,4 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import DatePicker from 'react-datepicker';
-import 'react-datepicker/dist/react-datepicker.css';
 import {
   CINEMA_SEAT_CAPACITY,
   createCheckoutPayload,
@@ -13,6 +11,7 @@ import {
   validateCheckout,
 } from '../shared/bookingApi';
 import { movieSlug } from '../../movies';
+import { DatePicker, DirectionalButton } from '../../shared';
 import { getFirstAvailableDate } from './bookingDates';
 import { BookingLoader, StepHeader } from './BookingStepComponents';
 
@@ -456,6 +455,7 @@ export function TicketSelection({ initialData = {}, onNext, onToast }) {
         <div className="form-group">
           <label htmlFor="booking-date">Screening Date</label>
           <DatePicker
+            variant="booking"
             id="booking-date"
             className="form-control"
             selected={toCalendarDate(date)}
@@ -593,7 +593,9 @@ export function TicketSelection({ initialData = {}, onNext, onToast }) {
           </div>
         </div>
       </div>
-      <button type="button" className="form-button booking-continue-button" onClick={continueToSeats}>Select Seats</button>
+      <DirectionalButton className="form-button booking-continue-button" direction="next" onClick={continueToSeats}>
+        Select Seats
+      </DirectionalButton>
     </fieldset>
   );
 }

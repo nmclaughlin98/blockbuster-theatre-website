@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { MovieGrid } from '../../movies';
-import { Layout } from '../../shared';
+import { DirectionalButton, Layout } from '../../shared';
 import { PageLoader } from '../../shared/PageLoader';
 import { CollectionsView } from '../collections/Collections';
 import { NowShowingSwitch } from './NowShowingSwitch';
@@ -136,7 +136,11 @@ export function NowShowing({ initialView }) {
                                 : 'Discover connected stories and films gathered together.'}
                         </p>
                     </div>
-                    {view === 'movies' && <a className="button btn-glass next-button" href="./timetable.html">View Timetable</a>}
+                    {view === 'movies' && (
+                        <DirectionalButton className="button btn-glass" href="./timetable.html" direction="next" variant="glass">
+                            View Timetable
+                        </DirectionalButton>
+                    )}
                 </div>
                 <NowShowingSwitch current={view} onChange={changeView} />
                 <div

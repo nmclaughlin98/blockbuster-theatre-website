@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { asset } from '../../shared';
+import { asset, DirectionalButton } from '../../shared';
 import { convertGuestAccount } from '../shared/bookingApi';
 import { StepHeader } from './BookingStepComponents';
 
@@ -259,28 +259,30 @@ export function BookingConfirmation({
               )}
               {conversionState.error && <p className="form-notice" role="alert">{conversionState.error}</p>}
               <div className="form-actions">
-                <button
+                <DirectionalButton
                   className="form-button previous"
-                  type="button"
+                  direction="previous"
                   onClick={() => setConversionState((current) => ({ ...current, dismissed: true }))}
                   disabled={conversionState.loading}
                 >
                   Maybe later
-                </button>
-                <button
-                  className="form-button next-button"
-                  type="button"
+                </DirectionalButton>
+                <DirectionalButton
+                  className="form-button"
+                  direction="next"
                   onClick={createAccount}
                   disabled={conversionState.loading || password.length < 8 || password !== confirmPassword}
                 >
                   {conversionState.loading ? 'Creating account...' : 'Create Account'}
-                </button>
+                </DirectionalButton>
               </div>
             </>
           )}
         </section>
       )}
-      <a className="form-button previous home" href="./index.html">Back to Home</a>
+      <DirectionalButton className="form-button previous home" href="./index.html" direction="previous">
+        Back to Home
+      </DirectionalButton>
     </fieldset>
   );
 }

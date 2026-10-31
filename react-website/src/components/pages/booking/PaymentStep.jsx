@@ -4,6 +4,7 @@ import {
   createGuestBookingPayload,
   getBookedSeats,
 } from '../shared/bookingApi';
+import { DirectionalButton } from '../../shared';
 import { BookingLoader, StepHeader } from './BookingStepComponents';
 
 function formatScreeningDate(date, time) {
@@ -124,16 +125,18 @@ export function PaymentStep({
       </p>
       {isSubmitting && <BookingLoader>{submissionStatus}</BookingLoader>}
       <div className="form-actions">
-        <button className="form-button previous" type="button" onClick={onBack} disabled={isSubmitting}>Back</button>
-        <button
-          className="form-button next-button"
-          type="button"
+        <DirectionalButton className="form-button previous" direction="previous" onClick={onBack} disabled={isSubmitting}>
+          Back
+        </DirectionalButton>
+        <DirectionalButton
+          className="form-button"
+          direction="next"
           onClick={confirmBooking}
           disabled={isSubmitting}
           aria-live="polite"
         >
           {isSubmitting ? 'Confirming booking...' : 'Confirm booking'}
-        </button>
+        </DirectionalButton>
       </div>
     </fieldset>
   );
