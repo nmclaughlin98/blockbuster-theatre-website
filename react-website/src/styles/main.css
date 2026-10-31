@@ -133,7 +133,9 @@ body {
     font-size: 48px;
 }
 
-body.noScroll {
+body.noScroll,
+body.home-loading,
+body.app-booting {
     overflow: hidden;
 }
 
@@ -3669,6 +3671,12 @@ footer small {
    Home Skeleton
    ========================================================================== */
 
+html:not(.home-route) #root > header,
+html:not(.home-route) #root > .ham-overlay,
+html:not(.home-route) #root > .home-skeleton-page {
+    display: none;
+}
+
 .home-skeleton-page {
     overflow: hidden;
     scroll-behavior: none;
@@ -3802,7 +3810,6 @@ footer small {
 }
 
 .home-skeleton-movies {
-    /* TODO */
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(min(100%, clamp(8.125rem, 38vw, 12.5rem)), 1fr));
     gap: clamp(0.8rem, 1.5vw, 0.9rem);

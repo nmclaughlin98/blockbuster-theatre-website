@@ -15,6 +15,13 @@ export function Home() {
   }, []);
 
   const { movies, loading, error } = useMovies();
+  useEffect(() => {
+    if (!loading) return undefined;
+
+    document.body.classList.add('home-loading');
+    return () => document.body.classList.remove('home-loading');
+  }, [loading]);
+
   const {
     collection: seasonalCollection,
     movies: seasonalMovies,

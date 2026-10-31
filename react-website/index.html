@@ -10,6 +10,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link rel="stylesheet"
         href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&icon_names=chevron_left,chevron_right,download,location_on,send,clock_loader_20,home,search,warning" />
+    <link rel="stylesheet" href="./src/styles/main.css" />
+    <link rel="stylesheet" href="./src/styles/media-queries.css" />
     <title>Blockbuster Theatre</title>
     <script>
         // Single Page Apps for GitHub Pages
@@ -37,10 +39,86 @@
             }
         })(window.location);
     </script>
+    <script>
+        if (!/booknow|collections\.html|collection\.html|movie-detail|nowshowing|comingsoon|timetable|about/i.test(window.location.pathname)) {
+            document.documentElement.classList.add('home-route');
+        }
+    </script>
 </head>
 
-<body>
-    <div id="root"></div>
+<body class="app-booting">
+    <div id="root">
+        <header>
+            <a class="header-box" href="/">
+                <picture>
+                    <source
+                        srcset="/assets/images/logo/logo-60.webp 1x, /assets/images/logo/logo-120.webp 2x, /assets/images/logo/logo-180.webp 3x"
+                        type="image/webp" />
+                    <img src="/assets/images/logo/png/logo-120.png" alt="Blockbuster Theatre" class="logo" />
+                </picture>
+                <span class="header-text">BLOCKBUSTER<br />THEATRE</span>
+            </a>
+            <nav class="nav primary-nav">
+                <ul class="menu">
+                    <li><a class="current" href="/">Home</a></li>
+                    <li><a href="./nowShowing.html">Now Showing</a></li>
+                    <li><a href="./comingSoon.html">Coming Soon</a></li>
+                    <li><a href="./about.html">About</a></li>
+                    <li><a class="nav-cta-btn" href="./bookNow.html">Book Tickets</a></li>
+                </ul>
+            </nav>
+            <button class="hamburger" aria-label="Toggle navigation">
+                <span class="line"></span>
+                <span class="line"></span>
+                <span class="line"></span>
+            </button>
+        </header>
+        <div class="ham-overlay"></div>
+        <div class="home-skeleton-page" role="status" aria-label="Loading home page" aria-busy="true">
+            <span class="visually-hidden">Loading home page</span>
+            <div class="home-skeleton-hero" aria-hidden="true">
+                <div class="home-skeleton-hero-caption">
+                    <span class="home-skeleton home-skeleton-title"></span>
+                    <span class="home-skeleton home-skeleton-tagline"></span>
+                    <div class="home-skeleton-hero-actions">
+                        <span class="home-skeleton home-skeleton-action"></span>
+                        <span class="home-skeleton home-skeleton-action home-skeleton-action-secondary"></span>
+                        <span class="home-skeleton home-skeleton-action home-skeleton-action-short"></span>
+                    </div>
+                </div>
+            </div>
+            <section class="home-skeleton-section" aria-hidden="true">
+                <div class="home-skeleton-section-header">
+                    <span class="home-skeleton home-skeleton-heading"></span>
+                    <span class="home-skeleton home-skeleton-link"></span>
+                </div>
+                <div class="home-skeleton-movies">
+                    <span class="home-skeleton home-skeleton-poster"></span>
+                    <span class="home-skeleton home-skeleton-poster"></span>
+                    <span class="home-skeleton home-skeleton-poster"></span>
+                    <span class="home-skeleton home-skeleton-poster"></span>
+                    <span class="home-skeleton home-skeleton-poster"></span>
+                    <span class="home-skeleton home-skeleton-poster"></span>
+                    <span class="home-skeleton home-skeleton-poster"></span>
+                </div>
+            </section>
+            <section class="home-skeleton-section" aria-hidden="true">
+                <div class="home-skeleton-section-header">
+                    <span class="home-skeleton home-skeleton-heading"></span>
+                    <span class="home-skeleton home-skeleton-link"></span>
+                </div>
+                <div class="home-skeleton-movies">
+                    <span class="home-skeleton home-skeleton-poster"></span>
+                    <span class="home-skeleton home-skeleton-poster"></span>
+                    <span class="home-skeleton home-skeleton-poster"></span>
+                    <span class="home-skeleton home-skeleton-poster"></span>
+                    <span class="home-skeleton home-skeleton-poster"></span>
+                    <span class="home-skeleton home-skeleton-poster"></span>
+                    <span class="home-skeleton home-skeleton-poster"></span>
+                </div>
+            </section>
+        </div>
+    </div>
     <script type="module" src="./src/main.jsx"></script>
 </body>
 
