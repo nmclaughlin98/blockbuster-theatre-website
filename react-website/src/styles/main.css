@@ -3801,8 +3801,8 @@ html:not(.home-route) #root>.home-skeleton-page {
 
 .about-description {
     color: var(--text-secondary);
-    font-size: 1.1rem;
-    line-height: 1.8;
+    font-size: clamp(1rem, 3vw, 1.1rem);
+    line-height: clamp(1.2, 3vw, 1.5);
     margin-bottom: 40px;
 }
 
@@ -3834,7 +3834,7 @@ html:not(.home-route) #root>.home-skeleton-page {
 }
 
 .box-office-location {
-    margin-top: 24px;
+    margin-top: 0;
     padding: 24px;
     background: var(--bg-surface);
     border: 1px solid var(--border-subtle);

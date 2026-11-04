@@ -36,8 +36,8 @@ function CinemaHero() {
         <h1>Experience Cinema In Full Glory</h1>
         <div className="movie-meta-bar">
           <span className="rating-badge">8 SCREENS</span>
-          <span className="about-section-badge">Dolby Atmos 3D Audio</span>
-          <span className="about-section-badge">4K IMAX Laser</span>
+          <span className="about-section-badge">Dolby Atmos</span>
+          <span className="about-section-badge">4K IMAX</span>
           <span className="about-section-badge">100% Accessible</span>
         </div>
       </div>
@@ -94,15 +94,15 @@ function ContactCard() {
       <form id="contact-form" onSubmit={handleSubmit}>
         <div className="form-group">
           <label htmlFor="contact-name">Your Name</label>
-          <input type="text" name="name" id="contact-name" placeholder="Alex Smith" autoComplete="name" required />
+          <input type="text" name="name" id="contact-name" placeholder="John Doe" autoComplete="name" required />
         </div>
         <div className="form-group">
           <label htmlFor="contact-email">Email Address</label>
-          <input type="email" name="email" id="contact-email" placeholder="alex@example.com" autoComplete="email" required />
+          <input type="email" name="email" id="contact-email" placeholder="john-doe@example.com" autoComplete="email" required />
         </div>
         <div className="form-group">
           <label htmlFor="contact-telephone">Telephone (Optional)</label>
-          <input type="tel" name="telephone" id="contact-telephone" placeholder="028 7147 2869" autoComplete="tel" />
+          <input type="tel" name="telephone" id="contact-telephone" placeholder="07700 900000" autoComplete="tel" />
         </div>
         <div className="form-group">
           <label htmlFor="contact-message">Message</label>
@@ -160,10 +160,8 @@ export function About() {
               <FaqItem key={question} question={question}>{answer}</FaqItem>
             ))}
           </div>
-          <div>
-            <ContactCard />
-            <BoxOfficeLocation />
-          </div>
+          <ContactCard />
+          <BoxOfficeLocation />
         </div>
       </section>
     </Layout>
