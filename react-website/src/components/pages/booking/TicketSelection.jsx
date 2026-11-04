@@ -464,7 +464,6 @@ export function TicketSelection({ initialData = {}, onNext, onToast }) {
             includeDates={enabledCalendarDates}
             dateFormat="EEE d MMM yyyy"
             calendarClassName="booking-date-calendar"
-            withPortal
             dayClassName={(calendarDate) => {
               const availability = calendarAvailability?.[toIsoDate(calendarDate)];
               return calendarAvailabilityReady
