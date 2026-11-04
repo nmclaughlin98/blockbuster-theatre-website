@@ -172,7 +172,7 @@ function drawMovieTable(pdf, movie, y, layout) {
   return y + 16;
 }
 
-export function downloadTimetablePdf(movies, weekCommencing) {
+export function downloadTimetablePdf(movies, weekCommencing, previewWindow) {
   const pdf = new jsPDF({ orientation: 'landscape', unit: 'pt', format: 'a4', compress: true });
   const pageWidth = pdf.internal.pageSize.getWidth();
   const pageHeight = pdf.internal.pageSize.getHeight();
@@ -211,6 +211,17 @@ export function downloadTimetablePdf(movies, weekCommencing) {
 
   const filename = `blockbuster-timetable-week-commencing-${weekCommencing.replaceAll('/', '-')}.pdf`;
   const objectUrl = URL.createObjectURL(pdf.output('blob'));
+  if (previewWindow && !previewWindow.closed) {
+    previewWindow.location.replace(objectUrl);
+    const cleanupInterval = window.setInterval(() => {
+      if (previewWindow.closed) {
+        window.clearInterval(cleanupInterval);
+        URL.revokeObjectURL(objectUrl);
+      }
+    }, 1000);
+    return true;
+  }
+
   const downloadLink = document.createElement('a');
   downloadLink.href = objectUrl;
   downloadLink.download = filename;
@@ -219,4 +230,5 @@ export function downloadTimetablePdf(movies, weekCommencing) {
   downloadLink.click();
   downloadLink.remove();
   setTimeout(() => URL.revokeObjectURL(objectUrl), 40_000);
+  return false;
 }

@@ -67,3 +67,59 @@ test('creates a PDF blob and triggers a download with the timetable filename', a
     globalThis.setTimeout = originalSetTimeout;
   }
 });
+
+test('opens the generated PDF in the supplied preview tab', async () => {
+  const originalDocument = globalThis.document;
+  const originalWindow = globalThis.window;
+  const originalCreateObjectURL = URL.createObjectURL;
+  const originalRevokeObjectURL = URL.revokeObjectURL;
+  let createdBlob;
+  const previewWindow = {
+    closed: false,
+    location: {
+      replace(url) {
+        this.href = url;
+      },
+    },
+  };
+  const vite = await createServer({
+    configFile: fileURLToPath(new URL('../vite.config.js', import.meta.url)),
+    server: { middlewareMode: true },
+    appType: 'custom',
+    logLevel: 'silent',
+  });
+
+  try {
+    const { downloadTimetablePdf } = await vite.ssrLoadModule(
+      '/src/components/pages/timetable/timetablePdf.js',
+    );
+    URL.createObjectURL = (blob) => {
+      createdBlob = blob;
+      return 'blob:timetable-preview';
+    };
+    URL.revokeObjectURL = () => {};
+    globalThis.window = {
+      setInterval() {
+        return 1;
+      },
+      clearInterval() {},
+    };
+    globalThis.document = {
+      createElement() {
+        assert.fail('Previewing the PDF should not trigger a download.');
+      },
+    };
+
+    const openedInTab = downloadTimetablePdf([], '30/10/2026', previewWindow);
+
+    assert.equal(openedInTab, true);
+    assert.equal(createdBlob.type, 'application/pdf');
+    assert.equal(previewWindow.location.href, 'blob:timetable-preview');
+  } finally {
+    await vite.close();
+    globalThis.document = originalDocument;
+    globalThis.window = originalWindow;
+    URL.createObjectURL = originalCreateObjectURL;
+    URL.revokeObjectURL = originalRevokeObjectURL;
+  }
+});

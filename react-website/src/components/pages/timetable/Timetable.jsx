@@ -156,13 +156,23 @@ export function Timetable() {
     }
 
     async function handleDownload() {
+        const previewWindow = window.open('', '_blank');
+        if (previewWindow) {
+            previewWindow.opener = null;
+            previewWindow.document.title = 'Preparing timetable PDF';
+            previewWindow.document.body.textContent = 'Preparing timetable PDF...';
+        }
+
         setDownloading(true);
         setDownloadMessage('Preparing...');
         try {
             const printableMovies = await getMoviesForDates(screeningDates);
-            await downloadTimetablePdf(printableMovies, weekCommencing);
-            setDownloadMessage('Your timetable PDF is downloading.');
+            const openedInTab = await downloadTimetablePdf(printableMovies, weekCommencing, previewWindow);
+            setDownloadMessage(openedInTab
+                ? 'Your timetable PDF opened in a new tab. On iPhone or iPad, use Share, then Save to Files.'
+                : 'The preview tab was blocked, so your timetable PDF is downloading instead.');
         } catch (downloadError) {
+            previewWindow?.close();
             setDownloadMessage(downloadError instanceof Error
                 ? `Unable to download timetable PDF: ${downloadError.message}`
                 : 'Unable to download timetable PDF.');
