@@ -2171,6 +2171,12 @@ textarea {
     max-height: 300px;
 }
 
+input:not([type="checkbox"]):not([type="radio"]):not([type="button"]):not([type="submit"]):not([type="reset"]):not([type="image"]):not([type="hidden"]):not([type="range"]):not([type="color"]),
+select,
+textarea {
+    font-size: max(16px, 1rem);
+}
+
 .subtotal-item {
     font-size: clamp(0.8rem, 4.3vw, 1.7rem);
 }
