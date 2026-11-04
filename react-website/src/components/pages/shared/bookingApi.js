@@ -342,6 +342,54 @@ export async function getMoviesForDate(date, signal) {
   return scheduledMovies;
 }
 
+export async function getMoviesForDates(dates, signal) {
+  if (!Array.isArray(dates)) {
+    throw new Error('Choose valid screening dates.');
+  }
+  const screeningDates = [...new Set(dates)].map((date) => ({
+    date,
+    weekday: getWeekdayForDate(date),
+  }));
+  if (!screeningDates.length) return [];
+
+  const movies = await getMovies(signal);
+  const requests = screeningDates.flatMap(({ date, weekday }) => movies
+    .filter((movie) => (
+      movie?.visible !== false
+      && movie?.isComingSoon !== true
+      && movie?.movieId != null
+      && (
+        (Array.isArray(movie.showtimes?.[weekday]) && movie.showtimes[weekday].length > 0)
+        || getShowtimesForDate(movie.showtimes, date).length > 0
+      )
+    ))
+    .map((movie) => ({ movie, date })));
+
+  const scheduledMovies = new Map();
+  let nextRequestIndex = 0;
+  const loadNextRequest = async () => {
+    while (nextRequestIndex < requests.length) {
+      const { movie, date } = requests[nextRequestIndex];
+      nextRequestIndex += 1;
+      const details = await getMovieDetail(movie.movieId, signal, date);
+      const showtimes = getShowtimesForDate(details.showtimes, date);
+      if (!showtimes.length) continue;
+
+      const key = String(movie.movieId);
+      const scheduledMovie = scheduledMovies.get(key);
+      if (scheduledMovie) {
+        scheduledMovie.showtimes[date] = showtimes;
+      } else {
+        scheduledMovies.set(key, { ...movie, showtimes: { [date]: showtimes } });
+      }
+    }
+  };
+  const workerCount = Math.min(4, requests.length);
+  await Promise.all(Array.from({ length: workerCount }, () => loadNextRequest()));
+
+  return [...scheduledMovies.values()];
+}
+
 export async function getBookingSelections(signal, date) {
   try {
     return { selections: await getFilmSelections(signal, date), error: null };

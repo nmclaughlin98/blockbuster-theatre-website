@@ -87,13 +87,13 @@ function drawMovieTable(pdf, movie, y, layout) {
   pdf.setFont('helvetica', 'normal');
   pdf.setFontSize(8);
   const genreLines = pdf.splitTextToSize(genre, titleWidth);
-  const titleBarHeight = Math.max(37, 24 + titleLines.length * 13 + genreLines.length * 9);
+  const titleBarHeight = Math.max(37, 22 + titleLines.length * 13 + genreLines.length * 9);
   const headerHeight = 22;
   pdf.setFont('helvetica', 'normal');
   pdf.setFontSize(8);
   const rowCells = weekTimes.map((slots) => screenColumns.map((screen) => {
     const times = slots.filter((slot) => slot.screen === screen).map((slot) => slot.time);
-    return times.length ? times.join(', ') : '-';
+    return times.length ? times.join('\n') : '-';
   }));
   const rowHeights = rowCells.map((cells) => Math.max(
     18,
@@ -107,17 +107,20 @@ function drawMovieTable(pdf, movie, y, layout) {
     y = pageContentTop;
   }
 
+  const tableTop = y;
+  const cornerRadius = 7;
   pdf.setFillColor(...COLORS.red);
-  pdf.rect(margin, y, contentWidth, titleBarHeight, 'F');
+  pdf.roundedRect(margin, y, contentWidth, titleBarHeight, cornerRadius, cornerRadius, 'F');
+  pdf.rect(margin, y + cornerRadius, contentWidth, titleBarHeight - cornerRadius, 'F');
   pdf.setFont('helvetica', 'bold');
   pdf.setFontSize(12);
   pdf.setTextColor(...COLORS.white);
-  pdf.text(titleLines, margin + 10, y + 12, { lineHeightFactor: 1.05 });
+  pdf.text(titleLines, margin + 10, y + 16, { lineHeightFactor: 1.05 });
 
   pdf.setFont('helvetica', 'normal');
   pdf.setFontSize(8);
   pdf.setTextColor(255, 215, 220);
-  pdf.text(genreLines, margin + 10, y + 16 + titleLines.length * 13, { lineHeightFactor: 1.05 });
+  pdf.text(genreLines, margin + 10, y + 20 + titleLines.length * 13, { lineHeightFactor: 1.05 });
   y += titleBarHeight;
 
   pdf.setFillColor(...COLORS.dark);
@@ -140,7 +143,7 @@ function drawMovieTable(pdf, movie, y, layout) {
     pdf.rect(margin, rowY, contentWidth, rowHeight, 'F');
     pdf.setDrawColor(...COLORS.border);
     pdf.setLineWidth(0.4);
-    pdf.rect(margin, rowY, contentWidth, rowHeight);
+    pdf.line(margin, rowY, margin + contentWidth, rowY);
 
     pdf.setFont('helvetica', 'bold');
     pdf.setFontSize(8);
@@ -161,6 +164,10 @@ function drawMovieTable(pdf, movie, y, layout) {
     }
     y += rowHeight;
   });
+
+  pdf.setDrawColor(...COLORS.border);
+  pdf.setLineWidth(0.6);
+  pdf.roundedRect(margin, tableTop, contentWidth, tableHeight, cornerRadius, cornerRadius, 'S');
 
   return y + 16;
 }

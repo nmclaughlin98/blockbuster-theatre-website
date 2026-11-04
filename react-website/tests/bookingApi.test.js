@@ -12,6 +12,7 @@ import {
   getMovieDetail,
   getMovieDetailIdForSelection,
   getMoviesForDate,
+  getMoviesForDates,
   getSelectionShowtimeDates,
   getSelectionDateAvailability,
   getShowtimesForDate,
@@ -209,6 +210,62 @@ test('loads date-specific showtime IDs for movies shown in the selected timetabl
     assert.equal(requestedUrls[1].pathname, '/movies/movie-42');
     assert.equal(requestedUrls[1].searchParams.get('date'), date);
     assert.deepEqual(movies[0].showtimes, { [date]: [showtime] });
+  } finally {
+    restoreFetch();
+  }
+});
+
+test('loads and combines showtimes for every requested timetable date', async () => {
+  const requestedUrls = [];
+  const dates = ['2026-10-26', '2026-10-27'];
+  const showtimesByDate = {
+    '2026-10-26': {
+      date: '2026-10-26',
+      showtimeId: '559924_2026-10-26_1930',
+      time: '19:30',
+      screen: '2',
+    },
+    '2026-10-27': {
+      date: '2026-10-27',
+      showtimeId: '559924_2026-10-27_2015',
+      time: '20:15',
+      screen: '3',
+    },
+  };
+  const restoreFetch = mockFetch(async (url) => {
+    const requestedUrl = new URL(url);
+    requestedUrls.push(requestedUrl);
+    if (requestedUrl.pathname === '/movies') {
+      return new Response(JSON.stringify({
+        movies: [{
+          movieId: 'movie-42',
+          title: 'Example Film',
+          showtimes: {
+            Monday: [{ time: '19:30', screen: '2' }],
+            Tuesday: [{ time: '20:15', screen: '3' }],
+          },
+        }],
+      }));
+    }
+    const date = requestedUrl.searchParams.get('date');
+    return new Response(JSON.stringify({ showtimes: { [date]: [showtimesByDate[date]] } }));
+  });
+
+  try {
+    const movies = await getMoviesForDates(dates);
+    assert.equal(requestedUrls.filter((url) => url.pathname === '/movies').length, 1);
+    assert.deepEqual(
+      requestedUrls
+        .filter((url) => url.pathname === '/movies/movie-42')
+        .map((url) => url.searchParams.get('date'))
+        .sort(),
+      dates,
+    );
+    assert.equal(movies.length, 1);
+    assert.deepEqual(movies[0].showtimes, {
+      '2026-10-26': [showtimesByDate['2026-10-26']],
+      '2026-10-27': [showtimesByDate['2026-10-27']],
+    });
   } finally {
     restoreFetch();
   }
