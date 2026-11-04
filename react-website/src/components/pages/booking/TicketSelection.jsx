@@ -464,6 +464,10 @@ export function TicketSelection({ initialData = {}, onNext, onToast }) {
             includeDates={enabledCalendarDates}
             dateFormat="EEE d MMM yyyy"
             calendarClassName="booking-date-calendar"
+            popperClassName="booking-date-popper"
+            portalId="booking-date-picker-portal"
+            inputMode="none"
+            showPopperArrow={false}
             dayClassName={(calendarDate) => {
               const availability = calendarAvailability?.[toIsoDate(calendarDate)];
               return calendarAvailabilityReady
