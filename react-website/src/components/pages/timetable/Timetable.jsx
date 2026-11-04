@@ -10,9 +10,8 @@ import {
 } from '../shared/bookingApi';
 import { createBookingHref } from '../shared/showtimeNavigation';
 import { useMovies } from '../shared/useMovies';
-import { downloadTimetablePdf } from './timetablePdf';
+import { openTimetablePdf } from './timetablePdf';
 
-const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 const maxShowtimeButtons = 4;
 
 function getMovieTitle(movie) {
@@ -45,7 +44,7 @@ function getWeekCommencing() {
     return monday.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' });
 }
 
-function TimetableControls({ day, search, onDayChange, onSearch, onDownload, downloadMessage, disabled, downloading }) {
+function TimetableControls({ days, day, search, onDayChange, onSearch, onDownload, downloadMessage, downloadError, disabled, downloading }) {
     return (
         <div className="timetable-controls">
             <div className="day-tabs" role="tablist" aria-label="Showtimes by day">
@@ -83,11 +82,16 @@ function TimetableControls({ day, search, onDayChange, onSearch, onDownload, dow
                 </div>
                 <button className="button btn-glass print-pdf-btn" type="button" onClick={onDownload}
                     disabled={disabled}>
-                    {downloading ? 'Preparing...' : 'Download Timetable'}
+                    {downloading ? 'Preparing...' : 'View Timetable PDF'}
                     <span className="material-symbols-outlined">download</span>
                 </button>
                 {downloadMessage &&
-                    <span className="timetable-download-status" role="status">{downloadMessage}</span>}
+                    <span
+                        className={`timetable-download-status ${downloadError ? 'error' : ''}`}
+                        role={downloadError ? 'alert' : 'status'}
+                    >
+                        {downloadMessage}
+                    </span>}
             </div>
         </div>
     );
@@ -130,12 +134,14 @@ export function Timetable() {
         document.title = 'Blockbuster Theatre - Timetable';
     }, []);
 
-    const [day, setDay] = useState('Monday');
     const screeningDates = useMemo(() => getUpcomingScreeningDates(), []);
+    const days = screeningDates.slice(0, -1).map(getWeekdayForDate);
+    const [day, setDay] = useState(days[0]);
     const screeningDate = screeningDates.find((date) => getWeekdayForDate(date) === day);
     const { movies, loading, error } = useMovies(screeningDate);
     const [search, setSearch] = useState('');
     const [downloadMessage, setDownloadMessage] = useState('');
+    const [downloadError, setDownloadError] = useState(false);
     const [downloading, setDownloading] = useState(false);
     const filteredMovies = movies
         .filter((movie) => (
@@ -157,25 +163,28 @@ export function Timetable() {
 
     async function handleDownload() {
         const previewWindow = window.open('', '_blank');
-        if (previewWindow) {
-            previewWindow.opener = null;
-            previewWindow.document.title = 'Preparing timetable PDF';
-            previewWindow.document.body.textContent = 'Preparing timetable PDF...';
+        if (!previewWindow) {
+            setDownloadMessage('Unable to open the timetable PDF. Please allow pop-ups and try again.');
+            setDownloadError(true);
+            return;
         }
 
+        previewWindow.opener = null;
+        previewWindow.document.title = 'Preparing timetable PDF';
+        previewWindow.document.body.textContent = 'Preparing timetable PDF...';
         setDownloading(true);
+        setDownloadError(false);
         setDownloadMessage('Preparing...');
         try {
             const printableMovies = await getMoviesForDates(screeningDates);
-            const openedInTab = await downloadTimetablePdf(printableMovies, weekCommencing, previewWindow);
-            setDownloadMessage(openedInTab
-                ? 'Your timetable PDF opened in a new tab. On iPhone or iPad, use Share, then Save to Files.'
-                : 'The preview tab was blocked, so your timetable PDF is downloading instead.');
+            await openTimetablePdf(printableMovies, weekCommencing, previewWindow);
+            setDownloadMessage('Your timetable PDF opened in a new tab.');
         } catch (downloadError) {
             previewWindow?.close();
+            setDownloadError(true);
             setDownloadMessage(downloadError instanceof Error
-                ? `Unable to download timetable PDF: ${downloadError.message}`
-                : 'Unable to download timetable PDF.');
+                ? `Unable to open timetable PDF: ${downloadError.message}`
+                : 'Unable to open timetable PDF.');
         } finally {
             setDownloading(false);
         }
@@ -189,12 +198,14 @@ export function Timetable() {
                     <p id="weekCommencingLabel">Schedule for Week Commencing {weekCommencing}</p>
                 </section>
                 <TimetableControls
+                    days={days}
                     day={day}
                     search={search}
                     onDayChange={setDay}
                     onSearch={setSearch}
                     onDownload={handleDownload}
                     downloadMessage={downloadMessage}
+                    downloadError={downloadError}
                     disabled={Boolean(error) || downloading}
                     downloading={downloading}
                 />

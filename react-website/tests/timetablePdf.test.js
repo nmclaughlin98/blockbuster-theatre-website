@@ -3,24 +3,7 @@ import { fileURLToPath } from 'node:url';
 import test from 'node:test';
 import { createServer } from 'vite';
 
-test('creates a PDF blob and triggers a download with the timetable filename', async () => {
-  const originalDocument = globalThis.document;
-  const originalCreateObjectURL = URL.createObjectURL;
-  const originalRevokeObjectURL = URL.revokeObjectURL;
-  const originalSetTimeout = globalThis.setTimeout;
-  let createdBlob;
-  let clicked = false;
-  let removed = false;
-  let appended = false;
-  const downloadLink = {
-    style: {},
-    click() {
-      clicked = true;
-    },
-    remove() {
-      removed = true;
-    },
-  };
+test('requires a preview tab instead of falling back to a download', async () => {
   const vite = await createServer({
     configFile: fileURLToPath(new URL('../vite.config.js', import.meta.url)),
     server: { middlewareMode: true },
@@ -29,51 +12,26 @@ test('creates a PDF blob and triggers a download with the timetable filename', a
   });
 
   try {
-    const { downloadTimetablePdf } = await vite.ssrLoadModule(
+    const { openTimetablePdf } = await vite.ssrLoadModule(
       '/src/components/pages/timetable/timetablePdf.js',
     );
-    URL.createObjectURL = (blob) => {
-      createdBlob = blob;
-      return 'blob:timetable';
-    };
-    URL.revokeObjectURL = () => {};
-    globalThis.setTimeout = () => 1;
-    globalThis.document = {
-      createElement(tagName) {
-        assert.equal(tagName, 'a');
-        return downloadLink;
-      },
-      body: {
-        appendChild(element) {
-          assert.equal(element, downloadLink);
-          appended = true;
-        },
-      },
-    };
 
-    downloadTimetablePdf([], '30/10/2026');
-
-    assert.equal(createdBlob.type, 'application/pdf');
-    assert.equal(downloadLink.href, 'blob:timetable');
-    assert.equal(downloadLink.download, 'blockbuster-timetable-week-commencing-30-10-2026.pdf');
-    assert.equal(appended, true);
-    assert.equal(clicked, true);
-    assert.equal(removed, true);
+    assert.throws(
+      () => openTimetablePdf([], '30/10/2026'),
+      /Open a new tab before generating the timetable PDF/,
+    );
   } finally {
     await vite.close();
-    globalThis.document = originalDocument;
-    URL.createObjectURL = originalCreateObjectURL;
-    URL.revokeObjectURL = originalRevokeObjectURL;
-    globalThis.setTimeout = originalSetTimeout;
   }
 });
 
 test('opens the generated PDF in the supplied preview tab', async () => {
   const originalDocument = globalThis.document;
-  const originalWindow = globalThis.window;
   const originalCreateObjectURL = URL.createObjectURL;
   const originalRevokeObjectURL = URL.revokeObjectURL;
   let createdBlob;
+  let intervalCallback;
+  const originalWindow = globalThis.window;
   const previewWindow = {
     closed: false,
     location: {
@@ -90,36 +48,38 @@ test('opens the generated PDF in the supplied preview tab', async () => {
   });
 
   try {
-    const { downloadTimetablePdf } = await vite.ssrLoadModule(
+    const { openTimetablePdf } = await vite.ssrLoadModule(
       '/src/components/pages/timetable/timetablePdf.js',
     );
     URL.createObjectURL = (blob) => {
       createdBlob = blob;
-      return 'blob:timetable-preview';
+      return 'blob:timetable';
     };
     URL.revokeObjectURL = () => {};
     globalThis.window = {
-      setInterval() {
+      setInterval(callback) {
+        intervalCallback = callback;
         return 1;
       },
       clearInterval() {},
     };
     globalThis.document = {
       createElement() {
-        assert.fail('Previewing the PDF should not trigger a download.');
+        assert.fail('Opening the PDF should not create a download link.');
       },
     };
 
-    const openedInTab = downloadTimetablePdf([], '30/10/2026', previewWindow);
+    openTimetablePdf([], '30/10/2026', previewWindow);
 
-    assert.equal(openedInTab, true);
     assert.equal(createdBlob.type, 'application/pdf');
-    assert.equal(previewWindow.location.href, 'blob:timetable-preview');
+    assert.equal(previewWindow.location.href, 'blob:timetable');
+    previewWindow.closed = true;
+    intervalCallback();
   } finally {
     await vite.close();
     globalThis.document = originalDocument;
-    globalThis.window = originalWindow;
     URL.createObjectURL = originalCreateObjectURL;
     URL.revokeObjectURL = originalRevokeObjectURL;
+    globalThis.window = originalWindow;
   }
 });

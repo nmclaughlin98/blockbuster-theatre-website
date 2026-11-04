@@ -172,7 +172,11 @@ function drawMovieTable(pdf, movie, y, layout) {
   return y + 16;
 }
 
-export function downloadTimetablePdf(movies, weekCommencing, previewWindow) {
+export function openTimetablePdf(movies, weekCommencing, previewWindow) {
+  if (!previewWindow || previewWindow.closed) {
+    throw new Error('Open a new tab before generating the timetable PDF.');
+  }
+
   const pdf = new jsPDF({ orientation: 'landscape', unit: 'pt', format: 'a4', compress: true });
   const pageWidth = pdf.internal.pageSize.getWidth();
   const pageHeight = pdf.internal.pageSize.getHeight();
@@ -209,26 +213,12 @@ export function downloadTimetablePdf(movies, weekCommencing, previewWindow) {
     addPageFooter(pdf, layout, page, totalPages);
   }
 
-  const filename = `blockbuster-timetable-week-commencing-${weekCommencing.replaceAll('/', '-')}.pdf`;
   const objectUrl = URL.createObjectURL(pdf.output('blob'));
-  if (previewWindow && !previewWindow.closed) {
-    previewWindow.location.replace(objectUrl);
-    const cleanupInterval = window.setInterval(() => {
-      if (previewWindow.closed) {
-        window.clearInterval(cleanupInterval);
-        URL.revokeObjectURL(objectUrl);
-      }
-    }, 1000);
-    return true;
-  }
-
-  const downloadLink = document.createElement('a');
-  downloadLink.href = objectUrl;
-  downloadLink.download = filename;
-  downloadLink.style.display = 'none';
-  document.body.appendChild(downloadLink);
-  downloadLink.click();
-  downloadLink.remove();
-  setTimeout(() => URL.revokeObjectURL(objectUrl), 40_000);
-  return false;
+  previewWindow.location.replace(objectUrl);
+  const cleanupInterval = window.setInterval(() => {
+    if (previewWindow.closed) {
+      window.clearInterval(cleanupInterval);
+      URL.revokeObjectURL(objectUrl);
+    }
+  }, 1000);
 }

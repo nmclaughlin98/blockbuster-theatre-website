@@ -1914,6 +1914,10 @@ section {
     font-size: 0.9rem;
 }
 
+.timetable-download-status.error {
+    color: var(--accent-red);
+}
+
 @media print {
     #root {
         padding-top: 0;
