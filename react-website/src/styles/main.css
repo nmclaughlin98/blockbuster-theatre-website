@@ -2156,6 +2156,7 @@ input[type="text"],
 input[type="email"],
 input[type="tel"],
 textarea {
+    max-width: 100%;
     width: 100%;
     padding: 14px 18px;
     background: var(--bg-surface-elevated);
@@ -2167,6 +2168,7 @@ textarea {
     transition: all var(--transition);
     touch-action: manipulation;
     min-height: 50px;
+    max-height: 300px;
 }
 
 .subtotal-item {
@@ -2845,7 +2847,7 @@ select option {
 
 .movie-hero-content h1 {
     font-family: var(--font-display);
-    font-size: clamp(2.5rem, 5vw, 4.5rem);
+    font-size: clamp(2rem, 10vw, 4.5rem);
     text-transform: uppercase;
     color: #fff;
     line-height: 1;
@@ -3000,13 +3002,22 @@ select option {
 }
 
 .accordion:hover {
-    background: rgba(255, 255, 255, 0.08);
+    background: var(--accent-red-hover-transparent);
     border-color: var(--border-highlight);
 }
 
 .accordion.active {
-    background: rgba(255, 51, 75, 0.1);
-    border-color: var(--border-accent);
+    background: #2b1119;
+    border-color: rgba(255, 77, 99, 0.42);
+    border-radius: var(--radius-md) var(--radius-md) 0 0;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.22);
+}
+
+.accordion:focus-visible {
+    position: relative;
+    z-index: 1;
+    outline: 2px solid var(--accent-red);
+    outline-offset: 3px;
 }
 
 .accordion .chevron {
@@ -3017,6 +3028,7 @@ select option {
 
 .accordion.active .chevron {
     transform: rotate(180deg);
+    color: var(--accent-red-hover);
 }
 
 .panel {
@@ -3031,15 +3043,33 @@ select option {
 }
 
 .panel.open {
-    padding: 20px 22px;
-    border: 1px solid var(--border-subtle);
+    padding: 20px 22px 22px;
+    border: 1px solid rgba(255, 77, 99, 0.2);
     border-top: none;
+    background: var(--bg-surface);
 }
 
 .panel p {
+    margin: 0;
     color: var(--text-secondary);
     font-size: 0.95rem;
     line-height: 1.7;
+}
+
+.panel a {
+    color: var(--accent-red-hover);
+    text-decoration: underline;
+    text-decoration-color: rgba(255, 77, 99, 0.45);
+    text-underline-offset: 3px;
+}
+
+.panel a:hover {
+    color: #fff;
+    text-decoration-color: currentColor;
+}
+
+.panel strong {
+    color: var(--text-primary);
 }
 
 /* Contact Card Form */
@@ -3047,7 +3077,7 @@ select option {
     background: var(--bg-surface);
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-lg);
-    padding: 32px;
+    padding: clamp(1rem, 4vw, 2rem);
 }
 
 .contact-card h2 {

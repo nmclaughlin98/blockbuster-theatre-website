@@ -423,10 +423,17 @@ header {
 .movie-hero-backdrop,
 .movie-still {
     min-height: clamp(25rem, 68svh, 42rem);
+    margin-bottom: 10px;
+    padding-bottom: 10px;
+}
+
+.about-content {
+    margin-top: 10px;
+    padding-top: 10px;
 }
 
 .movie-detail-caption h1 {
-    font-size: clamp(2rem, 6vw, 4.1875rem);
+    font-size: clamp(2rem, 12vw, 4.1875rem);
     overflow-wrap: anywhere;
 }
 
@@ -855,9 +862,6 @@ header {
 }
 
 @media (max-width: 480px) {
-    .hero-actions button {
-        display: none;
-    }
 
     .carousel-indicators li {
         width: 23px;
