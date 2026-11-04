@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { createBookingHref } from '../src/components/pages/showtimeNavigation.js';
+import { createBookingHref } from '../src/components/pages/shared/showtimeNavigation.js';
 
 test('booking links retain the exact screening date, time, and backend showtime ID', () => {
   const href = createBookingHref(

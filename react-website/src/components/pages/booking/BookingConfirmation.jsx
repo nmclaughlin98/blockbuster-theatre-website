@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { asset } from '../../shared';
-import { convertGuestAccount } from '../bookingApi';
+import { asset, DirectionalButton } from '../../shared';
+import { convertGuestAccount } from '../shared/bookingApi';
 import { StepHeader } from './BookingStepComponents';
 
 function formatScreeningDate(date, time) {
@@ -195,6 +195,26 @@ export function BookingConfirmation({
           <div className="ticket-barcode-area"><div className="ticket-booking-ref">REF: {bookingRef}</div></div>
         </div>
       </div>
+      <div className="wallet-pass-actions">
+        <button
+          className="wallet-badge-btn"
+          type="button"
+          aria-label="Add booking to Apple Wallet"
+          disabled={walletLoading}
+          onClick={() => createWalletPass('apple')}
+        >
+          <img src={asset('assets/images/icons/add-to-apple-wallet.svg')} alt="Add to Apple Wallet" />
+        </button>
+        <button
+          className="wallet-badge-btn"
+          type="button"
+          aria-label="Add booking to Google Wallet"
+          disabled={walletLoading}
+          onClick={() => createWalletPass('google')}
+        >
+          <img src={asset('assets/images/icons/add-to-google-wallet.svg')} alt="Add to Google Wallet" />
+        </button>
+      </div>
       {conversionTokenAvailable && !conversionState.dismissed && (
         <section className="guest-conversion-card" aria-labelledby="guest-conversion-title">
           {conversionState.complete ? (
@@ -239,48 +259,30 @@ export function BookingConfirmation({
               )}
               {conversionState.error && <p className="form-notice" role="alert">{conversionState.error}</p>}
               <div className="form-actions">
-                <button
-                  className="form-button next"
-                  type="button"
-                  onClick={createAccount}
-                  disabled={conversionState.loading || password.length < 8 || password !== confirmPassword}
-                >
-                  {conversionState.loading ? 'Creating account...' : 'Create Account'}
-                </button>
-                <button
+                <DirectionalButton
                   className="form-button previous"
-                  type="button"
+                  direction="previous"
                   onClick={() => setConversionState((current) => ({ ...current, dismissed: true }))}
                   disabled={conversionState.loading}
                 >
                   Maybe later
-                </button>
+                </DirectionalButton>
+                <DirectionalButton
+                  className="form-button"
+                  direction="next"
+                  onClick={createAccount}
+                  disabled={conversionState.loading || password.length < 8 || password !== confirmPassword}
+                >
+                  {conversionState.loading ? 'Creating account...' : 'Create Account'}
+                </DirectionalButton>
               </div>
             </>
           )}
         </section>
       )}
-      <div className="wallet-pass-actions">
-        <button
-          className="wallet-badge-btn"
-          type="button"
-          aria-label="Add booking to Apple Wallet"
-          disabled={walletLoading}
-          onClick={() => createWalletPass('apple')}
-        >
-          <img src={asset('assets/images/icons/add-to-apple-wallet.svg')} alt="Add to Apple Wallet" />
-        </button>
-        <button
-          className="wallet-badge-btn"
-          type="button"
-          aria-label="Add booking to Google Wallet"
-          disabled={walletLoading}
-          onClick={() => createWalletPass('google')}
-        >
-          <img src={asset('assets/images/icons/add-to-google-wallet.svg')} alt="Add to Google Wallet" />
-        </button>
-      </div>
-      <a className="form-button previous home" href="./index.html">Back to Home</a>
+      <DirectionalButton className="form-button previous home" href="./index.html" direction="previous">
+        Back to Home
+      </DirectionalButton>
     </fieldset>
   );
 }

@@ -18,16 +18,24 @@ test('formats the screening date for display while accepting its ISO value', asy
       '/src/components/pages/booking/PaymentStep.jsx',
     );
     const markup = renderToStaticMarkup(createElement(PaymentStep, {
+      initialData: {
+        selection: { title: 'Inception' },
+        showtime: {
+          showtimeId: '559924_2025-10-30_1100',
+          date: '2025-10-30',
+          time: '11:00',
+          screen: '5',
+        },
+        tickets: { adult: 1 },
+        quote: { total: 12 },
+        seats: ['F10'],
+        customer: { firstName: 'Niall', surname: 'McLaughlin', email: 'customer@example.com' },
+      },
       onBack: () => {},
-      onConfirm: () => {},
-      isSubmitting: false,
-      movieTitle: 'Inception',
-      seats: ['F10'],
-      totalAmount: 12,
-      customer: { firstName: 'Niall', surname: 'McLaughlin', email: 'customer@example.com' },
-      date: '2025-10-30',
-      time: '11:00',
-      screen: '5',
+      onNext: () => {},
+      onSeatConflict: () => {},
+      onTicketIssue: () => {},
+      onToast: () => {},
     }));
 
     assert.match(markup, /Thurs 30 Oct 2025 - 11:00/);

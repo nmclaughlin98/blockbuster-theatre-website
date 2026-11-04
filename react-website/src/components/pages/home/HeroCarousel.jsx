@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
-import { movieId } from '../../movies';
+import { movieId, movieSlug } from '../../movies';
+import { DirectionalButton } from '../../shared';
 
 function withAutoplay(url) {
     if (/[?&]autoplay=1(?:&|$)/.test(url)) return url;
@@ -126,7 +127,7 @@ export function HeroCarousel({ movies }) {
                                 <div className="hero-actions">
                                     <a
                                         className="button"
-                                        href={`./bookNow.html?movie=${encodeURIComponent(movie.title)}`}
+                                        href={`./bookNow.html?movie=${encodeURIComponent(movieSlug(movie))}`}
                                         onClick={(e) => e.currentTarget.blur()}
                                     >
                                         Book Tickets
@@ -142,7 +143,7 @@ export function HeroCarousel({ movies }) {
                                     )}
                                     <a
                                         className="button btn-glass"
-                                        href={`./templates/movie-detail.html?movie=${movieId(movie)}`}
+                                        href={`./templates/movie-detail.html?movie=${encodeURIComponent(movieSlug(movie))}`}
                                         onClick={(e) => e.currentTarget.blur()}
                                     >
                                         More Info
@@ -152,20 +153,20 @@ export function HeroCarousel({ movies }) {
                         </div>
                     ))}
                 </div>
-                <button
+                <DirectionalButton
                     className="carousel-control left"
+                    direction="previous"
+                    iconOnly
                     aria-label="Previous slide"
                     onClick={(e) => handleBlurClick(e, () => changeSlide((index - 1 + movies.length) % movies.length, 'left'))}
-                >
-                    <span className="material-symbols-outlined">chevron_left</span>
-                </button>
-                <button
+                />
+                <DirectionalButton
                     className="carousel-control right"
+                    direction="next"
+                    iconOnly
                     aria-label="Next slide"
                     onClick={(e) => handleBlurClick(e, () => changeSlide((index + 1) % movies.length, 'right'))}
-                >
-                    <span className="material-symbols-outlined">chevron_right</span>
-                </button>
+                />
             </div>
             <div
                 id="trailer-modal"

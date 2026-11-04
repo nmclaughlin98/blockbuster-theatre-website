@@ -1,10 +1,10 @@
 import { useEffect, useMemo } from 'react';
-import { MovieGrid } from '../movies';
-import { Layout } from '../shared';
-import { PageLoader } from '../shared/PageLoader';
-import { CollectionArtwork } from './CollectionArtwork';
-import { sortMoviesByReleaseDate } from './collectionSort';
-import { useCollection } from './useCollection';
+import { MovieGrid } from '../../movies';
+import { DirectionalButton, Layout } from '../../shared';
+import { PageLoader } from '../../shared/PageLoader';
+import { CollectionArtwork } from '../collections/CollectionArtwork';
+import { sortMoviesByReleaseDate } from '../collections/collectionSort';
+import { useCollection } from '../collections/useCollection';
 
 export function CollectionDetail() {
   const collectionId = new URLSearchParams(window.location.search).get('collection') || '';
@@ -12,8 +12,8 @@ export function CollectionDetail() {
   const orderedMovies = useMemo(() => sortMoviesByReleaseDate(movies), [movies]);
 
   useEffect(() => {
-    document.title = collection ? `${collection.name} - Blockbuster Theatre` : 'Collections - Blockbuster Theatre';
-  }, [collection]);
+    document.title = `Blockbuster Theatre - ${collection?.name || 'Collections'}`;
+  }, [collection?.name]);
 
   if (loading) {
     return (
@@ -32,7 +32,9 @@ export function CollectionDetail() {
             <p role={error ? 'alert' : undefined}>
               {error?.message || 'Choose a collection from the Collections tab in Now Showing.'}
             </p>
-            <a className="button btn-glass previous" href="./nowShowing.html?view=collections">Back to Collections</a>
+            <DirectionalButton className="button btn-glass" href="./nowShowing.html?view=collections" direction="previous" variant="glass">
+              Back to Collections
+            </DirectionalButton>
           </div>
         </section>
       ) : (
@@ -51,9 +53,14 @@ export function CollectionDetail() {
           </section>
           <section className="collection-movies">
             <div className="collection-content">
-              <a className="button btn-glass collection-back-button previous" href="./nowShowing.html?view=collections">
+              <DirectionalButton
+                className="button btn-glass collection-back-button"
+                href="./nowShowing.html?view=collections"
+                direction="previous"
+                variant="glass"
+              >
                 Back to Collections
-              </a>
+              </DirectionalButton>
               <div className="section-header">
                 <div>
                   <h2>Films in this collection</h2>

@@ -1,4 +1,4 @@
-import { MOVIES_API_URL } from '../../config.js';
+import { MOVIES_API_URL } from '../../../config.js';
 
 export async function getCollections(signal) {
   const response = await fetch(`${MOVIES_API_URL}/collections`, { signal });

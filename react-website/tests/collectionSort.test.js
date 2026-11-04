@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { sortMoviesByReleaseDate } from '../src/components/pages/collectionSort.js';
+import { sortMoviesByReleaseDate } from '../src/components/pages/collections/collectionSort.js';
 
 test('sorts collection movies by release date and keeps undated movies last', () => {
   const movies = [

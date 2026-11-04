@@ -1,11 +1,11 @@
-import { useMemo, useState } from 'react';
-import { MovieGrid } from '../movies';
-import { Layout } from '../shared';
-import { PageLoader } from '../shared/PageLoader';
-import { CollectionsView } from './Collections';
+import { useEffect, useMemo, useState } from 'react';
+import { MovieGrid } from '../../movies';
+import { DirectionalButton, Layout } from '../../shared';
+import { PageLoader } from '../../shared/PageLoader';
+import { CollectionsView } from '../collections/Collections';
 import { NowShowingSwitch } from './NowShowingSwitch';
-import { useCollections } from './useCollections';
-import { useMovies } from './useMovies';
+import { useCollections } from '../collections/useCollections';
+import { useMovies } from '../shared/useMovies';
 
 function getMovieGenres(movie) {
     return [...(Array.isArray(movie.genres) ? movie.genres : []), movie.genre]
@@ -65,6 +65,10 @@ function MovieFilters({ genres, search, sort, genre, onSearch, onSort, onGenre }
 export function NowShowing({ initialView }) {
     const requestedView = initialView || new URLSearchParams(window.location.search).get('view');
     const [view, setView] = useState(requestedView === 'collections' ? 'collections' : 'movies');
+    useEffect(() => {
+        document.title = `Blockbuster Theatre - ${view === 'collections' ? 'Collections' : 'Now Showing'}`;
+    }, [view]);
+
     const { movies, loading, error } = useMovies();
     const collectionState = useCollections(view === 'collections');
     const [search, setSearch] = useState('');
@@ -132,7 +136,11 @@ export function NowShowing({ initialView }) {
                                 : 'Discover connected stories and films gathered together.'}
                         </p>
                     </div>
-                    {view === 'movies' && <a className="button btn-glass" href="./timetable.html">View Timetable</a>}
+                    {view === 'movies' && (
+                        <DirectionalButton className="button btn-glass" href="./timetable.html" direction="next" variant="glass">
+                            View Timetable
+                        </DirectionalButton>
+                    )}
                 </div>
                 <NowShowingSwitch current={view} onChange={changeView} />
                 <div

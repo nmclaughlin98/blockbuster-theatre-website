@@ -1,15 +1,27 @@
-import { Layout } from '../shared';
-import { PageLoader } from '../shared/PageLoader';
-import { useMovies } from './useMovies';
-import { HeroCarousel } from './home/HeroCarousel';
-import { MovieSection } from './home/MovieSection';
-import { Offers } from './home/Offers';
-import { useCollection } from './useCollection';
+import { useEffect } from 'react';
+import { Layout } from '../../shared';
+import { useMovies } from '../shared/useMovies';
+import { HeroCarousel } from './HeroCarousel';
+import { HomeSkeleton } from './HomeSkeleton';
+import { MovieSection } from './MovieSection';
+import { Offers } from './Offers';
+import { useCollection } from '../collections/useCollection';
 
 const SEASONAL_PICKS_COLLECTION_ID = '8706566';
 
 export function Home() {
+  useEffect(() => {
+    document.title = 'Blockbuster Theatre';
+  }, []);
+
   const { movies, loading, error } = useMovies();
+  useEffect(() => {
+    if (!loading) return undefined;
+
+    document.body.classList.add('home-loading');
+    return () => document.body.classList.remove('home-loading');
+  }, [loading]);
+
   const {
     collection: seasonalCollection,
     movies: seasonalMovies,
@@ -21,7 +33,7 @@ export function Home() {
   if (loading) {
     return (
       <Layout current="home" loading>
-        <PageLoader label="Loading home page" />
+        <HomeSkeleton />
       </Layout>
     );
   }

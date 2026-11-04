@@ -1,10 +1,10 @@
-import { useMemo, useState } from 'react';
-import { movieId } from '../movies';
-import { Layout } from '../shared';
-import { PageLoader } from '../shared/PageLoader';
-import { getUpcomingScreeningDates, getWeekdayForDate, isShowtimeIdForDate } from './bookingApi';
-import { createBookingHref } from './showtimeNavigation';
-import { useMovies } from './useMovies';
+import { useEffect, useMemo, useState } from 'react';
+import { movieId, movieSlug } from '../../movies';
+import { Layout } from '../../shared';
+import { PageLoader } from '../../shared/PageLoader';
+import { getUpcomingScreeningDates, getWeekdayForDate, isShowtimeIdForDate } from '../shared/bookingApi';
+import { createBookingHref } from '../shared/showtimeNavigation';
+import { useMovies } from '../shared/useMovies';
 import { downloadTimetablePdf } from './timetablePdf';
 
 const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
@@ -106,7 +106,7 @@ function TimetableMovie({ movie, day }) {
                         className="showtime-btn"
                         href={createBookingHref(
                             './bookNow.html',
-                            movie.movieId ?? movie.slug ?? getMovieTitle(movie),
+                            movieSlug(movie) || getMovieTitle(movie),
                             slot.date,
                             slot,
                         )}
@@ -121,6 +121,10 @@ function TimetableMovie({ movie, day }) {
 }
 
 export function Timetable() {
+    useEffect(() => {
+        document.title = 'Blockbuster Theatre - Timetable';
+    }, []);
+
     const [day, setDay] = useState('Monday');
     const screeningDates = useMemo(() => getUpcomingScreeningDates(), []);
     const screeningDate = screeningDates.find((date) => getWeekdayForDate(date) === day);

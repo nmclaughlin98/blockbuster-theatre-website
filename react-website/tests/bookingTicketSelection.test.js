@@ -4,6 +4,26 @@ import test from 'node:test';
 import { createElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { createServer } from 'vite';
+import { getFirstAvailableDate } from '../src/components/pages/booking/bookingDates.js';
+
+test('finds the first available screening date', () => {
+  const dates = [
+    { isoDate: '2026-10-25' },
+    { isoDate: '2026-10-26' },
+    { isoDate: '2026-10-27' },
+  ];
+
+  assert.equal(getFirstAvailableDate(dates, {
+    '2026-10-25': [],
+    '2026-10-26': [{ showtimeId: 'showtime-1' }],
+    '2026-10-27': [{ showtimeId: 'showtime-2' }],
+  }), '2026-10-26');
+  assert.equal(getFirstAvailableDate(dates, {
+    '2026-10-25': [],
+    '2026-10-26': [],
+    '2026-10-27': [],
+  }), '');
+});
 
 test('shows the showtime spinner without hiding the rest of ticket selection', async () => {
   const vite = await createServer({
@@ -25,49 +45,18 @@ test('shows the showtime spinner without hiding the rest of ticket selection', a
       label: 'Inception',
     };
     const markup = renderToStaticMarkup(createElement(TicketSelection, {
-      selections: [selection],
-      selection,
-      date: '2026-10-25',
-      calendarMinDate: '2026-10-25',
-      calendarMaxDate: '2026-10-31',
-      time: '',
-      selectedShowtimeId: '',
-      tickets: {},
-      totalTickets: 0,
-      showtimes: [],
-      dates: [
-        { isoDate: '2026-10-25' },
-        { isoDate: '2026-10-26' },
-      ],
-      pricing: null,
-      calendarAvailability: {
-        '2026-10-25': { showtimesCount: 2, averageAvailableSeats: 60 },
-        '2026-10-26': { showtimesCount: 0, averageAvailableSeats: null },
+      initialData: {
+        selection,
+        date: '2026-10-25',
+        tickets: {},
       },
-      calendarAvailabilityLoading: false,
-      calendarAvailabilityError: null,
-      selectionLoading: false,
-      selectionError: null,
-      showtimeLoading: true,
-      showtimeError: null,
-      pricingLoading: false,
-      pricingError: null,
-      validation: null,
-      validationLoading: false,
-      onSelectionChange: () => {},
-      onDateChange: () => {},
-      onRetryCalendarAvailability: () => {},
-      onTimeChange: () => {},
-      onTicketChange: () => {},
-      onContinue: () => {},
+      onNext: () => {},
+      onToast: () => {},
     }));
 
     assert.match(markup, /id="booking-movie"/);
     assert.match(markup, /id="booking-date"/);
     assert.match(markup, /value="Sun 25 Oct 2026"/);
-    assert.match(markup, /booking-calendar-availability-dot--high/);
-    assert.match(markup, /booking-calendar-availability-dot--medium/);
-    assert.match(markup, /booking-calendar-availability-dot--low/);
     assert.match(markup, /class="showtime-chips"[^>]*>.*class="showtime-loading"[^>]*>.*class="loader"/);
     assert.match(markup, /Loading showtimes/);
     assert.doesNotMatch(markup, /movie-detail-loading/);

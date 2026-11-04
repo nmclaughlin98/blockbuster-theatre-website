@@ -3,7 +3,7 @@ import { asset } from '../shared';
 import { getPosterSrc, getPosterSrcSet } from '../../utils/posterImages';
 import { useNetworkSpeed } from '../../utils/useNetworkSpeed';
 import { Countdown } from './Countdown';
-import { movieId } from './movieId';
+import { movieSlug } from './movieId';
 
 export function MovieCard({ movie, comingSoon = false }) {
     const fallbackPoster = asset('assets/images/logo/png/logo-full.png');
@@ -17,7 +17,7 @@ export function MovieCard({ movie, comingSoon = false }) {
         <div className="poster-card-container">
             <a
                 className="poster-column"
-                href={`./${comingSoon ? 'movie-detail-coming-soon' : 'movie-detail'}.html?movie=${movieId(movie)}`}
+                href={`./${comingSoon ? 'movie-detail-coming-soon' : 'movie-detail'}.html?movie=${encodeURIComponent(movieSlug(movie))}`}
                 aria-label={`View details for ${movie.title}`}
             >
                 <img
