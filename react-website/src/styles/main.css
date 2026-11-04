@@ -2215,17 +2215,6 @@ select option {
     font-size: clamp(0.9rem, 2vw, 1rem);
 }
 
-.showtime-loading {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.75rem;
-    min-height: 60px;
-}
-
-.showtime-loading .loader {
-    --size: 0.5px;
-}
-
 .booking-loading {
     display: inline-flex;
     align-items: center;
@@ -2391,6 +2380,36 @@ select option {
     display: flex;
     width: fit-content;
     margin: 16px 0 0 auto;
+}
+
+.booking-continue-button.is-loading {
+    cursor: wait;
+}
+
+.booking-continue-button.is-loading:hover {
+    box-shadow: none;
+    transform: none;
+}
+
+.booking-button-spinner {
+    width: 0.9rem;
+    height: 0.9rem;
+    flex: 0 0 auto;
+    border: 2px solid rgba(255, 255, 255, 0.35);
+    border-top-color: currentColor;
+    border-radius: 50%;
+    animation: booking-button-spin 0.75s linear infinite;
+}
+
+.booking-field-loading {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+}
+
+@keyframes booking-button-spin {
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 /* ==========================================================================

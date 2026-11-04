@@ -13,7 +13,7 @@ import {
 import { movieSlug } from '../../movies';
 import { DatePicker, DirectionalButton } from '../../shared';
 import { getFirstAvailableDate } from './bookingDates';
-import { BookingLoader, StepHeader } from './BookingStepComponents';
+import { StepHeader } from './BookingStepComponents';
 
 const weekdayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
@@ -183,6 +183,11 @@ export function TicketSelection({ initialData = {}, onNext, onToast }) {
   const validationLoading = Boolean(checkoutRequestKey && (
     validationState.requestKey !== checkoutRequestKey || validationState.loading
   ));
+  const bookingStepLoading = selectionLoading
+    || calendarAvailabilityLoading
+    || showtimeLoading
+    || pricingLoading
+    || validationLoading;
   const ticketTotal = pricing?.ticketTiers.reduce(
     (total, tier) => total + tier.price * (tickets[tier.id] || 0),
     0,
@@ -430,11 +435,15 @@ export function TicketSelection({ initialData = {}, onNext, onToast }) {
         <select
           id="booking-movie"
           className="form-control"
+          aria-busy={selectionLoading}
+          disabled={selectionLoading}
           value={selectedSelection ? selectionKey(selectedSelection) : ''}
           onChange={(event) => changeSelection(event.target.value)}
           required
         >
-          <option value="" disabled>-- Choose a Film or Special Offer --</option>
+          <option value="" disabled>
+            {selectionLoading ? 'Loading films and special offers...' : '-- Choose a Film or Special Offer --'}
+          </option>
           <optgroup label="Movies">
             {selections.filter((item) => item.type === 'movie').map((item) => (
               <option value={selectionKey(item)} key={selectionKey(item)}>{item.label}</option>
@@ -446,13 +455,12 @@ export function TicketSelection({ initialData = {}, onNext, onToast }) {
             ))}
           </optgroup>
         </select>
-        {selectionLoading && <BookingLoader>Loading films and special offers...</BookingLoader>}
         {selectionError && <p className="form-notice" role="alert">{selectionError}</p>}
         {!selectionLoading && !selectionError && !selections.length
           && <p className="form-notice" role="status">No films or special offers are currently available.</p>}
       </div>
       <div className="date-time-group">
-        <div className="form-group">
+        <div className="form-group" aria-busy={calendarAvailabilityLoading}>
           <label htmlFor="booking-date">Screening Date</label>
           <DatePicker
             variant="booking"
@@ -495,9 +503,6 @@ export function TicketSelection({ initialData = {}, onNext, onToast }) {
             disabled={!selectedSelection}
             required
           />
-          {calendarAvailabilityLoading && (
-            <BookingLoader>Checking showtimes and seat availability...</BookingLoader>
-          )}
           {calendarAvailabilityError && (
             <p className="form-notice" role="alert">
               Could not load date availability: {calendarAvailabilityError}{' '}
@@ -523,11 +528,11 @@ export function TicketSelection({ initialData = {}, onNext, onToast }) {
         </div>
         <div className="form-group">
           <label>Select Showtime</label>
-          <div className="showtime-chips" aria-label="Available showtimes">
+          <div className="showtime-chips" aria-label="Available showtimes" aria-busy={showtimeLoading}>
             {!selectedSelection
               ? <span className="showtime-placeholder">Select a film or offer to see available showtimes.</span>
               : showtimeLoading
-                ? <BookingLoader className="showtime-loading">Loading showtimes...</BookingLoader>
+                ? <span className="showtime-placeholder booking-field-loading" role="status">Updating showtimes...</span>
                 : showtimeError
                   ? <span className="form-notice" role="alert">{showtimeError}</span>
                   : showtimes?.length
@@ -551,7 +556,7 @@ export function TicketSelection({ initialData = {}, onNext, onToast }) {
           </div>
         </div>
       </div>
-      <div className="form-group ticket-type-list">
+      <div className="form-group ticket-type-list" aria-busy={pricingLoading || validationLoading}>
         <label>Select Ticket Types</label>
         {!selectionLoading
           && !showtimeLoading
@@ -567,7 +572,6 @@ export function TicketSelection({ initialData = {}, onNext, onToast }) {
                 : 'Choose a film and showtime to view ticket types and prices.'}
             </p>
           )}
-        {pricingLoading && <BookingLoader>Loading ticket prices...</BookingLoader>}
         {pricingError && <p className="form-notice" role="alert">{pricingError}</p>}
         {!pricingLoading && !pricingError && selectedSelection && time && !pricing?.ticketTiers.length
           && <p className="form-notice" role="status">No ticket types are available for this showtime.</p>}
@@ -583,7 +587,6 @@ export function TicketSelection({ initialData = {}, onNext, onToast }) {
           </div>
         ))}
         {validation?.error && <p className="form-notice" role="alert">{validation.error}</p>}
-        {validationLoading && <BookingLoader>Checking ticket total...</BookingLoader>}
       </div>
       <div className="booking-subtotal-bar">
         <div className="subtotal-item booking-subtotal-values">
@@ -597,7 +600,15 @@ export function TicketSelection({ initialData = {}, onNext, onToast }) {
           </div>
         </div>
       </div>
-      <DirectionalButton className="form-button booking-continue-button" direction="next" onClick={continueToSeats}>
+      <DirectionalButton
+        className={`form-button booking-continue-button${bookingStepLoading ? ' is-loading' : ''}`}
+        direction="next"
+        onClick={continueToSeats}
+        disabled={bookingStepLoading}
+        aria-busy={bookingStepLoading}
+        aria-label={bookingStepLoading ? 'Updating booking options' : undefined}
+      >
+        {bookingStepLoading && <span className="booking-button-spinner" aria-hidden="true" />}
         Select Seats
       </DirectionalButton>
     </fieldset>
