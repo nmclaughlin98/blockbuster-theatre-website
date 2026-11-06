@@ -171,14 +171,14 @@ export function BookingConfirmation({
   return (
     <fieldset className="active" data-step="4">
       <StepHeader
-        title="Booking confirmed"
+        title="Booking Confirmed!"
         description={bookingDetails.confirmationEmailSent
           ? 'Your seats have been reserved. No payment was taken.'
           : 'Your reservation succeeded, but we could not send the confirmation email. No payment was taken.'}
       />
       <div className="ticket-pass">
         <div className="ticket-pass-header">
-          <div className="ticket-pass-brand">BLOCKBUSTER THEATRE</div>
+          <div className="ticket-pass-brand">BLOCKBUSTER<br />THEATRE</div>
           <div className="ticket-pass-status">BOOKING CONFIRMED</div>
         </div>
         <div className="ticket-pass-body">
