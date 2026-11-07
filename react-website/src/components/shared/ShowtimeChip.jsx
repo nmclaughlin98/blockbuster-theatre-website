@@ -5,6 +5,8 @@ export function ShowtimeChip({
   active = false,
   onClick,
   href,
+  title,
+  children,
 }) {
   const chipClassName = ['showtime-chip', className, active && 'active']
     .filter(Boolean)
@@ -18,8 +20,9 @@ export function ShowtimeChip({
 
   if (href) {
     return (
-      <a className={chipClassName} href={href}>
+      <a className={chipClassName} href={href} title={title}>
         {content}
+        {children}
       </a>
     );
   }
@@ -30,8 +33,10 @@ export function ShowtimeChip({
       type="button"
       aria-pressed={active}
       onClick={onClick}
+      title={title}
     >
       {content}
+      {children}
     </button>
   );
 }

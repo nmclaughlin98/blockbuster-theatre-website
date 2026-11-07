@@ -429,7 +429,13 @@ export async function getMovieDetail(movieId, signal, date) {
   return data;
 }
 
-export async function getSelectionDateAvailability(selection, dates, signal, onShowtimesReady) {
+export async function getSelectionDateAvailability(
+  selection,
+  dates,
+  signal,
+  onShowtimesReady,
+  onShowtimeAvailabilityReady,
+) {
   const schedules = new Array(dates.length);
   let nextDateIndex = 0;
   const loadDateSchedule = async () => {
@@ -470,6 +476,7 @@ export async function getSelectionDateAvailability(selection, dates, signal, onS
   const screenings = schedules.flatMap((showtimes, dateIndex) => (
     showtimes.map((showtime) => ({ date: dates[dateIndex].isoDate, showtime }))
   ));
+  const availableSeatsByShowtimeId = {};
   let nextScreeningIndex = 0;
   const loadScreeningAvailability = async () => {
     while (nextScreeningIndex < screenings.length) {
@@ -478,8 +485,10 @@ export async function getSelectionDateAvailability(selection, dates, signal, onS
       const { date, showtime } = screenings[index];
       const bookedSeats = await getBookedSeats(showtime.showtimeId, date, signal);
       const dateAvailability = availability[date];
+      const availableSeats = CINEMA_SEAT_CAPACITY - bookedSeats.length;
+      availableSeatsByShowtimeId[showtime.showtimeId] = availableSeats;
       dateAvailability.showtimesCount += 1;
-      dateAvailability.averageAvailableSeats += CINEMA_SEAT_CAPACITY - bookedSeats.length;
+      dateAvailability.averageAvailableSeats += availableSeats;
     }
   };
 
@@ -493,6 +502,7 @@ export async function getSelectionDateAvailability(selection, dates, signal, onS
       dateAvailability.averageAvailableSeats /= dateAvailability.showtimesCount;
     }
   }
+  onShowtimeAvailabilityReady?.(availableSeatsByShowtimeId);
   return availability;
 }
 

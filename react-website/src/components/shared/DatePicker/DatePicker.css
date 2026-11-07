@@ -178,30 +178,39 @@
     position: relative;
 }
 
-.booking-calendar-availability-dot {
+.booking-availability-indicator {
     display: inline-block;
     width: 0.72rem;
     height: 0.72rem;
     border-radius: 50%;
 }
 
-.booking-calendar-day-content .booking-calendar-availability-dot {
+.booking-calendar-day-content .booking-calendar-availability-indicator {
     position: absolute;
     right: -0.16rem;
     bottom: -0.08rem;
     border: 1px solid #171923;
 }
 
-.booking-calendar-availability-dot--high {
+.booking-availability-indicator--high {
     background: #22c55e;
 }
 
-.booking-calendar-availability-dot--medium {
+.booking-availability-indicator--medium {
     background: #f59e0b;
 }
 
-.booking-calendar-availability-dot--low {
+.booking-availability-indicator--low {
     background: #ef4444;
+}
+
+.booking-showtime-availability-indicator {
+    position: absolute;
+    right: -0.16rem;
+    bottom: -0.08rem;
+    width: 0.72rem;
+    height: 0.72rem;
+    border: 1px solid var(--bg-surface-elevated);
 }
 
 @media (max-width: 1024px) {
@@ -217,7 +226,12 @@
         min-height: clamp(2.6rem, 8vw, 3.125rem);
     }
 
-    .booking-calendar-day-content .booking-calendar-availability-dot {
+    .booking-calendar-day-content .booking-calendar-availability-indicator {
+        width: 0.85rem;
+        height: 0.85rem;
+    }
+
+    .booking-showtime-availability-indicator {
         width: 0.85rem;
         height: 0.85rem;
     }

@@ -602,6 +602,7 @@ test('loads date-specific showings and averages available seats for calendar dat
 
   try {
     let showtimesByDate;
+    let availableSeatsByShowtimeId;
     const availability = await getSelectionDateAvailability(
       movie,
       dates,
@@ -609,6 +610,9 @@ test('loads date-specific showings and averages available seats for calendar dat
       (showtimes) => {
         showtimesByDate = showtimes;
         showtimesReady = true;
+      },
+      (showtimeAvailability) => {
+        availableSeatsByShowtimeId = showtimeAvailability;
       },
     );
     assert.deepEqual(availability, {
@@ -623,6 +627,9 @@ test('loads date-specific showings and averages available seats for calendar dat
         screen: '5',
       }],
       '2026-10-26': [],
+    });
+    assert.deepEqual(availableSeatsByShowtimeId, {
+      '559924_2026-10-25_1215': 11,
     });
   } finally {
     restoreFetch();
