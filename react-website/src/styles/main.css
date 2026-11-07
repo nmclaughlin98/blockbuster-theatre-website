@@ -30,7 +30,7 @@
     --border-highlight: rgba(255, 255, 255, 0.18);
     --border-accent: rgba(255, 51, 75, 0.4);
 
-    --glass-bg: rgba(12, 13, 18, 0.82);
+    --glass-bg: rgba(12, 13, 18, 0.85);
     --glass-card: rgba(20, 23, 34, 0.65);
 
     --font-display: 'Oswald', 'Outfit', sans-serif;
@@ -421,7 +421,7 @@ header {
 .ham-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.8);
+    background: rgba(0, 0, 0, 0.93);
     z-index: 998;
     opacity: 0;
     visibility: hidden;
@@ -852,7 +852,7 @@ main {
 }
 
 section {
-    padding: var(--section-space) var(--page-gutter);
+    padding: 2.5rem var(--page-gutter);
     position: relative;
 }
 

@@ -1034,3 +1034,15 @@ header {
         font-size: 0.75rem !important;
     }
 }
+
+@media (min-width: 966px) {
+    .ham-overlay.show {
+        display: none;
+    }
+}
+
+@media (max-width: 965px) {
+    html.nav-menu-open {
+        overflow-y: hidden;
+    }
+}

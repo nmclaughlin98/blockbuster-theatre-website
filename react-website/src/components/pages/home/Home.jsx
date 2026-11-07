@@ -5,9 +5,9 @@ import { HeroCarousel } from './HeroCarousel';
 import { HomeSkeleton } from './HomeSkeleton';
 import { MovieSection } from './MovieSection';
 import { Offers } from './Offers';
-import { useCollection } from '../collections/useCollection';
+import { useAdditionalCollections } from '../collections/useAdditionalCollections';
 
-const SEASONAL_PICKS_COLLECTION_ID = '8706566';
+const ADDITIONAL_COLLECTION_IDS = ['8706566', '8706524'];
 
 export function Home() {
   useEffect(() => {
@@ -23,10 +23,9 @@ export function Home() {
   }, [loading]);
 
   const {
-    collection: seasonalCollection,
-    movies: seasonalMovies,
-    error: seasonalCollectionError,
-  } = useCollection(SEASONAL_PICKS_COLLECTION_ID);
+    collections: additionalCollections,
+    error: additionalCollectionsError,
+  } = useAdditionalCollections(ADDITIONAL_COLLECTION_IDS);
   const current = movies.filter((movie) => movie.visible !== false && movie.isComingSoon !== true);
   const carousel = movies.filter((movie) => movie.visible !== false && movie.isCarousel === true);
 
@@ -45,17 +44,20 @@ export function Home() {
       {!error && <>
         <MovieSection title="What's On" movies={[...current].sort((a, b) => new Date(b.releaseDate || 0) - new Date(a.releaseDate || 0)).slice(0, 7)} />
         <MovieSection title="Top Picks" movies={[...current].sort((a, b) => (b.score ?? 0) - (a.score ?? 0)).slice(0, 7)} />
-        {seasonalCollectionError && (
-          <p role="alert">Seasonal picks are temporarily unavailable.</p>
+        {additionalCollectionsError && (
+          <p role="alert">{additionalCollectionsError.message}</p>
         )}
-        {seasonalCollection?.isActive === true && seasonalMovies.length > 0 && (
-          <MovieSection
-            title={seasonalCollection.name}
-            movies={seasonalMovies}
-            viewAllHref={`./collection.html?collection=${SEASONAL_PICKS_COLLECTION_ID}`}
-            viewAllLabel="View Collection"
-          />
-        )}
+        {additionalCollections.map(({ collection, collectionId, movies }) => (
+          collection.isActive !== false && movies.length > 0 && (
+            <MovieSection
+              key={collectionId}
+              title={collection.name}
+              movies={movies}
+              viewAllHref={`./collection.html?collection=${encodeURIComponent(collectionId)}`}
+              viewAllLabel="View Collection"
+            />
+          )
+        ))}
       </>}
       <Offers />
     </Layout>

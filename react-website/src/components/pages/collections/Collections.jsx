@@ -1,6 +1,8 @@
 import { CollectionCard } from './CollectionCard';
 
 export function CollectionsView({ collections, loading, error, onRetry }) {
+  const activeCollections = collections.filter((collection) => collection.isActive !== false);
+
   if (loading) return <p className="collection-message" role="status">Loading collections…</p>;
   if (error) {
     return (
@@ -10,13 +12,13 @@ export function CollectionsView({ collections, loading, error, onRetry }) {
       </div>
     );
   }
-  if (!collections.length) {
+  if (!activeCollections.length) {
     return <p className="collection-message">No collections are available right now.</p>;
   }
 
   return (
     <div className="collection-card-grid">
-      {collections.map((collection) => (
+      {activeCollections.map((collection) => (
         <CollectionCard collection={collection} key={collection.collectionId} />
       ))}
     </div>

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { asset } from './asset';
 
 const links = [
@@ -79,6 +79,16 @@ function MenuButton({ open, onClick }) {
 export function Header({ current }) {
     const [open, setOpen] = useState(false);
     const closeMenu = () => setOpen(false);
+
+    useEffect(() => {
+        if (!open) return undefined;
+
+        const root = document.documentElement;
+        root.classList.add('nav-menu-open');
+        return () => {
+            root.classList.remove('nav-menu-open');
+        };
+    }, [open]);
 
     return (
         <>
