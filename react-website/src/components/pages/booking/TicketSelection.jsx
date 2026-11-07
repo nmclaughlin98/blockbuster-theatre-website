@@ -11,7 +11,7 @@ import {
   validateCheckout,
 } from '../shared/bookingApi';
 import { movieSlug } from '../../movies';
-import { DatePicker, DirectionalButton } from '../../shared';
+import { DatePicker, DirectionalButton, ShowtimeChip } from '../../shared';
 import { getFirstAvailableDate } from './bookingDates';
 import { StepHeader } from './BookingStepComponents';
 
@@ -537,16 +537,14 @@ export function TicketSelection({ initialData = {}, onNext, onToast }) {
                   ? <span className="form-notice" role="alert">{showtimeError}</span>
                   : showtimes?.length
                     ? showtimes.map((showtime) => (
-                      <button
-                        className={`time-chip ${selectedShowtime?.showtimeId === showtime.showtimeId ? 'active' : ''}`}
-                        type="button"
-                        aria-pressed={selectedShowtime?.showtimeId === showtime.showtimeId}
+                      <ShowtimeChip
+                        className="booking-showtime-chip"
+                        active={selectedShowtime?.showtimeId === showtime.showtimeId}
                         key={showtime.showtimeId}
                         onClick={() => changeTime(showtime)}
-                      >
-                        <span className="time-chip-time">{showtime.time}</span>
-                        <span className="time-chip-screen">Screen {showtime.screen}</span>
-                      </button>
+                        time={showtime.time}
+                        screen={showtime.screen}
+                      />
                     ))
                     : <span className="showtime-placeholder">
                       {selectedSelection.type === 'offer'

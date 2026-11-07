@@ -448,16 +448,19 @@ header {
         gap: clamp(0.9rem, 2vw, 1.2rem);
     }
 
-    .time-chip {
+    .detail-showtime-chip,
+    .timetable-showtime-chip {
         gap: 0.2rem;
         padding: 0.9rem;
     }
 
-    .time-chip-time {
+    .detail-showtime-chip .time-chip-time,
+    .timetable-showtime-chip .time-chip-time {
         font-size: 1.1rem;
     }
 
-    .time-chip-screen {
+    .detail-showtime-chip .time-chip-screen,
+    .timetable-showtime-chip .time-chip-screen {
         font-size: 0.8rem;
     }
 
@@ -490,6 +493,13 @@ header {
     }
 }
 
+@media (min-width: 769px) and (max-width: 974px) {
+    .movie-card {
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1.35fr);
+        gap: clamp(1rem, 2vw, 1.5rem);
+    }
+}
+
 @media (min-width: 975px) {
     .movie-page .showtimes-schedule .showtime-day {
         width: min(100%, clamp(18rem, 50vw, 42rem));
@@ -506,7 +516,7 @@ header {
     width: 100%;
 }
 
-.movie-page .showtimes-schedule .time-chip {
+.movie-page .showtimes-schedule .detail-showtime-chip {
     width: 100%;
     min-width: 0;
 }
@@ -539,13 +549,21 @@ header {
         gap: 0.8rem
     }
 
-    .showtime-chips> :not(.time-chip) {
+    .showtime-chips> :not(.booking-showtime-chip) {
         grid-column: 1 / -1;
     }
 
-    .showtime-chips .time-chip {
+    .showtime-chips .booking-showtime-chip {
         box-sizing: border-box;
         width: 100%;
+    }
+
+    .booking-showtime-chip .time-chip-time {
+        font-size: 1.1rem;
+    }
+
+    .booking-showtime-chip .time-chip-screen {
+        font-size: 0.8rem;
     }
 
 }

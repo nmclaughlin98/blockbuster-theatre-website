@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { movieId, movieSlug } from '../../movies';
-import { Layout } from '../../shared';
+import { Layout, ShowtimeChip } from '../../shared';
 import { PageLoader } from '../../shared/PageLoader';
 import {
     getMoviesForDates,
@@ -109,10 +109,10 @@ function TimetableMovie({ movie, day }) {
                     <span className="badge-genre">{getMovieGenre(movie)}</span>
                 </div>
             </div>
-            <div className="showtimes-grid" data-count={times.length}>
+            <div className="showtimes-grid">
                 {times.map((slot) => (
-                    <a
-                        className="showtime-btn"
+                    <ShowtimeChip
+                        className="timetable-showtime-chip"
                         href={createBookingHref(
                             './bookNow.html',
                             movieSlug(movie) || getMovieTitle(movie),
@@ -120,9 +120,9 @@ function TimetableMovie({ movie, day }) {
                             slot,
                         )}
                         key={slot.showtimeId}
-                    >
-                        {slot.time}<span>Screen {slot.screen}</span>
-                    </a>
+                        time={slot.time}
+                        screen={slot.screen}
+                    />
                 ))}
             </div>
         </div>

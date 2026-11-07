@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Countdown, movieSlug } from '../../movies/index.js';
-import { asset, Layout } from '../../shared';
+import { asset, Layout, ShowtimeChip } from '../../shared';
 import { PageLoader } from '../../shared/PageLoader';
 import { createBookingHref } from '../shared/showtimeNavigation';
 import { getUpcomingScreeningDates } from '../shared/bookingApi';
@@ -99,16 +99,14 @@ function ShowtimeSchedule({ movie, selectedDay, selectedTime, onSelectTime, book
                     <h2 className="day-of-week">{day}</h2>
                     <div className="show-time-list">
                         {(Array.isArray(times) ? times : []).map((slot) => (
-                            <button
-                                className={`time-chip ${selectedDay === day && selectedTime === slot.time ? 'active' : ''}`}
-                                type="button"
-                                aria-pressed={selectedDay === day && selectedTime === slot.time}
+                            <ShowtimeChip
+                                className="detail-showtime-chip"
+                                active={selectedDay === day && selectedTime === slot.time}
                                 key={`${slot.time}-${slot.screen}`}
                                 onClick={() => onSelectTime(day, slot.time, slot)}
-                            >
-                                <span className="time-chip-time">{slot.time}</span>
-                                <span className="time-chip-screen">Screen {slot.screen}</span>
-                            </button>
+                                time={slot.time}
+                                screen={slot.screen}
+                            />
                         ))}
                     </div>
                 </div>

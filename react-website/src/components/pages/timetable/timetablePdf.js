@@ -177,7 +177,7 @@ export function openTimetablePdf(movies, weekCommencing, previewWindow) {
     throw new Error('Open a new tab before generating the timetable PDF.');
   }
 
-  const pdf = new jsPDF({ orientation: 'landscape', unit: 'pt', format: 'a4', compress: true });
+  const pdf = new jsPDF({ orientation: 'portrait', unit: 'pt', format: 'a4', compress: true });
   const pageWidth = pdf.internal.pageSize.getWidth();
   const pageHeight = pdf.internal.pageSize.getHeight();
   const margin = 36;

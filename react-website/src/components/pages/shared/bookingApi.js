@@ -82,7 +82,7 @@ export function createGuestBookingPayload({
   if (!isShowtimeIdForDate(showtimeId, date)) {
     throw new Error('Choose a valid screening with a showtime ID for the selected date.');
   }
-  if (!Array.isArray(seats) || seats.length === 0 || seats.length > 10
+  if (!Array.isArray(seats) || seats.length === 0 || seats.length > 30
     || new Set(seats).size !== seats.length
     || seats.some((seat) => typeof seat !== 'string' || !/^[A-G](?:[1-9]|1[01])$/.test(seat))) {
     throw new Error('Select between 1 and 10 unique valid seats before completing your booking.');
@@ -267,11 +267,11 @@ export async function getFilmSelections(signal, date) {
     && (selection.type === 'movie'
       ? selection.movieId != null && typeof selection.title === 'string' && typeof selection.label === 'string'
       : selection.offerId != null
-        && selection.featuredMovieId != null
-        && selection.pricingId != null
-        && (typeof selection.displayLabel === 'string'
-          || typeof selection.label === 'string'
-          || typeof selection.title === 'string'))
+      && selection.featuredMovieId != null
+      && selection.pricingId != null
+      && (typeof selection.displayLabel === 'string'
+        || typeof selection.label === 'string'
+        || typeof selection.title === 'string'))
   ));
   if (!validSelections) throw new Error('The booking service returned an invalid film selection.');
   return selections.filter((selection) => (
