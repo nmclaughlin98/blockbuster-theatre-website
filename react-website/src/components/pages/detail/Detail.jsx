@@ -113,7 +113,8 @@ function ShowtimeSchedule({ movie, selectedDay, selectedTime, onSelectTime, book
                     </div>
                 </div>
             )) : <p>No showtimes available.</p>}
-            <a className="form-button" href={bookingHref}>Book Now</a>
+            <br />
+            <a className="form-button book-now-button" href={bookingHref}>Book Now</a>
         </aside>
     );
 }
@@ -143,8 +144,8 @@ function MovieContent({ movie, comingSoon }) {
         selectedShowtimeId
             ? slot.showtimeId === selectedShowtimeId
             : slot.time === selectedTime
-                && slot.day === selectedDay
-                && (!selectedDate || slot.date === selectedDate)
+            && slot.day === selectedDay
+            && (!selectedDate || slot.date === selectedDate)
     ));
     const bookingHref = selectedShowtime
         ? createBookingHref(

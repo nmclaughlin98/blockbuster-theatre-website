@@ -38,16 +38,8 @@
 }
 
 /* Tablets & Small Laptops (1024px and down) */
-@media (max-width: 1250px) {
-    .col.col-1-3 {
-        padding: 28px 20px;
-    }
-}
 
 @media (max-width: 1200px) {
-    .movie-page {
-        grid-template-columns: 2.9fr 2.1fr;
-    }
 
     .collection-card-content p {
         -webkit-line-clamp: 5;
@@ -76,6 +68,7 @@
     .nav-cta-btn {
         margin-left: 0 !important;
     }
+
 }
 
 @media (max-width: 965px) {
@@ -182,16 +175,7 @@
 
     .showtimes-schedule .showtime-day {
         grid-template-columns: 6rem minmax(0, 1fr);
-        gap: 8px;
         padding: 12px 0;
-    }
-
-    .showtimes-schedule .day-of-week {
-        font-size: clamp(0.8rem, 4vw, 1rem);
-    }
-
-    .showtimes-schedule .show-time-list {
-        gap: 8px;
     }
 
     .about-grid-layout {
@@ -460,6 +444,23 @@ header {
         width: 100%;
     }
 
+    .show-time-list {
+        gap: clamp(0.9rem, 2vw, 1.2rem);
+    }
+
+    .time-chip {
+        gap: 0.2rem;
+        padding: 0.9rem;
+    }
+
+    .time-chip-time {
+        font-size: 1.1rem;
+    }
+
+    .time-chip-screen {
+        font-size: 0.8rem;
+    }
+
     .movie-page,
     .movie-body-layout,
     .about-grid-layout {
@@ -478,8 +479,42 @@ header {
         gap: clamp(1.5rem, 4vw, 2.5rem);
     }
 
-    .showtimes-schedule .showtime-day {
+    .movie-page .showtimes-schedule .showtime-day {
+        width: 100%;
+    }
+
+    .movie-page .col.col-1-3.showtimes-schedule {
+        width: 100%;
+        padding-left: clamp(1rem, 5vw, 4rem);
+        padding-right: clamp(1rem, 5vw, 4rem);
+    }
+}
+
+@media (min-width: 975px) {
+    .movie-page .showtimes-schedule .showtime-day {
         width: min(100%, clamp(18rem, 50vw, 42rem));
+    }
+
+    .movie-page .col.col-1-3.showtimes-schedule {
+        width: min(100%, calc(clamp(18rem, 50vw, 42rem) + 56px));
+    }
+}
+
+.movie-page .showtimes-schedule .show-time-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    width: 100%;
+}
+
+.movie-page .showtimes-schedule .time-chip {
+    width: 100%;
+    min-width: 0;
+}
+
+@media (min-width: 1800px),
+(min-width: 601px) and (max-width: 974px) {
+    .movie-page .showtimes-schedule .show-time-list {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
     }
 }
 
@@ -513,13 +548,6 @@ header {
         width: 100%;
     }
 
-    .time-chip-time {
-        font-size: 1.1rem;
-    }
-
-    .time-chip-screen {
-        font-size: 0.8rem;
-    }
 }
 
 @media (max-width: 768px) {
