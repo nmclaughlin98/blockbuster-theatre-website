@@ -594,6 +594,25 @@ header {
         gap: 16px;
     }
 
+    .movie-info {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        align-items: start;
+        column-gap: clamp(0.5rem, 2vw, 1rem);
+    }
+
+    .movie-meta {
+        justify-content: flex-end;
+        min-width: 0;
+        text-align: right;
+    }
+
+    .badge-genre {
+        max-width: 100%;
+        text-align: right;
+        white-space: normal;
+    }
+
     .hamburger {
         display: flex;
     }

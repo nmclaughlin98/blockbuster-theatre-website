@@ -1,6 +1,10 @@
 import { useState } from 'react';
 import { asset, DirectionalButton } from '../../shared';
-import { convertGuestAccount, sortSeatIds } from '../shared/bookingApi';
+import {
+  convertGuestAccount,
+  getApiErrorMessage,
+  sortSeatIds,
+} from '../shared/bookingApi';
 import { StepHeader } from './BookingStepComponents';
 
 function formatScreeningDate(date, time) {
@@ -129,8 +133,10 @@ export function BookingConfirmation({
       } catch (error) {
         throw new Error('The wallet service returned an invalid response.', { cause: error });
       }
-      if (!response.ok) {
-        throw new Error(passData?.error || `Wallet pass request failed (${response.status}).`);
+      if (!response.ok || passData?.error) {
+        throw new Error(
+          getApiErrorMessage(passData) || `Wallet pass request failed (${response.status}).`,
+        );
       }
 
       if (walletType === 'apple') {

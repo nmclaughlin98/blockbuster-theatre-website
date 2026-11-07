@@ -459,11 +459,14 @@ test('includes an offer ID and verifies ticket quantities match selected seats',
   }), /Ticket quantities/);
 });
 
-test('preserves HTTP 409 status for a guest booking seat conflict', async () => {
+test('logs API error messages and preserves HTTP 409 status', async () => {
   const restoreFetch = mockFetch(async () => new Response(
     JSON.stringify({ message: 'One or more seats are no longer available.' }),
     { status: 409 },
   ));
+  const originalConsoleError = console.error;
+  const loggedErrors = [];
+  console.error = (...args) => loggedErrors.push(args.join(' '));
 
   try {
     await assert.rejects(createGuestBooking({ showtimeId: 'show_77812' }), (error) => {
@@ -471,7 +474,9 @@ test('preserves HTTP 409 status for a guest booking seat conflict', async () => 
       assert.match(error.message, /no longer available/);
       return true;
     });
+    assert.ok(loggedErrors.some((message) => message.includes('One or more seats are no longer available.')));
   } finally {
+    console.error = originalConsoleError;
     restoreFetch();
   }
 });

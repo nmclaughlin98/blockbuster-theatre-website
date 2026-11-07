@@ -5,6 +5,24 @@ import { BookingLoader, StepActions, StepHeader } from './BookingStepComponents'
 
 const accessibleSeats = new Set(['A1', 'A5', 'A6', 'A10']);
 
+function preventSeatSelectionScroll(event) {
+  if (event.type !== 'wheel' || event.deltaY !== 0) {
+    event.preventDefault();
+  }
+}
+
+function lockSeatSelectionScroll() {
+  window.addEventListener('wheel', preventSeatSelectionScroll, { passive: false });
+  window.addEventListener('touchmove', preventSeatSelectionScroll, { passive: false });
+  document.documentElement.classList.add('seat-selection-dragging');
+}
+
+function unlockSeatSelectionScroll() {
+  window.removeEventListener('wheel', preventSeatSelectionScroll);
+  window.removeEventListener('touchmove', preventSeatSelectionScroll);
+  document.documentElement.classList.remove('seat-selection-dragging');
+}
+
 export function SeatSelection({ initialData, onBack, onNext, onToast }) {
   const [selectedSeats, setSelectedSeats] = useState(() => sortSeatIds(initialData.seats || []));
   const [hoveredSeat, setHoveredSeat] = useState(null);
@@ -46,7 +64,7 @@ export function SeatSelection({ initialData, onBack, onNext, onToast }) {
 
   useEffect(() => () => {
     seatDragRef.current = null;
-    document.documentElement.classList.remove('seat-selection-dragging');
+    unlockSeatSelectionScroll();
   }, []);
 
   useEffect(() => {
@@ -133,7 +151,7 @@ export function SeatSelection({ initialData, onBack, onNext, onToast }) {
     };
     setHoveredSeat(null);
     event.currentTarget.setPointerCapture(event.pointerId);
-    document.documentElement.classList.add('seat-selection-dragging');
+    lockSeatSelectionScroll();
 
     if (!setSeatSelected(seatId, shouldSelect) && shouldSelect
       && selectedSeatsRef.current.length >= maxSeats) {
@@ -166,7 +184,7 @@ export function SeatSelection({ initialData, onBack, onNext, onToast }) {
   function finishSeatDrag(event) {
     if (seatDragRef.current?.pointerId === event.pointerId) {
       seatDragRef.current = null;
-      document.documentElement.classList.remove('seat-selection-dragging');
+      unlockSeatSelectionScroll();
     }
   }
 

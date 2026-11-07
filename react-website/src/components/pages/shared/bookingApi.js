@@ -8,6 +8,13 @@ export function sortSeatIds(seats) {
   ));
 }
 
+export function getApiErrorMessage(data) {
+  const message = [data?.message, data?.error?.message, data?.error].find((value) => (
+    typeof value === 'string' && value.trim()
+  ));
+  return message || null;
+}
+
 async function requestJson(path, options = {}, expectedStatus) {
   const response = await fetch(`${MOVIES_API_URL}${path}`, options);
   let data;
@@ -19,7 +26,11 @@ async function requestJson(path, options = {}, expectedStatus) {
   }
 
   if (!response.ok || (expectedStatus && response.status !== expectedStatus)) {
-    const error = new Error(data?.message || `Booking request failed (${response.status}).`);
+    const apiMessage = getApiErrorMessage(data);
+    if (apiMessage) {
+      console.error(`Booking API error (${response.status}) at ${path}: ${apiMessage}`);
+    }
+    const error = new Error(apiMessage || `Booking request failed (${response.status}).`);
     error.status = response.status;
     throw error;
   }

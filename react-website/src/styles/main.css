@@ -2241,9 +2241,12 @@ select option {
     box-shadow: 0 0 15px var(--accent-glow);
 }
 
-.detail-showtime-chip,
-.timetable-showtime-chip {
+.detail-showtime-chip {
     padding: 10px;
+}
+
+.timetable-showtime-chip {
+    padding: 20px;
 }
 
 .booking-showtime-chip {
@@ -2521,7 +2524,6 @@ select option {
 }
 
 html.seat-selection-dragging {
-    overflow-y: hidden;
     overscroll-behavior-y: none;
 }
 
