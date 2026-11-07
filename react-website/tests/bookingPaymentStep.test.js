@@ -5,7 +5,7 @@ import { createElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { createServer } from 'vite';
 
-test('formats the screening date for display while accepting its ISO value', async () => {
+test('formats the screening date and sorts selected seats on review', async () => {
   const vite = await createServer({
     configFile: fileURLToPath(new URL('../vite.config.js', import.meta.url)),
     server: { middlewareMode: true },
@@ -26,9 +26,9 @@ test('formats the screening date for display while accepting its ISO value', asy
           time: '11:00',
           screen: '5',
         },
-        tickets: { adult: 1 },
+        tickets: { adult: 2 },
         quote: { total: 12 },
-        seats: ['F10'],
+        seats: ['D2', 'D1'],
         customer: { firstName: 'Niall', surname: 'McLaughlin', email: 'customer@example.com' },
       },
       onBack: () => {},
@@ -39,6 +39,7 @@ test('formats the screening date for display while accepting its ISO value', asy
     }));
 
     assert.match(markup, /Thurs 30 Oct 2025 - 11:00/);
+    assert.match(markup, /Seats<\/span><strong>D1, D2<\/strong>/);
     assert.doesNotMatch(markup, /2025-10-30 at 11:00/);
   } finally {
     await vite.close();

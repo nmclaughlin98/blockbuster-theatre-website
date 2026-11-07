@@ -2,6 +2,12 @@ import { MOVIES_API_URL } from '../../../config.js';
 
 export const CINEMA_SEAT_CAPACITY = 71;
 
+export function sortSeatIds(seats) {
+  return [...seats].sort((first, second) => (
+    first.localeCompare(second, 'en', { numeric: true, sensitivity: 'base' })
+  ));
+}
+
 async function requestJson(path, options = {}, expectedStatus) {
   const response = await fetch(`${MOVIES_API_URL}${path}`, options);
   let data;
@@ -105,7 +111,7 @@ export function createGuestBookingPayload({
   const payload = {
     showtimeId,
     date,
-    seats: [...seats],
+    seats: sortSeatIds(seats),
     email: email.trim(),
     customerName: customerName.trim(),
     tickets: tickets.map(({ tierId, quantity }) => ({ tierId, quantity })),
@@ -150,7 +156,7 @@ export async function createGuestBooking(payload) {
     || (data.conversionTokenExpiresAt != null && typeof data.conversionTokenExpiresAt !== 'string')) {
     throw new Error('The booking service returned invalid guest booking details.');
   }
-  return data;
+  return { ...data, seats: sortSeatIds(data.seats) };
 }
 
 export async function convertGuestAccount(conversionToken, password) {

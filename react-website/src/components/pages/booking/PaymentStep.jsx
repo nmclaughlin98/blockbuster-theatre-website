@@ -3,6 +3,7 @@ import {
   createGuestBooking,
   createGuestBookingPayload,
   getBookedSeats,
+  sortSeatIds,
 } from '../shared/bookingApi';
 import { DirectionalButton } from '../../shared';
 import { BookingLoader, StepHeader } from './BookingStepComponents';
@@ -31,7 +32,7 @@ export function PaymentStep({
   const submittingRef = useRef(false);
   const showtime = initialData.showtime;
   const customer = initialData.customer;
-  const seats = initialData.seats;
+  const seats = sortSeatIds(initialData.seats);
   const tickets = Object.entries(initialData.tickets || {})
     .filter(([, quantity]) => quantity > 0)
     .map(([tierId, quantity]) => ({ tierId, quantity }));

@@ -206,14 +206,15 @@
 
 .booking-showtime-availability-indicator {
     position: absolute;
-    right: -0.16rem;
-    bottom: -0.08rem;
-    width: 0.72rem;
-    height: 0.72rem;
+    right: -0.3rem;
+    bottom: -0.2rem;
+    width: 1rem;
+    height: 1rem;
     border: 1px solid var(--bg-surface-elevated);
 }
 
 @media (max-width: 1024px) {
+
     .booking-date-calendar .react-datepicker__day,
     .booking-date-calendar .react-datepicker__day-name {
         width: clamp(2.6rem, 8vw, 3.125rem);

@@ -28,8 +28,8 @@ test('confirms the backend booking reference and total when confirmation email f
         showtimeId: '559924_2026-11-01_1215',
         date: '2026-11-01',
         movieTitle: 'Inception',
-        seats: ['F10', 'F11'],
-        tickets: [{ tierId: 'adult', quantity: 1 }, { tierId: 'child', quantity: 1 }],
+        seats: ['F11', 'D2', 'D1'],
+        tickets: [{ tierId: 'adult', quantity: 2 }, { tierId: 'child', quantity: 1 }],
         totalAmount: 24,
         currency: 'GBP',
         customerEmail: 'customer@example.com',
@@ -43,7 +43,7 @@ test('confirms the backend booking reference and total when confirmation email f
     assert.match(markup, /£24\.00/);
     assert.match(markup, /REF: BBT-883214/);
     assert.doesNotMatch(markup, /REF: 559924_2026-11-01_1215/);
-    assert.match(markup, /F10, F11/);
+    assert.match(markup, /D1, D2, F11/);
   } finally {
     await vite.close();
   }

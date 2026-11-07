@@ -2514,6 +2514,12 @@ select option {
     justify-content: center;
 }
 
+.seat-grid .seat {
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
 .seat:hover:not(.booked-seat):not(.seat-spacer) {
     background: #3e4668;
     transform: scale(1.15);

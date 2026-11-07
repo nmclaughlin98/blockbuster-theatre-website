@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { asset, DirectionalButton } from '../../shared';
-import { convertGuestAccount } from '../shared/bookingApi';
+import { convertGuestAccount, sortSeatIds } from '../shared/bookingApi';
 import { StepHeader } from './BookingStepComponents';
 
 function formatScreeningDate(date, time) {
@@ -34,7 +34,7 @@ export function BookingConfirmation({
     loading: false, error: '', complete: false, dismissed: false,
   });
   const bookingRef = bookingDetails.bookingRef;
-  const selectedSeats = bookingDetails.seats;
+  const selectedSeats = sortSeatIds(bookingDetails.seats);
   const movieTitle = bookingDetails.movieTitle || movie?.title || 'Movie';
   const customerEmail = bookingDetails.customerEmail || customer.email;
   const ticketCount = bookingDetails.tickets.reduce((total, ticket) => total + ticket.quantity, 0);

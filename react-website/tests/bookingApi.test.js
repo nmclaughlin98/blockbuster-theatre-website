@@ -25,6 +25,7 @@ import {
   selectionApiId,
   selectionDisplayLabel,
   selectionKey,
+  sortSeatIds,
   validateCheckout,
 } from '../src/components/pages/shared/bookingApi.js';
 
@@ -364,7 +365,7 @@ test('posts the exact guest booking payload to the versioned endpoint', async ()
     showtimeId: '559924_2026-11-01_1215',
     date: '2026-11-01',
     movieTitle: 'Inception',
-    seats: ['F10', 'F11'],
+    seats: ['F11', 'F10'],
     tickets: [{ tierId: 'adult', quantity: 1 }, { tierId: 'child', quantity: 1 }],
     totalAmount: 24,
     currency: 'GBP',
@@ -383,7 +384,7 @@ test('posts the exact guest booking payload to the versioned endpoint', async ()
     const payload = createGuestBookingPayload({
       showtimeId: '559924_2026-11-01_1215',
       date: '2026-11-01',
-      seats: ['F10', 'F11'],
+      seats: ['F11', 'F10'],
       email: ' customer@example.com ',
       customerName: ' Niall McLaughlin ',
       tickets: [{ tierId: 'adult', quantity: 1 }, { tierId: 'child', quantity: 1 }],
@@ -404,10 +405,17 @@ test('posts the exact guest booking payload to the versioned endpoint', async ()
     });
     assert.equal(JSON.parse(request.options.body).userId, undefined);
     assert.equal(JSON.parse(request.options.body).paymentToken, undefined);
-    assert.deepEqual(booking, bookingDetails);
+    assert.deepEqual(booking, { ...bookingDetails, seats: ['F10', 'F11'] });
   } finally {
     restoreFetch();
   }
+});
+
+test('sorts seats by row and numeric seat number', () => {
+  assert.deepEqual(
+    sortSeatIds(['D2', 'F4', 'D1', 'A10', 'A2', 'A1']),
+    ['A1', 'A2', 'A10', 'D1', 'D2', 'F4'],
+  );
 });
 
 test('rejects an incomplete guest booking request before sending it', () => {
