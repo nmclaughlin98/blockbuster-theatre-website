@@ -2520,6 +2520,11 @@ select option {
     -webkit-user-select: none;
 }
 
+html.seat-selection-dragging {
+    overflow-y: hidden;
+    overscroll-behavior-y: none;
+}
+
 .seat:hover:not(.booked-seat):not(.seat-spacer) {
     background: #3e4668;
     transform: scale(1.15);

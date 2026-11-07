@@ -44,6 +44,11 @@ export function SeatSelection({ initialData, onBack, onNext, onToast }) {
         ? `✓ ${selectedSeats.length} of ${maxSeats} seat${maxSeats === 1 ? '' : 's'} selected`
         : `Please select ${seatsRemaining} more seat${seatsRemaining === 1 ? '' : 's'}`;
 
+  useEffect(() => () => {
+    seatDragRef.current = null;
+    document.documentElement.classList.remove('seat-selection-dragging');
+  }, []);
+
   useEffect(() => {
     if (!requestKey) return undefined;
 
@@ -128,6 +133,7 @@ export function SeatSelection({ initialData, onBack, onNext, onToast }) {
     };
     setHoveredSeat(null);
     event.currentTarget.setPointerCapture(event.pointerId);
+    document.documentElement.classList.add('seat-selection-dragging');
 
     if (!setSeatSelected(seatId, shouldSelect) && shouldSelect
       && selectedSeatsRef.current.length >= maxSeats) {
@@ -160,6 +166,7 @@ export function SeatSelection({ initialData, onBack, onNext, onToast }) {
   function finishSeatDrag(event) {
     if (seatDragRef.current?.pointerId === event.pointerId) {
       seatDragRef.current = null;
+      document.documentElement.classList.remove('seat-selection-dragging');
     }
   }
 
