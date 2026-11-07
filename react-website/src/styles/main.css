@@ -1793,8 +1793,8 @@ section {
 
 .movie-card {
     display: grid;
-    grid-template-columns: minmax(0, 1.2fr) minmax(0, 2.3fr);
-    gap: var(--layout-gap);
+    grid-template-columns: minmax(0, 1.7fr) minmax(0, 2.1fr);
+    gap: clamp(0.5rem, 1vw, 1rem);
     background: linear-gradient(180deg, rgba(24, 28, 42, 0.92), rgba(17, 19, 28, 0.96));
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-lg);
@@ -2206,7 +2206,6 @@ select option {
 /* Showtime Chips */
 .showtime-chips {
     display: flex;
-    gap: clamp(7px, 1vw, 16px);
     flex-wrap: wrap;
     margin-top: 0;
     align-items: center;
@@ -2239,6 +2238,7 @@ select option {
     cursor: pointer;
     transition: all var(--transition);
     touch-action: manipulation;
+    padding: 10px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -3460,7 +3460,7 @@ select option {
     background: var(--bg-surface);
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-lg);
-    padding: clamp(1rem, 2vw, 2.5rem);
+    padding: clamp(1rem, 2vw, 2rem);
     height: fit-content;
     width: 100%;
 }
@@ -3489,7 +3489,7 @@ select option {
     display: grid;
     grid-template-columns: 6.5rem minmax(0, 1fr);
     align-items: center;
-    gap: clamp(0.5rem, 1vw, 1.5rem);
+    gap: clamp(0.5rem, 1vw, 1.2rem);
     padding: clamp(1rem, 1vw, 1.2rem) 0;
     border-bottom: 1px solid var(--border-subtle);
     text-align: left;
@@ -3508,7 +3508,7 @@ select option {
 .show-time-list {
     display: flex;
     justify-content: flex-start;
-    gap: clamp(0.5rem, 1vw, 1rem);
+    gap: clamp(0.5rem, 2vw, 0.8rem);
     flex-wrap: wrap;
     min-width: 0;
 }

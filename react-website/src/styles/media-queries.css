@@ -1074,3 +1074,8 @@ header {
         overflow-y: hidden;
     }
 }
+
+.movie-page .showtimes-schedule .book-now-button {
+    padding: 16px 32px;
+    font-size: clamp(1.05rem, 1.35vw, 1.2rem);
+}
