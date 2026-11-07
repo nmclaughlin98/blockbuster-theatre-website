@@ -2339,7 +2339,7 @@ select option {
 
 /* Live Booking Subtotal summary */
 .booking-subtotal-bar {
-    margin-top: 24px;
+    margin-top: 50px;
     margin-bottom: 24px;
     padding: 16px 24px;
     background: rgba(255, 51, 75, 0.08);
@@ -2460,7 +2460,7 @@ select option {
     align-items: center;
     justify-content: center;
     min-height: 2.5rem;
-    margin: 0.25rem 0 0;
+    margin: 1.2rem 0 0;
     padding: 0.6rem 1rem;
     border: 1px solid rgba(181, 189, 207, 0.2);
     border-radius: 999px;
@@ -2667,6 +2667,7 @@ select option {
     background: rgba(255, 255, 255, 0.1);
     padding: clamp(5px, 0.5vw, 10px) clamp(7px, 1vw, 13px);
     border-radius: var(--radius-sm);
+
 }
 
 /* Form Action Buttons */
@@ -2688,6 +2689,18 @@ select option {
 .form-button.previous:hover {
     background: rgba(255, 255, 255, 0.16);
     box-shadow: none;
+}
+
+/* ==========================================================================
+   Step 4: Review Your Booking
+   ========================================================================== */
+
+.review-details-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    margin-top: 50px;
+    margin-bottom: 20px;
 }
 
 /* ==========================================================================
@@ -2749,6 +2762,7 @@ select option {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 16px;
+    margin-top: 30px;
     margin-bottom: 20px;
 }
 
@@ -3846,6 +3860,7 @@ html:not(.home-route) #root>.home-skeleton-page {
     color: var(--text-secondary);
     line-height: 1.6;
     margin: 12px 0;
+    font-size: clamp(0.85rem, 3vw, 1rem);
 }
 
 .guest-conversion-card {

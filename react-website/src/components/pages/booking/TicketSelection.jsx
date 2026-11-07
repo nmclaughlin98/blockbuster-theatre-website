@@ -370,7 +370,7 @@ export function TicketSelection({ initialData = {}, onNext, onToast }) {
   }
 
   function changeTicketCount(tierId, amount) {
-    if (amount > 0 && totalTickets >= 10) {
+    if (amount > 0 && totalTickets >= 50) {
       onToast('Maximum of 10 tickets allowed.');
       return;
     }

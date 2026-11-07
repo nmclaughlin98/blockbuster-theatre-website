@@ -186,10 +186,10 @@ export function BookingConfirmation({
           <div className="ticket-details-grid">
             <div className="ticket-detail-item"><span>Showtime</span><strong>{formatScreeningDate(bookingDetails.date, time)}</strong></div>
             <div className="ticket-detail-item"><span>Screen</span><strong>Screen {screen}</strong></div>
-            <div className="ticket-detail-item"><span>Seat Numbers</span><strong>{selectedSeats.join(', ')}</strong></div>
-            <div className="ticket-detail-item"><span>Total</span><strong>{totalAmount}</strong></div>
+            <div className="ticket-detail-item"><span>Seat{ticketCount === 1 ? '' : 's'}</span><strong>{selectedSeats.join(', ')}</strong></div>
             <div className="ticket-detail-item"><span>Guest Name</span><strong>{customer.firstName} {customer.surname}</strong></div>
             <div className="ticket-detail-item"><span>Ticket Breakdown</span><strong>{ticketCount} Ticket{ticketCount === 1 ? '' : 's'}</strong></div>
+            <div className="ticket-detail-item"><span>Total</span><strong>{totalAmount}</strong></div>
           </div>
           <div className="ticket-perforation"><div className="ticket-perforation-line" /></div>
           <div className="ticket-barcode-area"><div className="ticket-booking-ref">REF: {bookingRef}</div></div>

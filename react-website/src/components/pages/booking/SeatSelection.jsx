@@ -112,7 +112,7 @@ export function SeatSelection({ initialData, onBack, onNext, onToast }) {
   return (
     <fieldset className="active" data-step="1">
       <StepHeader
-        title="Step 2: Reserve Your Seats"
+        title="Step 2: Choose Your Seats"
         description={(
           <span
             className={`seat-selection-status${seatsComplete ? ' seat-selection-status--complete' : ''}${seatsOverLimit ? ' seat-selection-status--warning' : ''}`}
@@ -137,12 +137,12 @@ export function SeatSelection({ initialData, onBack, onNext, onToast }) {
         </div>
       )}
       <div className="seating-plan">
-        <div className="screen-container"><div className="screen" /><div className="screen-text">MAIN CINEMA SCREEN (CURVED)</div></div>
+        <div className="screen-container"><div className="screen" /><div className="screen-text">MAIN CINEMA SCREEN</div></div>
         <div className="seat-legend-container">
           <div className="seat-legend">
+            <div className="legend-item"><div className="legend-seat selected-seat" /><span>Selected</span></div>
             <div className="legend-item"><div className="legend-seat" /><span>Available</span></div>
-            <div className="legend-item"><div className="legend-seat booked-seat" /><span>Booked</span></div>
-            <div className="legend-item"><div className="legend-seat selected-seat" /><span>Your Pick</span></div>
+            <div className="legend-item"><div className="legend-seat booked-seat" /><span>Unavailable</span></div>
             <div className="legend-item">
               <div className="legend-seat seat-accessible">
                 <img src={asset('assets/images/icons/accessible.png')} alt="" />
