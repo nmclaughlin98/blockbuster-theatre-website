@@ -1,5 +1,5 @@
 /* Timetable page styles, scoped to this page. */
-.root :global(.page-banner){
+.root :global(.page-banner) {
     width: 100%;
     max-width: var(--content-width);
     margin: 0 auto;
@@ -8,7 +8,7 @@
     position: relative;
 }
 
-.root :global(.page-banner)::before{
+.root :global(.page-banner)::before {
     content: "";
     position: absolute;
     inset: 18px 18% auto;
@@ -18,7 +18,7 @@
     pointer-events: none;
 }
 
-.root :global(.page-banner) h1{
+.root :global(.page-banner) h1 {
     font-family: var(--font-display);
     font-size: clamp(2.5rem, 5vw, 4.2rem);
     letter-spacing: 0.06em;
@@ -31,13 +31,13 @@
     -webkit-text-fill-color: transparent;
 }
 
-.root :global(.page-banner) p{
+.root :global(.page-banner) p {
     color: var(--text-secondary);
     font-size: 1rem;
     position: relative;
 }
 
-.root :global(.timetable-controls){
+.root :global(.timetable-controls) {
     width: 100%;
     max-width: var(--content-width);
     margin: 0 auto 28px;
@@ -48,7 +48,7 @@
     touch-action: manipulation;
 }
 
-.root :global(.timetable-toolbar){
+.root :global(.timetable-toolbar) {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -57,7 +57,7 @@
     touch-action: manipulation;
 }
 
-.root :global(.day-tabs){
+.root :global(.day-tabs) {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
@@ -65,7 +65,7 @@
     margin: 15px 0;
 }
 
-.root :global(.day-tab){
+.root :global(.day-tab) {
     padding: 10px 18px;
     border: 1px solid var(--border-subtle);
     background: rgba(255, 255, 255, 0.02);
@@ -81,7 +81,7 @@
 
 .root :global(.day-tab):hover,
 .root :global(.day-tab):focus-visible,
-.root :global(.day-tab):global(.active){
+.root :global(.day-tab):global(.active) {
     background: linear-gradient(135deg, var(--accent-red), #ff4968);
     border-color: rgba(255, 255, 255, 0.26);
     color: #fff;
@@ -89,7 +89,7 @@
     outline: none;
 }
 
-.root :global(.filter-bar){
+.root :global(.filter-bar) {
     position: relative;
     max-width: 420px;
     width: 100%;
@@ -97,24 +97,24 @@
     touch-action: manipulation;
 }
 
-.root :global(.print-pdf-btn){
+.root :global(.print-pdf-btn) {
     white-space: nowrap;
     margin-left: auto;
     touch-action: manipulation;
 }
 
-.root :global(.filter-bar) :global(.search-input){
+.root :global(.filter-bar) :global(.search-input) {
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-full);
     box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.02);
 }
 
-.root :global(.filter-bar) :global(.search-input):focus{
+.root :global(.filter-bar) :global(.search-input):focus {
     border-color: rgba(255, 51, 75, 0.65);
     box-shadow: 0 0 0 4px rgba(255, 51, 75, 0.12), 0 10px 20px rgba(0, 0, 0, 0.28);
 }
 
-.root :global(.timetable-container){
+.root :global(.timetable-container) {
     width: 100%;
     max-width: var(--content-width);
     margin: 0 auto 80px;
@@ -124,7 +124,7 @@
     gap: 18px;
 }
 
-.root :global(.movie-card){
+.root :global(.movie-card) {
     display: grid;
     grid-template-columns: minmax(0, 1.7fr) minmax(0, 2.1fr);
     gap: clamp(0.5rem, 1vw, 1rem);
@@ -137,7 +137,7 @@
     overflow: hidden;
 }
 
-.root :global(.movie-card)::before{
+.root :global(.movie-card)::before {
     content: "";
     position: absolute;
     inset: 0 auto auto 0;
@@ -147,13 +147,7 @@
     pointer-events: none;
 }
 
-.root :global(.movie-card):hover{
-    border-color: rgba(255, 255, 255, 0.12);
-    transform: translateY(-2px);
-    box-shadow: 0 16px 26px rgba(0, 0, 0, 0.28);
-}
-
-.root :global(.movie-info){
+.root :global(.movie-info) {
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -163,14 +157,19 @@
     min-width: 0;
 }
 
-.root :global(.movie-title){
+.root :global(.movie-title) {
     font-family: var(--font-heading);
     font-size: clamp(1.4rem, 2vw, 2rem);
     color: var(--text-primary);
     font-weight: 700;
+    width: auto;
 }
 
-.root :global(.movie-meta){
+.root :global(.movie-title):hover {
+    color: var(--accent-red);
+}
+
+.root :global(.movie-meta) {
     display: flex;
     flex-wrap: wrap;
     gap: 10px;
@@ -182,7 +181,7 @@
     text-shadow: 0 2px 20px rgba(0, 0, 0, 0.9);
 }
 
-.root :global(.badge-genre){
+.root :global(.badge-genre) {
     display: inline-flex;
     align-items: center;
     padding: 6px 10px;
@@ -193,7 +192,7 @@
     font-weight: 700;
 }
 
-.root :global(.showtimes-grid){
+.root :global(.showtimes-grid) {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(max(7.5rem, calc((100% - 36px) / 4)), 1fr));
     gap: 12px;
@@ -201,41 +200,41 @@
     align-content: center;
 }
 
-.root :global(.timetable-showtime-chip){
+.root :global(.timetable-showtime-chip) {
     max-width: 100%;
     text-align: center;
     text-decoration: none;
 }
 
-.root :global(.timetable-download-status){
+.root :global(.timetable-download-status) {
     flex-basis: 100%;
     color: var(--text-secondary);
     font-size: 0.9rem;
 }
 
-.root :global(.timetable-download-status):global(.error){
+.root :global(.timetable-download-status):global(.error) {
     color: var(--accent-red);
 }
 
-@media print{
+@media print {
 
-.root :global(.timetable-controls),
-.root :global(.page-banner) p{
+    .root :global(.timetable-controls),
+    .root :global(.page-banner) p {
         display: none !important;
     }
 
-.root :global(.page-banner){
+    .root :global(.page-banner) {
         padding-top: 0;
         margin-bottom: 12px;
     }
 
-.root :global(.movie-card){
+    .root :global(.movie-card) {
         break-inside: avoid;
         page-break-inside: avoid;
         box-shadow: none;
     }
 
-.root :global(.timetable-showtime-chip){
+    .root :global(.timetable-showtime-chip) {
         color: #111 !important;
         background: #fff !important;
         border-color: rgba(0, 0, 0, 0.2);
@@ -243,11 +242,11 @@
 
 }
 
-.root :global(.timetable-showtime-chip){
+.root :global(.timetable-showtime-chip) {
     padding: 20px;
 }
 
-.root :global(.filter-bar) label{
+.root :global(.filter-bar) label {
     font-family: var(--font-body);
     font-size: clamp(0.7rem, 1vw, 0.9rem);
     letter-spacing: 0.08em;
@@ -257,92 +256,92 @@
     margin-left: 5px;
 }
 
-.root :global(.page-banner){
+.root :global(.page-banner) {
     padding: clamp(2rem, 5vw, 2.875rem) var(--page-gutter) 1.125rem;
 }
 
-.root :global(.page-banner) h1{
+.root :global(.page-banner) h1 {
     font-size: clamp(1.8rem, 5vw, 4.2rem);
     overflow-wrap: anywhere;
 }
 
 .root :global(.timetable-controls),
-.root :global(.timetable-container){
+.root :global(.timetable-container) {
     padding-inline: var(--page-gutter);
 }
 
 .root :global(.timetable-toolbar)>*,
-.root :global(.movie-card)>*{
+.root :global(.movie-card)>* {
     min-width: 0;
 }
 
-.root :global(.movie-card){
+.root :global(.movie-card) {
     padding: clamp(1rem, 2.5vw, 1.5rem);
 }
 
-.root :global(.showtimes-grid){
+.root :global(.showtimes-grid) {
     grid-template-columns: repeat(auto-fill, minmax(max(7.5rem, calc((100% - 36px) / 4)), 1fr));
 }
 
-@media (max-width: 974px){
+@media (max-width: 974px) {
 
-.root :global(.timetable-showtime-chip){
+    .root :global(.timetable-showtime-chip) {
         gap: 0.2rem;
         padding: 0.9rem;
     }
 
-.root :global(.timetable-showtime-chip) :global(.time-chip-time){
+    .root :global(.timetable-showtime-chip) :global(.time-chip-time) {
         font-size: 1.1rem;
     }
 
-.root :global(.timetable-showtime-chip) :global(.time-chip-screen){
+    .root :global(.timetable-showtime-chip) :global(.time-chip-screen) {
         font-size: 0.8rem;
     }
 
-.root :global(.movie-card){
+    .root :global(.movie-card) {
         grid-template-columns: minmax(0, 1fr);
     }
 
 }
 
-@media (min-width: 769px) and (max-width: 974px){
+@media (min-width: 769px) and (max-width: 974px) {
 
-.root :global(.movie-card){
+    .root :global(.movie-card) {
         grid-template-columns: minmax(0, 1fr) minmax(0, 1.35fr);
         gap: clamp(1rem, 2vw, 1.5rem);
     }
 
 }
 
-@media (max-width: 768px){
+@media (max-width: 768px) {
 
-.root :global(.day-tabs){
+    .root :global(.day-tabs) {
         gap: 8px;
     }
 
-.root :global(.day-tab){
+    .root :global(.day-tab) {
         padding: 9px 13px;
         font-size: 0.72rem;
     }
 
-.root :global(.movie-card){
+    .root :global(.movie-card) {
         gap: 16px;
     }
 
-.root :global(.movie-info){
+    .root :global(.movie-info) {
         display: grid;
         grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
         align-items: start;
         column-gap: clamp(0.5rem, 2vw, 1rem);
     }
 
-.root :global(.movie-meta){
+    .root :global(.movie-meta) {
         justify-content: flex-end;
         min-width: 0;
         text-align: right;
     }
 
-.root :global(.badge-genre){
+    .root :global(.badge-genre) {
         max-width: 100%;
         text-align: right;
         white-space: normal;
@@ -350,31 +349,31 @@
 
 }
 
-@media (max-width: 650px){
+@media (max-width: 650px) {
 
-.root :global(.timetable-toolbar){
+    .root :global(.timetable-toolbar) {
         align-items: stretch;
     }
 
-.root :global(.filter-bar){
+    .root :global(.filter-bar) {
         max-width: none;
         margin: 0;
     }
 
-.root :global(.print-pdf-btn){
+    .root :global(.print-pdf-btn) {
         width: 100%;
         margin-left: 0;
     }
 
 }
 
-@media (max-width: 480px){
+@media (max-width: 480px) {
 
-.root :global(.page-banner) h1{
+    .root :global(.page-banner) h1 {
         font-size: clamp(1.65rem, 8vw, 2.5rem);
     }
 
-.root :global(.movie-card){
+    .root :global(.movie-card) {
         gap: 1rem;
     }
 

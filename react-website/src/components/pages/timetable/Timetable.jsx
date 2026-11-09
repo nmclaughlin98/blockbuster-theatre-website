@@ -105,7 +105,12 @@ function TimetableMovie({ movie, day }) {
     return (
         <div className="movie-card">
             <div className="movie-info">
-                <div className="movie-title">{getMovieTitle(movie)}</div>
+                <a
+                    className="movie-title"
+                    href={`./movie-detail.html?movie=${encodeURIComponent(movieSlug(movie))}`}
+                >
+                    {getMovieTitle(movie)}
+                </a>
                 <div className="movie-meta">
                     <span className="badge-genre">{getMovieGenre(movie)}</span>
                 </div>
