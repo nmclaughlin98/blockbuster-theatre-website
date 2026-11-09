@@ -143,7 +143,7 @@ export function HeroCarousel({ movies }) {
                                     )}
                                     <a
                                         className="button btn-glass"
-                                        href={`./templates/movie-detail.html?movie=${encodeURIComponent(movieSlug(movie))}`}
+                                        href={`./movie-detail.html?movie=${encodeURIComponent(movieSlug(movie))}`}
                                         onClick={(e) => e.currentTarget.blur()}
                                     >
                                         More Info
