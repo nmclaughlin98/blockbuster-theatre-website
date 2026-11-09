@@ -2,6 +2,19 @@ import { MOVIES_API_URL } from '../../../config.js';
 
 export const CINEMA_SEAT_CAPACITY = 71;
 
+export function sortSeatIds(seats) {
+  return [...seats].sort((first, second) => (
+    first.localeCompare(second, 'en', { numeric: true, sensitivity: 'base' })
+  ));
+}
+
+export function getApiErrorMessage(data) {
+  const message = [data?.message, data?.error?.message, data?.error].find((value) => (
+    typeof value === 'string' && value.trim()
+  ));
+  return message || null;
+}
+
 async function requestJson(path, options = {}, expectedStatus) {
   const response = await fetch(`${MOVIES_API_URL}${path}`, options);
   let data;
@@ -13,7 +26,11 @@ async function requestJson(path, options = {}, expectedStatus) {
   }
 
   if (!response.ok || (expectedStatus && response.status !== expectedStatus)) {
-    const error = new Error(data?.message || `Booking request failed (${response.status}).`);
+    const apiMessage = getApiErrorMessage(data);
+    if (apiMessage) {
+      console.error(`Booking API error (${response.status}) at ${path}: ${apiMessage}`);
+    }
+    const error = new Error(apiMessage || `Booking request failed (${response.status}).`);
     error.status = response.status;
     throw error;
   }
@@ -82,7 +99,7 @@ export function createGuestBookingPayload({
   if (!isShowtimeIdForDate(showtimeId, date)) {
     throw new Error('Choose a valid screening with a showtime ID for the selected date.');
   }
-  if (!Array.isArray(seats) || seats.length === 0 || seats.length > 10
+  if (!Array.isArray(seats) || seats.length === 0 || seats.length > 30
     || new Set(seats).size !== seats.length
     || seats.some((seat) => typeof seat !== 'string' || !/^[A-G](?:[1-9]|1[01])$/.test(seat))) {
     throw new Error('Select between 1 and 10 unique valid seats before completing your booking.');
@@ -105,7 +122,7 @@ export function createGuestBookingPayload({
   const payload = {
     showtimeId,
     date,
-    seats: [...seats],
+    seats: sortSeatIds(seats),
     email: email.trim(),
     customerName: customerName.trim(),
     tickets: tickets.map(({ tierId, quantity }) => ({ tierId, quantity })),
@@ -150,7 +167,7 @@ export async function createGuestBooking(payload) {
     || (data.conversionTokenExpiresAt != null && typeof data.conversionTokenExpiresAt !== 'string')) {
     throw new Error('The booking service returned invalid guest booking details.');
   }
-  return data;
+  return { ...data, seats: sortSeatIds(data.seats) };
 }
 
 export async function convertGuestAccount(conversionToken, password) {
@@ -267,11 +284,11 @@ export async function getFilmSelections(signal, date) {
     && (selection.type === 'movie'
       ? selection.movieId != null && typeof selection.title === 'string' && typeof selection.label === 'string'
       : selection.offerId != null
-        && selection.featuredMovieId != null
-        && selection.pricingId != null
-        && (typeof selection.displayLabel === 'string'
-          || typeof selection.label === 'string'
-          || typeof selection.title === 'string'))
+      && selection.featuredMovieId != null
+      && selection.pricingId != null
+      && (typeof selection.displayLabel === 'string'
+        || typeof selection.label === 'string'
+        || typeof selection.title === 'string'))
   ));
   if (!validSelections) throw new Error('The booking service returned an invalid film selection.');
   return selections.filter((selection) => (
@@ -342,6 +359,54 @@ export async function getMoviesForDate(date, signal) {
   return scheduledMovies;
 }
 
+export async function getMoviesForDates(dates, signal) {
+  if (!Array.isArray(dates)) {
+    throw new Error('Choose valid screening dates.');
+  }
+  const screeningDates = [...new Set(dates)].map((date) => ({
+    date,
+    weekday: getWeekdayForDate(date),
+  }));
+  if (!screeningDates.length) return [];
+
+  const movies = await getMovies(signal);
+  const requests = screeningDates.flatMap(({ date, weekday }) => movies
+    .filter((movie) => (
+      movie?.visible !== false
+      && movie?.isComingSoon !== true
+      && movie?.movieId != null
+      && (
+        (Array.isArray(movie.showtimes?.[weekday]) && movie.showtimes[weekday].length > 0)
+        || getShowtimesForDate(movie.showtimes, date).length > 0
+      )
+    ))
+    .map((movie) => ({ movie, date })));
+
+  const scheduledMovies = new Map();
+  let nextRequestIndex = 0;
+  const loadNextRequest = async () => {
+    while (nextRequestIndex < requests.length) {
+      const { movie, date } = requests[nextRequestIndex];
+      nextRequestIndex += 1;
+      const details = await getMovieDetail(movie.movieId, signal, date);
+      const showtimes = getShowtimesForDate(details.showtimes, date);
+      if (!showtimes.length) continue;
+
+      const key = String(movie.movieId);
+      const scheduledMovie = scheduledMovies.get(key);
+      if (scheduledMovie) {
+        scheduledMovie.showtimes[date] = showtimes;
+      } else {
+        scheduledMovies.set(key, { ...movie, showtimes: { [date]: showtimes } });
+      }
+    }
+  };
+  const workerCount = Math.min(4, requests.length);
+  await Promise.all(Array.from({ length: workerCount }, () => loadNextRequest()));
+
+  return [...scheduledMovies.values()];
+}
+
 export async function getBookingSelections(signal, date) {
   try {
     return { selections: await getFilmSelections(signal, date), error: null };
@@ -381,7 +446,13 @@ export async function getMovieDetail(movieId, signal, date) {
   return data;
 }
 
-export async function getSelectionDateAvailability(selection, dates, signal, onShowtimesReady) {
+export async function getSelectionDateAvailability(
+  selection,
+  dates,
+  signal,
+  onShowtimesReady,
+  onShowtimeAvailabilityReady,
+) {
   const schedules = new Array(dates.length);
   let nextDateIndex = 0;
   const loadDateSchedule = async () => {
@@ -422,6 +493,7 @@ export async function getSelectionDateAvailability(selection, dates, signal, onS
   const screenings = schedules.flatMap((showtimes, dateIndex) => (
     showtimes.map((showtime) => ({ date: dates[dateIndex].isoDate, showtime }))
   ));
+  const availableSeatsByShowtimeId = {};
   let nextScreeningIndex = 0;
   const loadScreeningAvailability = async () => {
     while (nextScreeningIndex < screenings.length) {
@@ -430,8 +502,10 @@ export async function getSelectionDateAvailability(selection, dates, signal, onS
       const { date, showtime } = screenings[index];
       const bookedSeats = await getBookedSeats(showtime.showtimeId, date, signal);
       const dateAvailability = availability[date];
+      const availableSeats = CINEMA_SEAT_CAPACITY - bookedSeats.length;
+      availableSeatsByShowtimeId[showtime.showtimeId] = availableSeats;
       dateAvailability.showtimesCount += 1;
-      dateAvailability.averageAvailableSeats += CINEMA_SEAT_CAPACITY - bookedSeats.length;
+      dateAvailability.averageAvailableSeats += availableSeats;
     }
   };
 
@@ -445,6 +519,7 @@ export async function getSelectionDateAvailability(selection, dates, signal, onS
       dateAvailability.averageAvailableSeats /= dateAvailability.showtimesCount;
     }
   }
+  onShowtimeAvailabilityReady?.(availableSeatsByShowtimeId);
   return availability;
 }
 

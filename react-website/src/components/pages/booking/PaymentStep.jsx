@@ -3,6 +3,7 @@ import {
   createGuestBooking,
   createGuestBookingPayload,
   getBookedSeats,
+  sortSeatIds,
 } from '../shared/bookingApi';
 import { DirectionalButton } from '../../shared';
 import { BookingLoader, StepHeader } from './BookingStepComponents';
@@ -31,7 +32,7 @@ export function PaymentStep({
   const submittingRef = useRef(false);
   const showtime = initialData.showtime;
   const customer = initialData.customer;
-  const seats = initialData.seats;
+  const seats = sortSeatIds(initialData.seats);
   const tickets = Object.entries(initialData.tickets || {})
     .filter(([, quantity]) => quantity > 0)
     .map(([tierId, quantity]) => ({ tierId, quantity }));
@@ -111,14 +112,16 @@ export function PaymentStep({
         title="Step 4: Review Your Booking"
         description="Review the details below to reserve your seats. No card details are collected or submitted."
       />
-      <div className="ticket-details-grid">
+      <div className="review-details-grid">
         <div className="ticket-detail-item"><span>Film</span><strong>{initialData.selection?.title || 'Selected film'}</strong></div>
         <div className="ticket-detail-item"><span>Showtime</span><strong>{formatScreeningDate(showtime?.date || initialData.date, showtime?.time || '')}</strong></div>
         <div className="ticket-detail-item"><span>Screen</span><strong>Screen {showtime?.screen || ''}</strong></div>
-        <div className="ticket-detail-item"><span>Guest</span><strong>{customer.firstName} {customer.surname}</strong></div>
+        <div className="ticket-detail-item"><span>Guest Name</span><strong>{customer.firstName} {customer.surname}</strong></div>
         <div className="ticket-detail-item"><span>Email</span><strong>{customer.email}</strong></div>
-        <div className="ticket-detail-item"><span>Seats</span><strong>{seats.join(', ')}</strong></div>
+        <div className="ticket-detail-item"><span>Seat{seats.length === 1 ? '' : 's'}</span><strong>{seats.join(', ')}</strong></div>
+        <div className="ticket-detail-item"><span>Ticket Breakdown</span><strong>{seats.length} Ticket{seats.length === 1 ? '' : 's'}</strong></div>
         <div className="ticket-detail-item"><span>Total</span><strong>{new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP' }).format(initialData.quote?.total || 0)}</strong></div>
+        <br />
       </div>
       <p className="form-notice" role="status">
         This flow records a booking reservation only. The displayed total is retained for your reference; payment is not taken.

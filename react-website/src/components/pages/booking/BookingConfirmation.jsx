@@ -1,6 +1,10 @@
 import { useState } from 'react';
 import { asset, DirectionalButton } from '../../shared';
-import { convertGuestAccount } from '../shared/bookingApi';
+import {
+  convertGuestAccount,
+  getApiErrorMessage,
+  sortSeatIds,
+} from '../shared/bookingApi';
 import { StepHeader } from './BookingStepComponents';
 
 function formatScreeningDate(date, time) {
@@ -34,7 +38,7 @@ export function BookingConfirmation({
     loading: false, error: '', complete: false, dismissed: false,
   });
   const bookingRef = bookingDetails.bookingRef;
-  const selectedSeats = bookingDetails.seats;
+  const selectedSeats = sortSeatIds(bookingDetails.seats);
   const movieTitle = bookingDetails.movieTitle || movie?.title || 'Movie';
   const customerEmail = bookingDetails.customerEmail || customer.email;
   const ticketCount = bookingDetails.tickets.reduce((total, ticket) => total + ticket.quantity, 0);
@@ -129,8 +133,10 @@ export function BookingConfirmation({
       } catch (error) {
         throw new Error('The wallet service returned an invalid response.', { cause: error });
       }
-      if (!response.ok) {
-        throw new Error(passData?.error || `Wallet pass request failed (${response.status}).`);
+      if (!response.ok || passData?.error) {
+        throw new Error(
+          getApiErrorMessage(passData) || `Wallet pass request failed (${response.status}).`,
+        );
       }
 
       if (walletType === 'apple') {
@@ -171,14 +177,14 @@ export function BookingConfirmation({
   return (
     <fieldset className="active" data-step="4">
       <StepHeader
-        title="Booking confirmed"
+        title="Booking Confirmed!"
         description={bookingDetails.confirmationEmailSent
           ? 'Your seats have been reserved. No payment was taken.'
           : 'Your reservation succeeded, but we could not send the confirmation email. No payment was taken.'}
       />
       <div className="ticket-pass">
         <div className="ticket-pass-header">
-          <div className="ticket-pass-brand">BLOCKBUSTER THEATRE</div>
+          <div className="ticket-pass-brand">BLOCKBUSTER<br />THEATRE</div>
           <div className="ticket-pass-status">BOOKING CONFIRMED</div>
         </div>
         <div className="ticket-pass-body">
@@ -186,10 +192,10 @@ export function BookingConfirmation({
           <div className="ticket-details-grid">
             <div className="ticket-detail-item"><span>Showtime</span><strong>{formatScreeningDate(bookingDetails.date, time)}</strong></div>
             <div className="ticket-detail-item"><span>Screen</span><strong>Screen {screen}</strong></div>
-            <div className="ticket-detail-item"><span>Seat Numbers</span><strong>{selectedSeats.join(', ')}</strong></div>
-            <div className="ticket-detail-item"><span>Total</span><strong>{totalAmount}</strong></div>
+            <div className="ticket-detail-item"><span>Seat{ticketCount === 1 ? '' : 's'}</span><strong>{selectedSeats.join(', ')}</strong></div>
             <div className="ticket-detail-item"><span>Guest Name</span><strong>{customer.firstName} {customer.surname}</strong></div>
             <div className="ticket-detail-item"><span>Ticket Breakdown</span><strong>{ticketCount} Ticket{ticketCount === 1 ? '' : 's'}</strong></div>
+            <div className="ticket-detail-item"><span>Total</span><strong>{totalAmount}</strong></div>
           </div>
           <div className="ticket-perforation"><div className="ticket-perforation-line" /></div>
           <div className="ticket-barcode-area"><div className="ticket-booking-ref">REF: {bookingRef}</div></div>

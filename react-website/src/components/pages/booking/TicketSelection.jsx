@@ -11,9 +11,10 @@ import {
   validateCheckout,
 } from '../shared/bookingApi';
 import { movieSlug } from '../../movies';
-import { DatePicker, DirectionalButton } from '../../shared';
+import { DatePicker, DirectionalButton, ShowtimeChip } from '../../shared';
+import { AvailabilityIndicator } from './AvailabilityIndicator';
 import { getFirstAvailableDate } from './bookingDates';
-import { BookingLoader, StepHeader } from './BookingStepComponents';
+import { StepHeader } from './BookingStepComponents';
 
 const weekdayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
@@ -116,7 +117,7 @@ export function TicketSelection({ initialData = {}, onNext, onToast }) {
   const [selectedScreening, setSelectedScreening] = useState(() => getInitialScreening(initialData, params));
   const [tickets, setTickets] = useState(() => initialData.tickets || {});
   const [showtimeState, setShowtimeState] = useState({
-    requestKey: '', showtimesByDate: {}, error: null,
+    requestKey: '', showtimesByDate: {}, availableSeatsByShowtimeId: {}, error: null,
   });
   const [pricingState, setPricingState] = useState({
     requestKey: '', pricing: null, loading: false, error: null,
@@ -153,6 +154,7 @@ export function TicketSelection({ initialData = {}, onNext, onToast }) {
     ? showtimeState
     : null;
   const showtimesByDate = currentShowtimeState?.showtimesByDate || {};
+  const availableSeatsByShowtimeId = currentShowtimeState?.availableSeatsByShowtimeId || {};
   const showtimeLoading = Boolean(selectedSelection && !currentShowtimeState);
   const showtimeError = currentShowtimeState?.error || null;
   const currentDate = createCalendarDate(dateOverride)
@@ -183,6 +185,11 @@ export function TicketSelection({ initialData = {}, onNext, onToast }) {
   const validationLoading = Boolean(checkoutRequestKey && (
     validationState.requestKey !== checkoutRequestKey || validationState.loading
   ));
+  const bookingStepLoading = selectionLoading
+    || calendarAvailabilityLoading
+    || showtimeLoading
+    || pricingLoading
+    || validationLoading;
   const ticketTotal = pricing?.ticketTiers.reduce(
     (total, tier) => total + tier.price * (tickets[tier.id] || 0),
     0,
@@ -218,7 +225,10 @@ export function TicketSelection({ initialData = {}, onNext, onToast }) {
         requestKey, availability: cachedAvailability.availability, loading: false, error: null,
       });
       setShowtimeState({
-        requestKey, showtimesByDate: cachedAvailability.showtimesByDate, error: null,
+        requestKey,
+        showtimesByDate: cachedAvailability.showtimesByDate,
+        availableSeatsByShowtimeId: cachedAvailability.availableSeatsByShowtimeId || {},
+        error: null,
       });
       applyFirstAvailableDate(cachedAvailability.showtimesByDate);
       return undefined;
@@ -228,23 +238,43 @@ export function TicketSelection({ initialData = {}, onNext, onToast }) {
     setCalendarAvailabilityState({ requestKey, availability: null, loading: true, error: null });
     let showtimesReady = false;
     let availableShowtimes = {};
+    let availableSeatsByShowtimeId = {};
     getSelectionDateAvailability(selection, dates, controller.signal, (showtimesByDate) => {
       if (controller.signal.aborted) return;
       showtimesReady = true;
       availableShowtimes = showtimesByDate;
-      setShowtimeState({ requestKey, showtimesByDate, error: null });
+      setShowtimeState({
+        requestKey, showtimesByDate, availableSeatsByShowtimeId: {}, error: null,
+      });
       applyFirstAvailableDate(showtimesByDate);
+    }, (showtimeAvailability) => {
+      if (controller.signal.aborted) return;
+      availableSeatsByShowtimeId = showtimeAvailability;
+      setShowtimeState((current) => (
+        current.requestKey === requestKey
+          ? { ...current, availableSeatsByShowtimeId }
+          : current
+      ));
     })
       .then((availability) => {
         if (controller.signal.aborted) return;
-        const result = { availability, showtimesByDate: availableShowtimes };
+        const result = {
+          availability,
+          showtimesByDate: availableShowtimes,
+          availableSeatsByShowtimeId,
+        };
         calendarAvailabilityCacheRef.current.set(requestKey, result);
         setCalendarAvailabilityState({ requestKey, availability, loading: false, error: null });
       })
       .catch((error) => {
         if (!controller.signal.aborted) {
           if (!showtimesReady) {
-            setShowtimeState({ requestKey, showtimesByDate: {}, error: error.message });
+            setShowtimeState({
+              requestKey,
+              showtimesByDate: {},
+              availableSeatsByShowtimeId: {},
+              error: error.message,
+            });
           }
           setCalendarAvailabilityState({
             requestKey, availability: null, loading: false, error: error.message,
@@ -365,7 +395,7 @@ export function TicketSelection({ initialData = {}, onNext, onToast }) {
   }
 
   function changeTicketCount(tierId, amount) {
-    if (amount > 0 && totalTickets >= 10) {
+    if (amount > 0 && totalTickets >= 50) {
       onToast('Maximum of 10 tickets allowed.');
       return;
     }
@@ -430,11 +460,15 @@ export function TicketSelection({ initialData = {}, onNext, onToast }) {
         <select
           id="booking-movie"
           className="form-control"
+          aria-busy={selectionLoading}
+          disabled={selectionLoading}
           value={selectedSelection ? selectionKey(selectedSelection) : ''}
           onChange={(event) => changeSelection(event.target.value)}
           required
         >
-          <option value="" disabled>-- Choose a Film or Special Offer --</option>
+          <option value="" disabled>
+            {selectionLoading ? 'Loading films and special offers...' : '-- Choose a Film or Special Offer --'}
+          </option>
           <optgroup label="Movies">
             {selections.filter((item) => item.type === 'movie').map((item) => (
               <option value={selectionKey(item)} key={selectionKey(item)}>{item.label}</option>
@@ -446,13 +480,12 @@ export function TicketSelection({ initialData = {}, onNext, onToast }) {
             ))}
           </optgroup>
         </select>
-        {selectionLoading && <BookingLoader>Loading films and special offers...</BookingLoader>}
         {selectionError && <p className="form-notice" role="alert">{selectionError}</p>}
         {!selectionLoading && !selectionError && !selections.length
           && <p className="form-notice" role="status">No films or special offers are currently available.</p>}
       </div>
       <div className="date-time-group">
-        <div className="form-group">
+        <div className="form-group" aria-busy={calendarAvailabilityLoading}>
           <label htmlFor="booking-date">Screening Date</label>
           <DatePicker
             variant="booking"
@@ -464,6 +497,10 @@ export function TicketSelection({ initialData = {}, onNext, onToast }) {
             includeDates={enabledCalendarDates}
             dateFormat="EEE d MMM yyyy"
             calendarClassName="booking-date-calendar"
+            popperClassName="booking-date-popper"
+            portalId="booking-date-picker-portal"
+            inputMode="none"
+            showPopperArrow={false}
             dayClassName={(calendarDate) => {
               const availability = calendarAvailability?.[toIsoDate(calendarDate)];
               return calendarAvailabilityReady
@@ -480,7 +517,10 @@ export function TicketSelection({ initialData = {}, onNext, onToast }) {
                 <span className="booking-calendar-day-content" title={tooltip}>
                   {dayNumber}
                   {calendarAvailabilityReady && level !== 'none' && (
-                    <span className={`booking-calendar-availability-dot booking-calendar-availability-dot--${level}`} aria-hidden="true" />
+                    <AvailabilityIndicator
+                      className="booking-calendar-availability-indicator"
+                      level={level}
+                    />
                   )}
                 </span>
               );
@@ -491,9 +531,6 @@ export function TicketSelection({ initialData = {}, onNext, onToast }) {
             disabled={!selectedSelection}
             required
           />
-          {calendarAvailabilityLoading && (
-            <BookingLoader>Checking showtimes and seat availability...</BookingLoader>
-          )}
           {calendarAvailabilityError && (
             <p className="form-notice" role="alert">
               Could not load date availability: {calendarAvailabilityError}{' '}
@@ -519,26 +556,41 @@ export function TicketSelection({ initialData = {}, onNext, onToast }) {
         </div>
         <div className="form-group">
           <label>Select Showtime</label>
-          <div className="showtime-chips" aria-label="Available showtimes">
+          <div className="showtime-chips" aria-label="Available showtimes" aria-busy={showtimeLoading}>
             {!selectedSelection
               ? <span className="showtime-placeholder">Select a film or offer to see available showtimes.</span>
               : showtimeLoading
-                ? <BookingLoader className="showtime-loading">Loading showtimes...</BookingLoader>
+                ? <span className="showtime-placeholder booking-field-loading" role="status">Updating showtimes...</span>
                 : showtimeError
                   ? <span className="form-notice" role="alert">{showtimeError}</span>
                   : showtimes?.length
-                    ? showtimes.map((showtime) => (
-                      <button
-                        className={`time-chip ${selectedShowtime?.showtimeId === showtime.showtimeId ? 'active' : ''}`}
-                        type="button"
-                        aria-pressed={selectedShowtime?.showtimeId === showtime.showtimeId}
-                        key={showtime.showtimeId}
-                        onClick={() => changeTime(showtime)}
-                      >
-                        <span className="time-chip-time">{showtime.time}</span>
-                        <span className="time-chip-screen">Screen {showtime.screen}</span>
-                      </button>
-                    ))
+                    ? showtimes.map((showtime) => {
+                      const availableSeats = availableSeatsByShowtimeId[showtime.showtimeId];
+                      const availability = Number.isFinite(availableSeats)
+                        ? { showtimesCount: 1, averageAvailableSeats: availableSeats }
+                        : null;
+                      const availabilityLevel = getAvailabilityLevel(availability);
+                      const availabilityTitle = availabilityLevel === 'none'
+                        ? undefined
+                        : `${availabilityLevel[0].toUpperCase()}${availabilityLevel.slice(1)} availability: ${availableSeats} seat${availableSeats === 1 ? '' : 's'} left`;
+
+                      return (
+                        <ShowtimeChip
+                          className="booking-showtime-chip"
+                          active={selectedShowtime?.showtimeId === showtime.showtimeId}
+                          key={showtime.showtimeId}
+                          onClick={() => changeTime(showtime)}
+                          time={showtime.time}
+                          screen={showtime.screen}
+                          title={availabilityTitle}
+                        >
+                          <AvailabilityIndicator
+                            className="booking-showtime-availability-indicator"
+                            level={availabilityLevel}
+                          />
+                        </ShowtimeChip>
+                      );
+                    })
                     : <span className="showtime-placeholder">
                       {selectedSelection.type === 'offer'
                         ? 'No showtimes are available for this offer and day.'
@@ -547,7 +599,7 @@ export function TicketSelection({ initialData = {}, onNext, onToast }) {
           </div>
         </div>
       </div>
-      <div className="form-group ticket-type-list">
+      <div className="form-group ticket-type-list" aria-busy={pricingLoading || validationLoading}>
         <label>Select Ticket Types</label>
         {!selectionLoading
           && !showtimeLoading
@@ -563,7 +615,6 @@ export function TicketSelection({ initialData = {}, onNext, onToast }) {
                 : 'Choose a film and showtime to view ticket types and prices.'}
             </p>
           )}
-        {pricingLoading && <BookingLoader>Loading ticket prices...</BookingLoader>}
         {pricingError && <p className="form-notice" role="alert">{pricingError}</p>}
         {!pricingLoading && !pricingError && selectedSelection && time && !pricing?.ticketTiers.length
           && <p className="form-notice" role="status">No ticket types are available for this showtime.</p>}
@@ -579,7 +630,6 @@ export function TicketSelection({ initialData = {}, onNext, onToast }) {
           </div>
         ))}
         {validation?.error && <p className="form-notice" role="alert">{validation.error}</p>}
-        {validationLoading && <BookingLoader>Checking ticket total...</BookingLoader>}
       </div>
       <div className="booking-subtotal-bar">
         <div className="subtotal-item booking-subtotal-values">
@@ -593,7 +643,15 @@ export function TicketSelection({ initialData = {}, onNext, onToast }) {
           </div>
         </div>
       </div>
-      <DirectionalButton className="form-button booking-continue-button" direction="next" onClick={continueToSeats}>
+      <DirectionalButton
+        className={`form-button booking-continue-button${bookingStepLoading ? ' is-loading' : ''}`}
+        direction="next"
+        onClick={continueToSeats}
+        disabled={bookingStepLoading}
+        aria-busy={bookingStepLoading}
+        aria-label={bookingStepLoading ? 'Updating booking options' : undefined}
+      >
+        {bookingStepLoading && <span className="booking-button-spinner" aria-hidden="true" />}
         Select Seats
       </DirectionalButton>
     </fieldset>

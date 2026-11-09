@@ -12,6 +12,7 @@ import {
   getMovieDetail,
   getMovieDetailIdForSelection,
   getMoviesForDate,
+  getMoviesForDates,
   getSelectionShowtimeDates,
   getSelectionDateAvailability,
   getShowtimesForDate,
@@ -24,6 +25,7 @@ import {
   selectionApiId,
   selectionDisplayLabel,
   selectionKey,
+  sortSeatIds,
   validateCheckout,
 } from '../src/components/pages/shared/bookingApi.js';
 
@@ -214,6 +216,62 @@ test('loads date-specific showtime IDs for movies shown in the selected timetabl
   }
 });
 
+test('loads and combines showtimes for every requested timetable date', async () => {
+  const requestedUrls = [];
+  const dates = ['2026-10-26', '2026-10-27'];
+  const showtimesByDate = {
+    '2026-10-26': {
+      date: '2026-10-26',
+      showtimeId: '559924_2026-10-26_1930',
+      time: '19:30',
+      screen: '2',
+    },
+    '2026-10-27': {
+      date: '2026-10-27',
+      showtimeId: '559924_2026-10-27_2015',
+      time: '20:15',
+      screen: '3',
+    },
+  };
+  const restoreFetch = mockFetch(async (url) => {
+    const requestedUrl = new URL(url);
+    requestedUrls.push(requestedUrl);
+    if (requestedUrl.pathname === '/movies') {
+      return new Response(JSON.stringify({
+        movies: [{
+          movieId: 'movie-42',
+          title: 'Example Film',
+          showtimes: {
+            Monday: [{ time: '19:30', screen: '2' }],
+            Tuesday: [{ time: '20:15', screen: '3' }],
+          },
+        }],
+      }));
+    }
+    const date = requestedUrl.searchParams.get('date');
+    return new Response(JSON.stringify({ showtimes: { [date]: [showtimesByDate[date]] } }));
+  });
+
+  try {
+    const movies = await getMoviesForDates(dates);
+    assert.equal(requestedUrls.filter((url) => url.pathname === '/movies').length, 1);
+    assert.deepEqual(
+      requestedUrls
+        .filter((url) => url.pathname === '/movies/movie-42')
+        .map((url) => url.searchParams.get('date'))
+        .sort(),
+      dates,
+    );
+    assert.equal(movies.length, 1);
+    assert.deepEqual(movies[0].showtimes, {
+      '2026-10-26': [showtimesByDate['2026-10-26']],
+      '2026-10-27': [showtimesByDate['2026-10-27']],
+    });
+  } finally {
+    restoreFetch();
+  }
+});
+
 test('loads booked seats by the exact showtime ID and selected date', async () => {
   const requestedUrls = [];
   const responses = [
@@ -307,7 +365,7 @@ test('posts the exact guest booking payload to the versioned endpoint', async ()
     showtimeId: '559924_2026-11-01_1215',
     date: '2026-11-01',
     movieTitle: 'Inception',
-    seats: ['F10', 'F11'],
+    seats: ['F11', 'F10'],
     tickets: [{ tierId: 'adult', quantity: 1 }, { tierId: 'child', quantity: 1 }],
     totalAmount: 24,
     currency: 'GBP',
@@ -326,7 +384,7 @@ test('posts the exact guest booking payload to the versioned endpoint', async ()
     const payload = createGuestBookingPayload({
       showtimeId: '559924_2026-11-01_1215',
       date: '2026-11-01',
-      seats: ['F10', 'F11'],
+      seats: ['F11', 'F10'],
       email: ' customer@example.com ',
       customerName: ' Niall McLaughlin ',
       tickets: [{ tierId: 'adult', quantity: 1 }, { tierId: 'child', quantity: 1 }],
@@ -347,10 +405,17 @@ test('posts the exact guest booking payload to the versioned endpoint', async ()
     });
     assert.equal(JSON.parse(request.options.body).userId, undefined);
     assert.equal(JSON.parse(request.options.body).paymentToken, undefined);
-    assert.deepEqual(booking, bookingDetails);
+    assert.deepEqual(booking, { ...bookingDetails, seats: ['F10', 'F11'] });
   } finally {
     restoreFetch();
   }
+});
+
+test('sorts seats by row and numeric seat number', () => {
+  assert.deepEqual(
+    sortSeatIds(['D2', 'F4', 'D1', 'A10', 'A2', 'A1']),
+    ['A1', 'A2', 'A10', 'D1', 'D2', 'F4'],
+  );
 });
 
 test('rejects an incomplete guest booking request before sending it', () => {
@@ -394,11 +459,14 @@ test('includes an offer ID and verifies ticket quantities match selected seats',
   }), /Ticket quantities/);
 });
 
-test('preserves HTTP 409 status for a guest booking seat conflict', async () => {
+test('logs API error messages and preserves HTTP 409 status', async () => {
   const restoreFetch = mockFetch(async () => new Response(
     JSON.stringify({ message: 'One or more seats are no longer available.' }),
     { status: 409 },
   ));
+  const originalConsoleError = console.error;
+  const loggedErrors = [];
+  console.error = (...args) => loggedErrors.push(args.join(' '));
 
   try {
     await assert.rejects(createGuestBooking({ showtimeId: 'show_77812' }), (error) => {
@@ -406,7 +474,9 @@ test('preserves HTTP 409 status for a guest booking seat conflict', async () => 
       assert.match(error.message, /no longer available/);
       return true;
     });
+    assert.ok(loggedErrors.some((message) => message.includes('One or more seats are no longer available.')));
   } finally {
+    console.error = originalConsoleError;
     restoreFetch();
   }
 });
@@ -545,6 +615,7 @@ test('loads date-specific showings and averages available seats for calendar dat
 
   try {
     let showtimesByDate;
+    let availableSeatsByShowtimeId;
     const availability = await getSelectionDateAvailability(
       movie,
       dates,
@@ -552,6 +623,9 @@ test('loads date-specific showings and averages available seats for calendar dat
       (showtimes) => {
         showtimesByDate = showtimes;
         showtimesReady = true;
+      },
+      (showtimeAvailability) => {
+        availableSeatsByShowtimeId = showtimeAvailability;
       },
     );
     assert.deepEqual(availability, {
@@ -566,6 +640,9 @@ test('loads date-specific showings and averages available seats for calendar dat
         screen: '5',
       }],
       '2026-10-26': [],
+    });
+    assert.deepEqual(availableSeatsByShowtimeId, {
+      '559924_2026-10-25_1215': 11,
     });
   } finally {
     restoreFetch();

@@ -46,6 +46,7 @@ export function GuestDetails({ initialData, onBack, onNext, onToast }) {
             aria-invalid={showErrors && !firstNameValid}
             aria-describedby={showErrors && !firstNameValid ? 'guest-first-name-error' : undefined}
             autoComplete="given-name"
+            placeholder="John"
             required
           />
           {showErrors && !firstNameValid && <p id="guest-first-name-error" className="guest-details-error" role="alert">Please enter your first name.</p>}
@@ -60,6 +61,7 @@ export function GuestDetails({ initialData, onBack, onNext, onToast }) {
             aria-invalid={showErrors && !surnameValid}
             aria-describedby={showErrors && !surnameValid ? 'guest-surname-error' : undefined}
             autoComplete="family-name"
+            placeholder="Doe"
             required
           />
           {showErrors && !surnameValid && <p id="guest-surname-error" className="guest-details-error" role="alert">Please enter your surname.</p>}
@@ -75,6 +77,7 @@ export function GuestDetails({ initialData, onBack, onNext, onToast }) {
           aria-invalid={showErrors && !emailValid}
           aria-describedby={showErrors && !emailValid ? 'guest-email-error' : undefined}
           autoComplete="email"
+          placeholder="john-doe@example.com"
           required
         />
         {showErrors && !emailValid && <p id="guest-email-error" className="guest-details-error" role="alert">Please enter a valid email address.</p>}

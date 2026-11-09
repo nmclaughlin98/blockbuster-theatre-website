@@ -25,7 +25,7 @@ test('finds the first available screening date', () => {
   }), '');
 });
 
-test('shows the showtime spinner without hiding the rest of ticket selection', async () => {
+test('keeps ticket selection visible with a subtle button loading state', async () => {
   const vite = await createServer({
     configFile: fileURLToPath(new URL('../vite.config.js', import.meta.url)),
     server: { middlewareMode: true },
@@ -57,8 +57,14 @@ test('shows the showtime spinner without hiding the rest of ticket selection', a
     assert.match(markup, /id="booking-movie"/);
     assert.match(markup, /id="booking-date"/);
     assert.match(markup, /value="Sun 25 Oct 2026"/);
-    assert.match(markup, /class="showtime-chips"[^>]*>.*class="showtime-loading"[^>]*>.*class="loader"/);
-    assert.match(markup, /Loading showtimes/);
+    assert.match(markup, /class="showtime-chips"[^>]*aria-busy="true"/);
+    assert.match(markup, /class="booking-button-spinner"/);
+    const continueButton = markup.match(/<button[^>]*booking-continue-button[^>]*>/)?.[0];
+    assert.ok(continueButton);
+    assert.match(continueButton, /is-loading/);
+    assert.match(continueButton, /disabled=""/);
+    assert.match(continueButton, /aria-busy="true"/);
+    assert.doesNotMatch(markup, /class="showtime-loading"/);
     assert.doesNotMatch(markup, /movie-detail-loading/);
   } finally {
     await vite.close();

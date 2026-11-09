@@ -1,3 +1,4 @@
+import styles from './BookingPage.module.css';
 import { useEffect, useState } from 'react';
 import { Layout } from '../../shared';
 import { Toast } from '../../shared/Toast';
@@ -54,7 +55,7 @@ export function Booking() {
   }
 
   return (
-    <Layout current="booking">
+    <Layout className={styles.root} current="booking">
       <section className="booking-section">
         <div className="booking-title-block">
           <h1>Book Your Tickets</h1>

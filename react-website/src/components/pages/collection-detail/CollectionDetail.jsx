@@ -1,3 +1,4 @@
+import styles from './CollectionDetail.module.css';
 import { useEffect, useMemo } from 'react';
 import { MovieGrid } from '../../movies';
 import { DirectionalButton, Layout } from '../../shared';
@@ -17,14 +18,14 @@ export function CollectionDetail() {
 
   if (loading) {
     return (
-      <Layout current="now" loading>
+      <Layout className={styles.root} current="now" loading>
         <PageLoader label="Loading collection" />
       </Layout>
     );
   }
 
   return (
-    <Layout current="now">
+    <Layout className={styles.root} current="now">
       {!collectionId || error ? (
         <section className="collection-empty-state">
           <div className="collection-content">

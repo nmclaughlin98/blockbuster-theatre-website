@@ -1,3 +1,4 @@
+import styles from './NowShowing.module.css';
 import { useEffect, useMemo, useState } from 'react';
 import { MovieGrid } from '../../movies';
 import { DirectionalButton, Layout } from '../../shared';
@@ -118,14 +119,14 @@ export function NowShowing({ initialView }) {
 
     if (pageLoading) {
         return (
-            <Layout current="now" loading>
+            <Layout className={styles.root} current="now" loading>
                 <PageLoader label={view === 'movies' ? 'Loading now showing movies' : 'Loading collections'} />
             </Layout>
         );
     }
 
     return (
-        <Layout current="now">
+        <Layout className={styles.root} current="now">
             <section className="movie-poster">
                 <div className="section-header">
                     <div>

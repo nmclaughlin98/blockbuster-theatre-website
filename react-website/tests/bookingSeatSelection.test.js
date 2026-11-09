@@ -35,6 +35,10 @@ test('preserves selected seats while loading and reports the selection count', a
       seats: [],
       tickets: { adult: 3 },
     });
+    const unsortedSeatMarkup = renderSeatSelection({
+      seats: ['D2', 'D1'],
+      tickets: { adult: 2 },
+    });
     const completePluralMarkup = renderSeatSelection({
       seats: ['A2', 'A3'],
       tickets: { adult: 2 },
@@ -44,6 +48,7 @@ test('preserves selected seats while loading and reports the selection count', a
     assert.match(selectedButton, /\bdisabled=/);
     assert.match(markup, /Selected Seats: <strong>A2<\/strong>/);
     assert.match(markup, /seat-selection-status--complete[^>]*>✓ 1 of 1 seat selected/);
+    assert.match(unsortedSeatMarkup, /Selected Seats: <strong>D1, D2<\/strong>/);
     assert.match(remainingSeatMarkup, /Please select 1 more seat/);
     assert.match(remainingSeatsMarkup, /Please select 3 more seats/);
     assert.match(completePluralMarkup, /✓ 2 of 2 seats selected/);

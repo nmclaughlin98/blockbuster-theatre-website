@@ -1,3 +1,8 @@
+## Date
+
+<!-- pr-date:start -->
+<!-- pr-date:end -->
+
 ## Commits
 
 <!-- pr-commits:start -->
@@ -7,7 +12,3 @@
 
 <!-- Add a brief summary if useful. -->
 
-## Date
-
-<!-- pr-date:start -->
-<!-- pr-date:end -->

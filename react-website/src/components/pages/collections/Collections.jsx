@@ -1,24 +1,31 @@
+import styles from './Collections.module.css';
 import { CollectionCard } from './CollectionCard';
 
 export function CollectionsView({ collections, loading, error, onRetry }) {
-  if (loading) return <p className="collection-message" role="status">Loading collections…</p>;
+  const activeCollections = collections.filter((collection) => collection.isActive !== false);
+
+  if (loading) return <div className={styles.root}><p className="collection-message" role="status">Loading collections…</p></div>;
   if (error) {
     return (
-      <div className="collection-error-state">
-        <p className="collection-message" role="alert">{error.message}</p>
-        <button className="button btn-glass" type="button" onClick={onRetry}>Try again</button>
+      <div className={styles.root}>
+        <div className="collection-error-state">
+          <p className="collection-message" role="alert">{error.message}</p>
+          <button className="button btn-glass" type="button" onClick={onRetry}>Try again</button>
+        </div>
       </div>
     );
   }
-  if (!collections.length) {
-    return <p className="collection-message">No collections are available right now.</p>;
+  if (!activeCollections.length) {
+    return <div className={styles.root}><p className="collection-message">No collections are available right now.</p></div>;
   }
 
   return (
-    <div className="collection-card-grid">
-      {collections.map((collection) => (
-        <CollectionCard collection={collection} key={collection.collectionId} />
-      ))}
+    <div className={styles.root}>
+      <div className="collection-card-grid">
+        {activeCollections.map((collection) => (
+          <CollectionCard collection={collection} key={collection.collectionId} />
+        ))}
+      </div>
     </div>
   );
 }

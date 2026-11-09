@@ -19,7 +19,6 @@ function SkeletonMovieSection({ title }) {
 export function HomeSkeleton() {
   return (
     <div className="home-skeleton-page" role="status" aria-label="Loading home page" aria-busy="true">
-      <span className="visually-hidden">Loading home page</span>
       <div className="home-skeleton-hero" aria-hidden="true">
         <div className="home-skeleton-hero-caption">
           <span className="home-skeleton home-skeleton-title" />
