@@ -127,7 +127,6 @@ if (require.main === module) {
     console.error(error);
     process.exitCode = 1;
   });
-  });
 }
 
 module.exports = { buildPullRequestBody, formatCommits, replaceMarkedSection };
