@@ -1,3 +1,4 @@
+import styles from './Timetable.module.css';
 import { useEffect, useMemo, useState } from 'react';
 import { movieId, movieSlug } from '../../movies';
 import { Layout, ShowtimeChip } from '../../shared';
@@ -155,7 +156,7 @@ export function Timetable() {
 
     if (loading) {
         return (
-            <Layout current="now" loading>
+            <Layout className={styles.root} current="now" loading>
                 <PageLoader label="Loading movie timetable" />
             </Layout>
         );
@@ -191,7 +192,7 @@ export function Timetable() {
     }
 
     return (
-        <Layout current="now">
+        <Layout className={styles.root} current="now">
             <div id="timetablePrintArea">
                 <section className="page-banner">
                     <h1>Weekly Movie Timetable</h1>

@@ -1,0 +1,381 @@
+/* Timetable page styles, scoped to this page. */
+.root :global(.page-banner){
+    width: 100%;
+    max-width: var(--content-width);
+    margin: 0 auto;
+    padding: 46px 20px 18px;
+    text-align: center;
+    position: relative;
+}
+
+.root :global(.page-banner)::before{
+    content: "";
+    position: absolute;
+    inset: 18px 18% auto;
+    height: 120px;
+    background: radial-gradient(circle, rgba(255, 51, 75, 0.25), transparent 68%);
+    filter: blur(28px);
+    pointer-events: none;
+}
+
+.root :global(.page-banner) h1{
+    font-family: var(--font-display);
+    font-size: clamp(2.5rem, 5vw, 4.2rem);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    position: relative;
+    background: linear-gradient(135deg, #fff 30%, #ffb0ba 55%, #ffd7d7 100%);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.root :global(.page-banner) p{
+    color: var(--text-secondary);
+    font-size: 1rem;
+    position: relative;
+}
+
+.root :global(.timetable-controls){
+    width: 100%;
+    max-width: var(--content-width);
+    margin: 0 auto 28px;
+    padding: 0 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    touch-action: manipulation;
+}
+
+.root :global(.timetable-toolbar){
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    flex-wrap: wrap;
+    touch-action: manipulation;
+}
+
+.root :global(.day-tabs){
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    margin: 15px 0;
+}
+
+.root :global(.day-tab){
+    padding: 10px 18px;
+    border: 1px solid var(--border-subtle);
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: var(--radius-full);
+    color: var(--text-secondary);
+    font-size: 0.82rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all var(--transition);
+}
+
+.root :global(.day-tab):hover,
+.root :global(.day-tab):focus-visible,
+.root :global(.day-tab):global(.active){
+    background: linear-gradient(135deg, var(--accent-red), #ff4968);
+    border-color: rgba(255, 255, 255, 0.26);
+    color: #fff;
+    box-shadow: 0 10px 22px rgba(255, 51, 75, 0.28);
+    outline: none;
+}
+
+.root :global(.filter-bar){
+    position: relative;
+    max-width: 420px;
+    width: 100%;
+    margin: 0 auto 0 0;
+    touch-action: manipulation;
+}
+
+.root :global(.print-pdf-btn){
+    white-space: nowrap;
+    margin-left: auto;
+    touch-action: manipulation;
+}
+
+.root :global(.filter-bar) :global(.search-input){
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-full);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.02);
+}
+
+.root :global(.filter-bar) :global(.search-input):focus{
+    border-color: rgba(255, 51, 75, 0.65);
+    box-shadow: 0 0 0 4px rgba(255, 51, 75, 0.12), 0 10px 20px rgba(0, 0, 0, 0.28);
+}
+
+.root :global(.timetable-container){
+    width: 100%;
+    max-width: var(--content-width);
+    margin: 0 auto 80px;
+    padding: 0 20px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.root :global(.movie-card){
+    display: grid;
+    grid-template-columns: minmax(0, 1.7fr) minmax(0, 2.1fr);
+    gap: clamp(0.5rem, 1vw, 1rem);
+    background: linear-gradient(180deg, rgba(24, 28, 42, 0.92), rgba(17, 19, 28, 0.96));
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    padding: 22px 24px;
+    box-shadow: var(--shadow-sm);
+    position: relative;
+    overflow: hidden;
+}
+
+.root :global(.movie-card)::before{
+    content: "";
+    position: absolute;
+    inset: 0 auto auto 0;
+    width: 120px;
+    height: 100%;
+    background: linear-gradient(90deg, rgba(255, 255, 255, 0.03), transparent);
+    pointer-events: none;
+}
+
+.root :global(.movie-card):hover{
+    border-color: rgba(255, 255, 255, 0.12);
+    transform: translateY(-2px);
+    box-shadow: 0 16px 26px rgba(0, 0, 0, 0.28);
+}
+
+.root :global(.movie-info){
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 12px;
+    position: relative;
+    z-index: 1;
+    min-width: 0;
+}
+
+.root :global(.movie-title){
+    font-family: var(--font-heading);
+    font-size: clamp(1.4rem, 2vw, 2rem);
+    color: var(--text-primary);
+    font-weight: 700;
+}
+
+.root :global(.movie-meta){
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    text-shadow: 0 2px 20px rgba(0, 0, 0, 0.9);
+}
+
+.root :global(.badge-genre){
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 10px;
+    border-radius: var(--radius-full);
+    background: rgba(255, 51, 75, 0.12);
+    border: 1px solid rgba(255, 51, 75, 0.32);
+    color: #ffe4ea;
+    font-weight: 700;
+}
+
+.root :global(.showtimes-grid){
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(max(7.5rem, calc((100% - 36px) / 4)), 1fr));
+    gap: 12px;
+    align-items: start;
+    align-content: center;
+}
+
+.root :global(.timetable-showtime-chip){
+    max-width: 100%;
+    text-align: center;
+    text-decoration: none;
+}
+
+.root :global(.timetable-download-status){
+    flex-basis: 100%;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.root :global(.timetable-download-status):global(.error){
+    color: var(--accent-red);
+}
+
+@media print{
+
+.root :global(.timetable-controls),
+.root :global(.page-banner) p{
+        display: none !important;
+    }
+
+.root :global(.page-banner){
+        padding-top: 0;
+        margin-bottom: 12px;
+    }
+
+.root :global(.movie-card){
+        break-inside: avoid;
+        page-break-inside: avoid;
+        box-shadow: none;
+    }
+
+.root :global(.timetable-showtime-chip){
+        color: #111 !important;
+        background: #fff !important;
+        border-color: rgba(0, 0, 0, 0.2);
+    }
+
+}
+
+.root :global(.timetable-showtime-chip){
+    padding: 20px;
+}
+
+.root :global(.filter-bar) label{
+    font-family: var(--font-body);
+    font-size: clamp(0.7rem, 1vw, 0.9rem);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    font-weight: 700;
+    margin-left: 5px;
+}
+
+.root :global(.page-banner){
+    padding: clamp(2rem, 5vw, 2.875rem) var(--page-gutter) 1.125rem;
+}
+
+.root :global(.page-banner) h1{
+    font-size: clamp(1.8rem, 5vw, 4.2rem);
+    overflow-wrap: anywhere;
+}
+
+.root :global(.timetable-controls),
+.root :global(.timetable-container){
+    padding-inline: var(--page-gutter);
+}
+
+.root :global(.timetable-toolbar)>*,
+.root :global(.movie-card)>*{
+    min-width: 0;
+}
+
+.root :global(.movie-card){
+    padding: clamp(1rem, 2.5vw, 1.5rem);
+}
+
+.root :global(.showtimes-grid){
+    grid-template-columns: repeat(auto-fill, minmax(max(7.5rem, calc((100% - 36px) / 4)), 1fr));
+}
+
+@media (max-width: 974px){
+
+.root :global(.timetable-showtime-chip){
+        gap: 0.2rem;
+        padding: 0.9rem;
+    }
+
+.root :global(.timetable-showtime-chip) :global(.time-chip-time){
+        font-size: 1.1rem;
+    }
+
+.root :global(.timetable-showtime-chip) :global(.time-chip-screen){
+        font-size: 0.8rem;
+    }
+
+.root :global(.movie-card){
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+}
+
+@media (min-width: 769px) and (max-width: 974px){
+
+.root :global(.movie-card){
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1.35fr);
+        gap: clamp(1rem, 2vw, 1.5rem);
+    }
+
+}
+
+@media (max-width: 768px){
+
+.root :global(.day-tabs){
+        gap: 8px;
+    }
+
+.root :global(.day-tab){
+        padding: 9px 13px;
+        font-size: 0.72rem;
+    }
+
+.root :global(.movie-card){
+        gap: 16px;
+    }
+
+.root :global(.movie-info){
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        align-items: start;
+        column-gap: clamp(0.5rem, 2vw, 1rem);
+    }
+
+.root :global(.movie-meta){
+        justify-content: flex-end;
+        min-width: 0;
+        text-align: right;
+    }
+
+.root :global(.badge-genre){
+        max-width: 100%;
+        text-align: right;
+        white-space: normal;
+    }
+
+}
+
+@media (max-width: 650px){
+
+.root :global(.timetable-toolbar){
+        align-items: stretch;
+    }
+
+.root :global(.filter-bar){
+        max-width: none;
+        margin: 0;
+    }
+
+.root :global(.print-pdf-btn){
+        width: 100%;
+        margin-left: 0;
+    }
+
+}
+
+@media (max-width: 480px){
+
+.root :global(.page-banner) h1{
+        font-size: clamp(1.65rem, 8vw, 2.5rem);
+    }
+
+.root :global(.movie-card){
+        gap: 1rem;
+    }
+
+}

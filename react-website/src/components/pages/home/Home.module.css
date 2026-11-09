@@ -1,0 +1,662 @@
+/* Home page styles, scoped to this page. */
+@keyframes carousel-slide-in-right{
+    from {
+        transform: translateX(100%);
+    }
+
+    to {
+        transform: translateX(0);
+    }
+}
+
+@keyframes carousel-slide-in-left{
+    from {
+        transform: translateX(-100%);
+    }
+
+    to {
+        transform: translateX(0);
+    }
+}
+
+@keyframes carousel-slide-out-left{
+    from {
+        transform: translateX(0);
+    }
+
+    to {
+        transform: translateX(-100%);
+    }
+}
+
+@keyframes carousel-slide-out-right{
+    from {
+        transform: translateX(0);
+    }
+
+    to {
+        transform: translateX(100%);
+    }
+}
+
+.root :global(#picturecarousel),
+.root :global(.carousel){
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+    background: #000;
+}
+
+.root :global(.carousel-inner){
+    position: relative;
+    width: 100%;
+    height: 600px;
+    overflow: hidden;
+    touch-action: pan-y;
+}
+
+.root :global(.carousel-inner) :global(.item){
+    position: absolute;
+    inset: 0;
+    visibility: hidden;
+    z-index: 1;
+    transform: translateX(100%);
+    will-change: transform;
+}
+
+.root :global(.carousel-inner) :global(.item):global(.active){
+    visibility: visible;
+    z-index: 2;
+    transform: translateX(0);
+}
+
+.root :global(.carousel-inner) :global(.item):global(.slide-out-left),
+.root :global(.carousel-inner) :global(.item):global(.slide-out-right){
+    visibility: visible;
+    z-index: 1;
+}
+
+.root :global(.carousel-inner) :global(.item):global(.slide-in-right){
+    animation: carousel-slide-in-right 0.8s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.root :global(.carousel-inner) :global(.item):global(.slide-in-left){
+    animation: carousel-slide-in-left 0.8s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.root :global(.carousel-inner) :global(.item):global(.slide-out-left){
+    animation: carousel-slide-out-left 0.8s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.root :global(.carousel-inner) :global(.item):global(.slide-out-right){
+    animation: carousel-slide-out-right 0.8s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce){
+
+.root :global(.carousel-inner) :global(.item):global(.slide-in-right),
+.root :global(.carousel-inner) :global(.item):global(.slide-in-left),
+.root :global(.carousel-inner) :global(.item):global(.slide-out-left),
+.root :global(.carousel-inner) :global(.item):global(.slide-out-right){
+        animation-duration: 0.01ms;
+    }
+
+}
+
+.root :global(.carousel-inner) :global(.item) img{
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center 50%;
+    transform: scale(1.04);
+    transition: transform 6s ease-out;
+}
+
+.root :global(.carousel-inner):global(.is-ready) :global(.item):global(.active) img{
+    transform: scale(1);
+}
+
+.root :global(.carousel-inner) :global(.item)::after{
+    content: '';
+    position: absolute;
+    inset: 0 -100%;
+    background: linear-gradient(to bottom,
+            rgba(12, 13, 18, 0.2) 0%,
+            rgba(12, 13, 18, 0.5) 50%,
+            rgba(12, 13, 18, 0.95) 90%,
+            var(--bg-main) 100%);
+    pointer-events: none;
+}
+
+.root :global(.hero-caption){
+    position: absolute;
+    bottom: 50px;
+    left: clamp(20px, 6vw, 80px);
+    right: clamp(20px, 6vw, 80px);
+    max-width: 1200px;
+    z-index: 10;
+    text-align: left;
+    padding: 0;
+    text-shadow: 0 2px 20px rgba(0, 0, 0, 0.9);
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.25s,
+        transform 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.25s;
+}
+
+.root :global(.carousel-inner) :global(.item):global(.active) :global(.hero-caption){
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.root :global(.hero-caption) h2{
+    font-family: var(--font-display);
+    font-size: clamp(2.5rem, 5vw, 4.5rem);
+    letter-spacing: 0.03em;
+    color: #fff;
+    margin-bottom: 12px;
+    text-transform: uppercase;
+    line-height: 1;
+}
+
+.root :global(.hero-caption) p{
+    max-width: 80%;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 4;
+    overflow: hidden;
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: clamp(1.6rem, 2.5vw, 1.7rem);
+    font-weight: 400;
+    letter-spacing: 0.07em;
+    color: var(--text-secondary);
+    line-height: 4rem;
+    margin-bottom: 24px;
+}
+
+.root :global(.hero-caption) :global(.hero-actions){
+    display: flex;
+    align-items: center;
+    width: fit-content;
+    max-width: 100%;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+}
+
+.root :global(.carousel-indicators){
+    position: absolute;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 10px;
+    z-index: 15;
+    touch-action: manipulation;
+}
+
+.root :global(.carousel-indicators) li{
+    width: 36px;
+    height: 4px;
+    border-radius: var(--radius-full);
+    background: rgba(255, 255, 255, 0.25);
+    cursor: pointer;
+    transition: all var(--transition);
+}
+
+.root :global(.carousel-indicators) li:global(.active){
+    width: 64px;
+    background: var(--accent-red);
+    box-shadow: 0 0 12px var(--accent-glow);
+}
+
+.root :global(.carousel-control){
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 50px;
+    height: 50px;
+    border-radius: var(--radius-full);
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--border-subtle);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 20;
+    cursor: pointer;
+    transition: all var(--transition);
+    touch-action: manipulation;
+}
+
+.root :global(.carousel-control):hover{
+    background: var(--accent-red-transparent);
+    box-shadow: 0 0 20px var(--accent-glow);
+    color: #fff;
+    transform: translateY(-50%) scale(1.2);
+}
+
+.root :global(.carousel-control):global(.left){
+    left: 20px;
+}
+
+.root :global(.carousel-control):global(.right){
+    right: 20px;
+}
+
+.root :global(.btn-secondary){
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(12px);
+    color: #fff;
+    border: 1px solid var(--border-subtle);
+}
+
+.root :global(.btn-secondary):hover{
+    background: rgba(255, 255, 255, 0.16);
+    border-color: rgba(255, 255, 255, 0.3);
+    transform: translateY(-2px);
+}
+
+.root :global(.movie-section-header){
+    align-items: flex-start;
+    flex-wrap: nowrap;
+}
+
+.root :global(.movie-section-header)>h1{
+    flex: 1 1 auto;
+    min-width: 0;
+    margin: 0;
+    align-self: stretch;
+}
+
+.root :global(.movie-section-header)>a{
+    flex: 0 0 auto;
+    white-space: nowrap;
+}
+
+.root :global(.offers)>h1{
+    font-family: var(--font-display);
+    font-size: clamp(2rem, 3.5vw, 2.7rem);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.root :global(.offers)>h1::before{
+    content: '';
+    display: inline-block;
+    width: 6px;
+    height: 0.85em;
+    background: var(--accent-red);
+    border-radius: var(--radius-full);
+}
+
+.root :global(.offers){
+    background: linear-gradient(180deg, var(--bg-main) 0%, var(--bg-surface) 100%);
+    border-bottom: 1px solid var(--border-subtle);
+}
+
+.root :global(.offers-grid),
+.root :global(.offers) :global(.col-container){
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 18.75rem), 1fr));
+    gap: clamp(1rem, 2vw, 1.75rem);
+    margin-top: 32px;
+}
+
+.root :global(.offers) :global(.col){
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    padding: 28px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    transition: all var(--transition);
+}
+
+.root :global(.offers) :global(.col)::before{
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--accent-red), var(--accent-gold));
+    opacity: 0;
+    transition: opacity var(--transition);
+}
+
+.root :global(.offers) :global(.col):hover{
+    transform: translateY(-6px);
+    border-color: var(--border-highlight);
+    box-shadow: var(--shadow-md);
+}
+
+.root :global(.offers) :global(.col):hover::before{
+    opacity: 1;
+}
+
+.root :global(.offers) :global(.poster):global(.icon){
+    width: 140px;
+    height: 200px;
+    object-fit: cover;
+    border-radius: var(--radius-md);
+    margin-bottom: 20px;
+    box-shadow: var(--shadow-sm);
+}
+
+.root :global(.offers) h2{
+    font-family: var(--font-heading);
+    font-size: clamp(1.4rem, 2vw, 1.75rem);
+    color: #fff;
+    margin-bottom: clamp(8px, 1vw, 12px);
+}
+
+.root :global(.offers) p{
+    color: var(--text-secondary);
+    font-size: clamp(0.8rem, 1vw, 0.9rem);
+    margin-bottom: clamp(6px, 1vw, 10px);
+}
+
+.root :global(.offers) :global(.featured-movie){
+    font-family: var(--font-body);
+    font-size: clamp(1.0rem, 1vw, 1.2rem);
+    font-weight: 700;
+    color: var(--text-secondary);
+    margin-bottom: clamp(6px, 1vw, 20px);
+}
+
+.root :global(.offers) p:last-child{
+    font-weight: 700;
+    color: var(--accent-gold);
+    margin-top: clamp(8px, 1vw, 16px);
+}
+
+.root :global(.offers) :global(.button){
+    margin-top: clamp(12px, 1vw, 20px);
+    transition: all var(--transition);
+}
+
+.root :global(.modal-backdrop){
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--transition);
+    padding: 20px;
+}
+
+.root :global(.modal-backdrop):global(.open){
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.root :global(.modal-dialog){
+    position: relative;
+    width: 100%;
+    max-width: min(1200px, calc(100vw - 40px));
+    aspect-ratio: 16 / 9;
+    max-height: calc(100vh - 40px);
+    background: #000;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    border: 1px solid var(--border-highlight);
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.9);
+    transform: scale(0.92);
+    transition: transform var(--transition);
+}
+
+.root :global(.modal-backdrop):global(.open) :global(.modal-dialog){
+    transform: scale(1);
+}
+
+.root :global(.modal-close-btn){
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 40px;
+    height: 40px;
+    background: rgba(0, 0, 0, 0.7);
+    border: none;
+    border-radius: var(--radius-full);
+    color: #fff;
+    font-size: 1.8rem;
+    line-height: 1;
+    cursor: pointer;
+    z-index: 1;
+    transition: color var(--transition);
+    touch-action: manipulation;
+}
+
+.root :global(#trailer-iframe){
+    display: block;
+    width: 100%;
+    height: 100%;
+    border: 0;
+}
+
+.root :global(.modal-close-btn):hover{
+    color: var(--accent-red);
+}
+
+@media (min-width: 1920px){
+
+.root :global(.carousel-inner),
+.root :global(.carousel-inner) :global(.item){
+        height: 700px;
+    }
+
+}
+
+@media (max-width: 1400px){
+
+.root :global(.hero-caption) p{
+        max-width: 100%;
+        gap: 2px;
+    }
+
+}
+
+@media (max-width: 530px){
+
+.root :global(.offers)>h1{
+        line-height: 1.0;
+        font-size: clamp(1.2rem, 6.7vw, 2rem);
+    }
+
+}
+
+.root :global(.carousel-inner),
+.root :global(.carousel-inner) :global(.item){
+    height: clamp(21rem, 58svh, 38rem);
+}
+
+.root :global(.hero-caption) h2{
+    font-size: clamp(1.75rem, 6vw, 4.5rem);
+    line-height: 1.1;
+}
+
+.root :global(.hero-caption) p{
+    max-width: min(80%, 60rem);
+    font-size: clamp(1rem, 2vw, 1.5rem);
+    line-height: 1.5;
+}
+
+.root :global(.modal-dialog){
+    max-width: min(75rem, calc(100vw - var(--page-gutter) - var(--page-gutter)));
+    max-height: calc(100svh - var(--page-gutter) - var(--page-gutter));
+}
+
+@media (max-width: 768px){
+
+.root :global(.carousel-control){
+        display: none;
+    }
+
+.root :global(.carousel-inner),
+.root :global(.carousel-inner) :global(.item){
+        height: clamp(21rem, 58svh, 32rem);
+    }
+
+.root :global(.hero-caption) :global(.hero-actions){
+        font-size: clamp(0.8rem, 2vw, 1rem);
+        border-radius: var(--radius-sm);
+        gap: 8px;
+        max-width: 100%;
+    }
+
+.root :global(.hero-caption){
+        left: var(--page-gutter);
+        right: var(--page-gutter);
+        bottom: clamp(2.5rem, 8vw, 3.5rem);
+        max-width: none;
+    }
+
+.root :global(.hero-caption) p{
+        max-width: 100%;
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 3;
+        line-clamp: 3;
+        overflow: hidden;
+    }
+
+}
+
+@media (max-width: 650px){
+
+.root :global(.hero-caption) :global(.hero-actions){
+        display: grid;
+        width: 100%;
+        grid-auto-flow: column;
+        grid-auto-columns: minmax(0, 1fr);
+    }
+
+.root :global(.hero-caption) :global(.hero-actions) :global(.button){
+        width: 100%;
+        min-width: 0;
+        text-align: center;
+        padding: 10px;
+        font-size: clamp(0.8rem, 3.4vw, 1rem);
+    }
+
+}
+
+@media (max-width: 480px){
+
+.root :global(.hero-caption) h2{
+        margin-bottom: 15px;
+    }
+
+.root :global(.hero-caption) p{
+        margin-bottom: 16px;
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 2;
+        overflow: hidden;
+    }
+
+.root :global(.carousel-control){
+        display: none;
+    }
+
+.root :global(.carousel-indicators) li{
+        width: 23px;
+    }
+
+.root :global(.carousel-indicators) li:global(.active){
+        width: 44px;
+        box-shadow: 0 0 12px var(--accent-glow);
+    }
+
+}
+
+@media (max-width: 380px){
+
+.root :global(.hero-caption) h2{
+        margin-bottom: 10px;
+    }
+
+.root :global(.hero-actions) button{
+        display: none;
+    }
+
+.root :global(.carousel-indicators) li{
+        width: 23px;
+    }
+
+.root :global(.carousel-indicators) li:global(.active){
+        width: 44px;
+        box-shadow: 0 0 12px var(--accent-glow);
+    }
+
+}
+
+@media (orientation: landscape) and (max-height: 500px){
+
+.root :global(.hero-caption) p{
+        margin-bottom: 16px;
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 2;
+        overflow: hidden;
+    }
+
+.root :global(.hero-caption) :global(.hero-actions){
+        gap: 15px;
+    }
+
+.root :global(.hero-caption) :global(.hero-actions) :global(.button){
+        padding: 8px 12px;
+        font-size: clamp(0.8rem, 3.7vw, 1rem);
+    }
+
+.root :global(.carousel-indicators){
+        bottom: 10px;
+    }
+
+.root :global(.carousel-control){
+        width: 35px;
+        height: 35px;
+    }
+
+.root :global(.carousel-inner),
+.root :global(.carousel-inner) :global(.item){
+        height: clamp(14rem, 70svh, 19.5rem);
+    }
+
+}
+
+@media (orientation: landscape) and (max-height: 500px) and (min-width: 769px){
+
+.root :global(.hero-caption){
+        bottom: 28px;
+        left: 62px;
+        right: 60px;
+    }
+
+}
+
+@media (orientation: landscape) and (max-height: 500px) and (min-width: 481px){
+
+.root :global(.hero-caption) h2{
+        margin-bottom: 20px;
+    }
+
+}

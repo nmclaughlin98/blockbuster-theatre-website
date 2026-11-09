@@ -1,3 +1,4 @@
+import styles from './Home.module.css';
 import { useEffect } from 'react';
 import { Layout } from '../../shared';
 import { useMovies } from '../shared/useMovies';
@@ -31,14 +32,14 @@ export function Home() {
 
   if (loading) {
     return (
-      <Layout current="home" loading>
+      <Layout className={styles.root} current="home" loading>
         <HomeSkeleton />
       </Layout>
     );
   }
 
   return (
-    <Layout current="home">
+    <Layout className={styles.root} current="home">
       <HeroCarousel movies={carousel} />
       {error && <p>Movie listings are temporarily unavailable.</p>}
       {!error && <>

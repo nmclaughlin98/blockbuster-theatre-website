@@ -1,3 +1,4 @@
+import styles from './About.module.css';
 import { useEffect, useState } from 'react';
 import { Layout, asset } from '../../shared';
 
@@ -143,7 +144,7 @@ export function About() {
   }, []);
 
   return (
-    <Layout current="about">
+    <Layout className={styles.root} current="about">
       <CinemaHero />
       <section className="about-content">
         <div className="about-grid-layout">

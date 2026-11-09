@@ -1,3 +1,4 @@
+import styles from './Detail.module.css';
 import { useEffect, useState } from 'react';
 import { Countdown, movieSlug } from '../../movies/index.js';
 import { asset, Layout, ShowtimeChip } from '../../shared';
@@ -224,14 +225,14 @@ export function Detail({ comingSoon = false }) {
 
     if (loading) {
         return (
-            <Layout loading>
+            <Layout className={styles.root} loading>
                 <PageLoader label="Loading movie details" />
             </Layout>
         );
     }
 
     return (
-        <Layout>
+        <Layout className={styles.root}>
             {error || !movie
                 ? <p role="alert">Movie details are temporarily unavailable.</p>
                 : <MovieContent movie={movie} comingSoon={comingSoon} />}
