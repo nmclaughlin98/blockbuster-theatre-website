@@ -191,6 +191,49 @@
     margin-top: 16px;
 }
 
+.trailerLauncher {
+    position: relative;
+    width: 100%;
+    max-width: 1000px;
+}
+
+.trailerLauncher :global(.trailer-media) {
+    pointer-events: none;
+}
+
+.trailerLaunchButton {
+    position: absolute;
+    inset: 16px 0 0;
+    display: grid;
+    place-items: center;
+    width: 100%;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+}
+
+.trailerLaunchButton svg {
+    width: clamp(3.5rem, 8vw, 5rem);
+    height: clamp(3.5rem, 8vw, 5rem);
+    padding: 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    border-radius: 50%;
+    background: rgba(12, 13, 18, 0.75);
+    fill: #fff;
+    transition: background-color var(--transition), transform var(--transition);
+}
+
+.trailerLaunchButton:hover svg {
+    background: var(--accent-red);
+    transform: scale(1.08);
+}
+
+.trailerLaunchButton:focus-visible {
+    outline: 2px solid var(--text-primary);
+    outline-offset: 3px;
+}
+
 .root :global(.trailer-still){
     object-fit: cover;
 }

@@ -1,14 +1,6 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { movieId, movieSlug } from '../../movies';
-import { DirectionalButton } from '../../shared';
-
-function withAutoplay(url) {
-    if (/[?&]autoplay=1(?:&|$)/.test(url)) return url;
-    const hashIndex = url.indexOf('#');
-    const urlWithoutHash = hashIndex === -1 ? url : url.slice(0, hashIndex);
-    const hash = hashIndex === -1 ? '' : url.slice(hashIndex);
-    return `${urlWithoutHash}${urlWithoutHash.includes('?') ? '&' : '?'}autoplay=1${hash}`;
-}
+import { DirectionalButton, TrailerModal } from '../../shared';
 
 export function HeroCarousel({ movies }) {
     const [index, setIndex] = useState(0);
@@ -29,12 +21,12 @@ export function HeroCarousel({ movies }) {
         if (action) action();
     }
 
-    function changeSlide(nextIndex, direction) {
+    const changeSlide = useCallback((nextIndex, direction) => {
         if (nextIndex === index) return;
         setPreviousIndex(index);
         setSlideDirection(direction);
         setIndex(nextIndex);
-    }
+    }, [index]);
 
     function handleSwipeStart(event) {
         if (
@@ -65,25 +57,9 @@ export function HeroCarousel({ movies }) {
         if (!movies.length || isPaused || trailerUrl) return undefined;
         const timer = setInterval(() => changeSlide((index + 1) % movies.length, 'right'), 6000);
         return () => clearInterval(timer);
-    }, [movies.length, index, isPaused, trailerUrl]);
-
-    useEffect(() => {
-        if (!trailerUrl) return undefined;
-
-        function closeOnEscape(event) {
-            if (event.key === 'Escape') setTrailerUrl('');
-        }
-
-        document.body.classList.add('noScroll');
-        document.addEventListener('keydown', closeOnEscape);
-        return () => {
-            document.body.classList.remove('noScroll');
-            document.removeEventListener('keydown', closeOnEscape);
-        };
-    }, [trailerUrl]);
+    }, [movies.length, isPaused, trailerUrl, changeSlide, index]);
 
     if (!movies.length) return null;
-    const trailerEmbedUrl = trailerUrl ? withAutoplay(trailerUrl) : '';
 
     return (
         <>
@@ -168,34 +144,7 @@ export function HeroCarousel({ movies }) {
                     onClick={(e) => handleBlurClick(e, () => changeSlide((index + 1) % movies.length, 'right'))}
                 />
             </div>
-            <div
-                id="trailer-modal"
-                className={`modal-backdrop ${trailerUrl ? 'open' : ''}`}
-                aria-hidden={!trailerUrl}
-                inert={!trailerUrl ? '' : undefined}
-                onClick={(event) => {
-                    if (event.target === event.currentTarget) setTrailerUrl('');
-                }}
-            >
-                <div className="modal-dialog" role="dialog" aria-modal="true" aria-label="Movie trailer">
-                    <button
-                        type="button"
-                        className="modal-close-btn"
-                        aria-label="Close trailer"
-                        onClick={(e) => handleBlurClick(e, () => setTrailerUrl(''))}
-                    >
-                        &times;
-                    </button>
-                    <iframe
-                        id="trailer-iframe"
-                        src={trailerEmbedUrl || null}
-                        title="Movie trailer"
-                        referrerPolicy="strict-origin-when-cross-origin"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                        allowFullScreen
-                    />
-                </div>
-            </div>
+            <TrailerModal url={trailerUrl} onClose={() => setTrailerUrl('')} />
         </>
     );
 }
