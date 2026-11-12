@@ -503,19 +503,6 @@ section {
     position: relative;
 }
 
-.section-header {
-    display: flex;
-    align-items: flex-end;
-    justify-content: space-between;
-    margin-bottom: 32px;
-    border-bottom: 1px solid var(--border-subtle);
-    padding-bottom: 16px;
-    flex-wrap: wrap;
-    gap: 16px;
-}
-
-.section-header h1,
-.section-header h2,
 .poster-section>h1 {
     font-family: var(--font-display);
     font-size: clamp(2rem, 3.5vw, 2.7rem);
@@ -527,7 +514,6 @@ section {
     gap: 12px;
 }
 
-.section-header h1::before,
 .poster-section>h1::before {
     content: '';
     display: inline-block;
@@ -545,157 +531,6 @@ section {
     min-width: 0;
     width: 100%;
     margin: 0 auto;
-}
-
-.poster-card-container {
-    position: relative;
-    min-width: 0;
-    max-width: none;
-    justify-self: stretch;
-}
-
-.poster-column {
-    position: relative;
-    background: var(--bg-card);
-    border-radius: var(--radius-lg);
-    overflow: hidden;
-    border: 1px solid var(--border-subtle);
-    transition: transform var(--transition), box-shadow var(--transition), border-color var(--transition);
-    display: flex;
-    flex-direction: column;
-}
-
-.poster-card-container:hover .poster-column,
-.poster-card-container:focus-within .poster-column {
-    transform: translateY(-8px);
-    box-shadow: var(--shadow-lg), 0 0 30px rgba(255, 51, 75, 0.2);
-    border-color: var(--border-accent);
-    border-width: 3px;
-    color: inherit;
-}
-
-.poster-column .poster {
-    width: 100%;
-    aspect-ratio: 2 / 3;
-    object-fit: cover;
-    transition: transform var(--transition-smooth), filter var(--transition-smooth);
-    touch-action: manipulation;
-}
-
-.poster-card-container:hover .poster-column .poster,
-.poster-card-container:focus-within .poster-column .poster {
-    transform: scale(1.05);
-    filter: brightness(0.7);
-}
-
-.poster-column .overlay {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-end;
-    padding: clamp(0.5rem, 2.5vw, 1.25rem);
-    background: none;
-    z-index: 2;
-    pointer-events: auto;
-    touch-action: manipulation;
-}
-
-.poster-column .overlay::before,
-.poster-column .overlay::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    z-index: 0;
-    pointer-events: none;
-    transition: opacity var(--transition-smooth);
-}
-
-.poster-column .overlay::before {
-    background: linear-gradient(to top,
-            rgba(10, 11, 15, 0.95) 0%,
-            rgba(10, 11, 15, 0.6) 35%,
-            transparent 65%);
-}
-
-.poster-column .overlay::after {
-    background: linear-gradient(to top,
-            rgba(10, 11, 15, 0.85) 0%,
-            rgba(10, 11, 15, 0.75) 55%,
-            rgba(10, 11, 15, 0.4) 100%);
-    opacity: 0;
-}
-
-.poster-column .overlay>* {
-    position: relative;
-    z-index: 1;
-}
-
-.poster-card-container:hover .poster-column .overlay::before,
-.poster-card-container:focus-within .poster-column .overlay::before {
-    opacity: 0;
-}
-
-.poster-card-container:hover .poster-column .overlay::after,
-.poster-card-container:focus-within .poster-column .overlay::after {
-    opacity: 1;
-}
-
-.overlay-text {
-    font-family: var(--font-heading);
-    font-size: clamp(1.1rem, 4.8rem, 1.6rem);
-    font-weight: 700;
-    color: #fff;
-    line-height: 1.25;
-    margin-bottom: 6px;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-    transition: transform var(--transition-smooth);
-}
-
-.runtime {
-    font-size: clamp(0.75rem, 2.2vw, 0.95rem);
-    font-weight: 550;
-    color: var(--text-secondary);
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    margin-bottom: 8px;
-}
-
-.runtime::before {
-    font-family: 'Material Symbols Outlined';
-    content: 'clock_loader_20';
-    font-size: 0.95rem;
-}
-
-.rating {
-    height: 50px;
-    width: auto;
-    object-fit: contain;
-    margin-bottom: 8px;
-    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
-    opacity: 0;
-    visibility: hidden;
-    transform: translateY(8px);
-    transition: opacity 0.3s ease, transform 0.3s ease;
-    shape-rendering: geometricPrecision;
-}
-
-.coming-soon-release-date {
-    font-size: 1.4rem;
-    font-weight: 700;
-    color: var(--accent-gold);
-    margin: 20px 0;
-}
-
-.poster-card-container:hover .poster-column .rating,
-.poster-card-container:focus-within .poster-column .rating {
-    opacity: 1;
-    visibility: visible;
-    transform: translateY(0);
 }
 
 .countdown-timer {

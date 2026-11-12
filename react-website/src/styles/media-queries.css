@@ -7,11 +7,6 @@
         grid-template-columns: repeat(7, minmax(0, 1fr));
     }
 
-.poster-card-container{
-        max-width: none;
-        justify-self: stretch;
-    }
-
 }
 
 @media (max-width: 1400px){
@@ -39,10 +34,6 @@
 }
 
 @media (max-width: 965px){
-
-.coming-soon-release-date{
-        font-size: 1.2rem
-    }
 
 .countdown-timer{
         font-size: 1.0rem;
@@ -135,12 +126,6 @@
 
 @media (max-width: 530px){
 
-.rating{
-        height: 35px;
-    }
-
-.section-header h1,
-.section-header h2,
 .poster-section>h1{
         line-height: 1.0;
         font-size: clamp(1.2rem, 6.7vw, 2rem);
@@ -162,14 +147,6 @@ header{
 
 .logo{
     height: clamp(2.5rem, 5vw, 3.6rem);
-}
-
-.section-header{
-    gap: clamp(0.75rem, 2vw, 1.5rem);
-}
-
-.section-header>*{
-    min-width: 0;
 }
 
 .movie-body-layout>*{
@@ -207,10 +184,6 @@ header{
 
 :root{
         --header-height: 4.375rem;
-    }
-
-.coming-soon-release-date{
-        font-size: 1rem;
     }
 
 .hamburger{
@@ -251,16 +224,6 @@ footer{
 
 .collection-lookup .button{
         width: 100%;
-    }
-
-.section-header{
-        align-items: flex-start;
-    }
-
-.section-header>.button,
-.section-header>.btn,
-.section-header>a{
-        max-width: 100%;
     }
 
 }

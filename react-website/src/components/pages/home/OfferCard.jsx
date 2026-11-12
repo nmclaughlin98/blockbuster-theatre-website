@@ -9,7 +9,10 @@ export function OfferCard({ offer, featuredMovie, isSlowConnection }) {
   const displayLabel = offer.displayLabel ?? offer.title;
 
   return (
-    <div className={styles.card}>
+    <a
+      className={styles.card}
+      href={`./bookNow.html?offerId=${encodeURIComponent(offer.offerId)}`}
+    >
       {featuredMovie?.poster && (
         <img
           className={styles.poster}
@@ -19,25 +22,21 @@ export function OfferCard({ offer, featuredMovie, isSlowConnection }) {
           srcSet={!imageFailed
             ? getPosterSrcSet(featuredMovie.poster, isSlowConnection)
             : undefined}
-          sizes="140px"
+          sizes="(min-width: 768px) 150px, 100px"
           alt={`${displayLabel} featuring ${featuredMovie.title}`}
           onError={() => setImageFailed(true)}
         />
       )}
-      <h2 className={styles.title}>{displayLabel}</h2>
-      {featuredMovie && (
-        <p className={`${styles.description} ${styles.featuredMovie}`}>
-          Featuring: {featuredMovie.title}
-        </p>
-      )}
-      {offer.tagline && <p className={styles.description}>{offer.tagline}</p>}
-      {offer.priceDescription && <p className={styles.description}>{offer.priceDescription}</p>}
-      <a
-        className={`button ${styles.button}`}
-        href={`./bookNow.html?offerId=${encodeURIComponent(offer.offerId)}`}
-      >
-        {offer.ctaLabel ?? 'Claim Offer'}
-      </a>
-    </div>
+      <div className={styles.details}>
+        <h2 className={styles.title}>{displayLabel}</h2>
+        {featuredMovie && (
+          <p className={`${styles.description} ${styles.featuredMovie}`}>
+            Featuring: {featuredMovie.title}
+          </p>
+        )}
+        {offer.tagline && <p className={styles.description}>{offer.tagline}</p>}
+        {offer.priceDescription && <p className={styles.description}>{offer.priceDescription}</p>}
+      </div>
+    </a>
   );
 }

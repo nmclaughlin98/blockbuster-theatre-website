@@ -1,6 +1,6 @@
 import styles from './About.module.css';
 import { useEffect, useState } from 'react';
-import { Layout, asset } from '../../shared';
+import { Layout, SectionHeader, asset } from '../../shared';
 
 const faqs = [
   {
@@ -149,14 +149,14 @@ export function About() {
       <section className="about-content">
         <div className="about-grid-layout">
           <div>
-            <div className="section-header about-section-heading"><h2>About Blockbuster Theatre</h2></div>
+            <SectionHeader title="About Blockbuster Theatre" headingLevel={2} className="about-section-heading" />
             <p className="about-description">
               Blockbuster Theatre is a premium, fully accessible modern independent cinema dedicated to delivering
               unforgettable big-screen experiences. Every screen features state-of-the-art Dolby Atmos surround sound,
               pristine 4K laser projection, luxury recliner seating, and dedicated wheelchair viewing boxes with full
               telecoil hearing loops installed.
             </p>
-            <div className="section-header about-section-heading"><h2>Frequently Asked Questions</h2></div>
+            <SectionHeader title="Frequently Asked Questions" headingLevel={2} className="about-section-heading" />
             {faqs.map(({ question, answer }) => (
               <FaqItem key={question} question={question}>{answer}</FaqItem>
             ))}

@@ -1,18 +1,20 @@
-.card{
+.card {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    padding: 1rem;
+    padding-right: 2.75rem;
+    color: inherit;
+    text-decoration: none;
     background: var(--bg-card);
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-lg);
-    padding: 28px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
     position: relative;
     overflow: hidden;
-    transition: all var(--transition);
+    transition: transform var(--transition), background-color var(--transition), border-color var(--transition), box-shadow var(--transition);
 }
 
-.card::before{
+.card::before {
     content: '';
     position: absolute;
     top: 0;
@@ -24,47 +26,110 @@
     transition: opacity var(--transition);
 }
 
-.card:hover{
-    transform: translateY(-6px);
+.card:hover,
+.card:focus-visible {
+    transform: translateY(-2px);
+    background: var(--bg-card-hover);
     border-color: var(--border-highlight);
     box-shadow: var(--shadow-md);
 }
 
-.card:hover::before{
+.card:hover::before,
+.card:focus-visible::before {
     opacity: 1;
 }
 
-.poster{
-    width: 140px;
-    height: 200px;
+.card::after {
+    content: '›';
+    position: absolute;
+    top: 50%;
+    right: 1rem;
+    color: #a0aec0;
+    font-size: 2rem;
+    line-height: 1;
+    transform: translateY(-50%);
+    transition: color var(--transition), transform var(--transition);
+}
+
+.card:hover::after,
+.card:focus-visible::after {
+    color: #fff;
+    transform: translate(2px, -50%);
+}
+
+.card:focus-visible {
+    outline: 2px solid var(--accent-red);
+    outline-offset: 3px;
+}
+
+.card:active {
+    transform: scale(0.99);
+    background: var(--bg-surface-elevated);
+}
+
+.poster {
+    display: block;
+    width: 100px;
+    height: 150px;
+    aspect-ratio: 2 / 3;
     object-fit: cover;
+    flex-shrink: 0;
     border-radius: var(--radius-md);
-    margin-bottom: 20px;
     box-shadow: var(--shadow-sm);
 }
 
-.title{
+.details {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    flex: 1 1 auto;
+    min-width: 0;
+    text-align: left;
+}
+
+.title {
     font-family: var(--font-heading);
-    font-size: clamp(1.4rem, 2vw, 1.75rem);
-    color: #fff;
-    margin-bottom: clamp(8px, 1vw, 12px);
-}
-
-.description{
-    color: var(--text-secondary);
-    font-size: clamp(0.8rem, 1vw, 0.9rem);
-    margin-bottom: clamp(6px, 1vw, 10px);
-}
-
-.featuredMovie{
-    font-family: var(--font-body);
-    font-size: clamp(1rem, 1vw, 1.2rem);
+    font-size: clamp(1.2rem, 1.8vw, 1.6rem);
     font-weight: 700;
-    color: var(--text-secondary);
-    margin-bottom: clamp(6px, 1vw, 20px);
+    color: #fff;
+    line-height: 1.2;
+    margin: 0 0 clamp(8px, 1vw, 12px);
 }
 
-.button{
-    margin-top: clamp(12px, 1vw, 20px);
-    transition: all var(--transition);
+.description {
+    color: #cbd5e1;
+    font-size: clamp(0.7rem, 1vw, 1rem);
+    line-height: 1.35;
+    margin: 0 0 clamp(6px, 1vw, 10px);
+}
+
+.featuredMovie {
+    font-family: var(--font-body);
+    font-size: clamp(0.8rem, 1.4vw, 1rem);
+    font-weight: 700;
+}
+
+@media (min-width: 768px) {
+    .card {
+        gap: 1.5rem;
+        padding: 1.25rem;
+        padding-right: 3rem;
+    }
+
+    .poster {
+        width: 150px;
+        height: 225px;
+    }
+
+    .title {
+        font-size: clamp(1.35rem, 2vw, 1.8rem);
+    }
+
+    .description {
+        font-size: clamp(0.9rem, 1.2vw, 1.1rem);
+    }
+
+    .featuredMovie {
+        font-size: clamp(0.9rem, 1.2vw, 1.1rem);
+    }
 }

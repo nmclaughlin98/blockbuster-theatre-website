@@ -1,7 +1,7 @@
 import styles from './CollectionDetail.module.css';
 import { useEffect, useMemo } from 'react';
 import { MovieGrid } from '../../movies';
-import { DirectionalButton, Layout } from '../../shared';
+import { DirectionalButton, Layout, SectionHeader } from '../../shared';
 import { PageLoader } from '../../shared/PageLoader';
 import { CollectionArtwork } from '../collections/CollectionArtwork';
 import { sortMoviesByReleaseDate } from '../collections/collectionSort';
@@ -62,14 +62,11 @@ export function CollectionDetail() {
               >
                 Back to Collections
               </DirectionalButton>
-              <div className="section-header">
-                <div>
-                  <h2>Films in this collection</h2>
-                  <p className="muted">
-                    {movies.length} {movies.length === 1 ? 'film' : 'films'} available
-                  </p>
-                </div>
-              </div>
+              <SectionHeader
+                title="Films in this collection"
+                description={`${movies.length} ${movies.length === 1 ? 'film' : 'films'} available`}
+                headingLevel={2}
+              />
               {movies.length
                 ? <MovieGrid movies={orderedMovies} />
                 : <p className="collection-message">

@@ -1,6 +1,6 @@
 import { useLayoutEffect, useRef, useState } from 'react';
 import { MovieGrid } from '../../movies';
-import { DirectionalButton } from '../../shared';
+import { DirectionalButton, SectionHeader } from '../../shared';
 
 export function MovieSection({
   title,
@@ -36,12 +36,11 @@ export function MovieSection({
 
   return (
     <section className="movie-poster">
-      <div className="section-header movie-section-header">
-        <h1>{title}</h1>
+      <SectionHeader title={title} className="movie-section-header">
         <DirectionalButton className="btn-glass button" href={viewAllHref} direction="next" variant="glass">
           {viewAllLabel}
         </DirectionalButton>
-      </div>
+      </SectionHeader>
       <MovieGrid movies={movies.slice(0, visibleCount)} containerRef={gridRef} />
     </section>
   );

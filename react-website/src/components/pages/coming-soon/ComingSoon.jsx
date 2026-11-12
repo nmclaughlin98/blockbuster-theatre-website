@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { MovieGrid } from '../../movies';
-import { Layout } from '../../shared';
+import { Layout, SectionHeader } from '../../shared';
 import { PageLoader } from '../../shared/PageLoader';
 import { useMovies } from '../shared/useMovies';
 
@@ -25,14 +25,10 @@ export function ComingSoon() {
   return (
     <Layout current="coming">
       <section className="movie-poster">
-        <div className="section-header">
-          <div>
-            <h1>Coming Soon</h1>
-            <p className="muted">
-              Get a sneak peek at the most anticipated big-screen blockbusters arriving soon.
-            </p>
-          </div>
-        </div>
+        <SectionHeader
+          title="Coming Soon"
+          description="Get a sneak peek at the most anticipated big-screen blockbusters arriving soon."
+        />
         {error
           ? <p>Coming soon movies are temporarily unavailable.</p>
           : <MovieGrid movies={upcoming} comingSoon />}

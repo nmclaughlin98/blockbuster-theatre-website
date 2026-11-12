@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNetworkSpeed } from '../../../utils/useNetworkSpeed';
 import { getFilmSelections } from '../shared/bookingApi';
 import { useMovies } from '../shared/useMovies';
+import { SectionHeader } from '../../shared';
 import { OfferCard } from './OfferCard';
 
 export function Offers() {
@@ -28,7 +29,7 @@ export function Offers() {
 
   return (
     <section className="offers">
-      <div className="section-header"><h1>Special Cinema Offers</h1></div>
+      <SectionHeader title="Special Cinema Offers" />
       {state.loading && <p role="status">Loading special offers...</p>}
       {state.error && <p className="form-notice" role="alert">{state.error}</p>}
       {!state.loading && !state.error && !state.offers.length

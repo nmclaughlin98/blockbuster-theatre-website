@@ -1,7 +1,7 @@
 import styles from './NowShowing.module.css';
 import { useEffect, useMemo, useState } from 'react';
 import { MovieGrid } from '../../movies';
-import { DirectionalButton, Layout } from '../../shared';
+import { DirectionalButton, Layout, SectionHeader } from '../../shared';
 import { PageLoader } from '../../shared/PageLoader';
 import { CollectionsView } from '../collections/Collections';
 import { NowShowingSwitch } from './NowShowingSwitch';
@@ -128,21 +128,18 @@ export function NowShowing({ initialView }) {
     return (
         <Layout className={styles.root} current="now">
             <section className="movie-poster">
-                <div className="section-header">
-                    <div>
-                        <h1>{view === 'movies' ? 'Now Showing' : 'Collections'}</h1>
-                        <p className="muted">
-                            {view === 'movies'
-                                ? 'Select a movie to view synopsis, showtimes, and book reserved luxury seats.'
-                                : 'Discover connected stories and films gathered together.'}
-                        </p>
-                    </div>
+                <SectionHeader
+                    title={view === 'movies' ? 'Now Showing' : 'Collections'}
+                    description={view === 'movies'
+                        ? 'Select a movie to view synopsis, showtimes, and book reserved luxury seats.'
+                        : 'Discover connected stories and films gathered together.'}
+                >
                     {view === 'movies' && (
                         <DirectionalButton className="button btn-glass" href="./timetable.html" direction="next" variant="glass">
                             View Timetable
                         </DirectionalButton>
                     )}
-                </div>
+                </SectionHeader>
                 <NowShowingSwitch current={view} onChange={changeView} />
                 <div
                     className="now-showing-view"
