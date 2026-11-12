@@ -16,6 +16,7 @@ export function TicketTypeCard({
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   }).format(price);
+  const [wholePrice, pence = '00'] = formattedPrice.split('.');
 
   return (
     <article className={styles.card}>
@@ -25,7 +26,11 @@ export function TicketTypeCard({
           <span className={styles.description}>{description}</span>
         </p>
         <p className={styles.price}>
-          <strong>{currencySymbol}{formattedPrice}</strong>
+          <strong className={styles.priceAmount}>
+            <span className={styles.priceSymbol}>{currencySymbol}</span>
+            <span className={styles.priceWhole}>{wholePrice}</span>
+            <span className={styles.priceFraction}>.{pence}</span>
+          </strong>
         </p>
       </div>
       <div className={styles.stepper} role="group" aria-label={`${title} ticket quantity`}>

@@ -1,4 +1,5 @@
 .card {
+    --ticket-price-accent: rgb(255, 112, 131);
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -43,10 +44,31 @@
 
 .price {
     margin-top: 0.7rem;
-    font-weight: 500;
     white-space: nowrap;
     font-family: var(--font-display);
-    letter-spacing: 0.06em;
+    font-size: clamp(1.6rem, 4vw, 2rem);
+    font-variant-numeric: tabular-nums;
+    color: var(--ticket-price-accent);
+}
+
+.priceAmount {
+    display: inline-flex;
+    align-items: baseline;
+    font-variant-numeric: tabular-nums;
+}
+
+
+.priceSymbol,
+.priceFraction {
+    font-size: 0.625em;
+    font-weight: 700;
+    color: var(--ticket-price-accent);
+}
+
+
+.priceWhole {
+    font-weight: 700;
+    line-height: 1;
 }
 
 .separator {

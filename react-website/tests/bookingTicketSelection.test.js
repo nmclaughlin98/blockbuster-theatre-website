@@ -109,7 +109,7 @@ test('renders ticket card metadata and disables decrement at its minimum', async
       onDecrement: () => {},
     }));
 
-    assert.match(markup, /£6\.50/);
+    assert.match(markup, /<span[^>]*>£<\/span><span[^>]*>6<\/span><span[^>]*>\.50<\/span>/);
     assert.match(markup, /Off-peak adult admission/);
     const decrementButton = markup.match(/<button[^>]*aria-label="Decrease Standard Adult tickets"[^>]*>/)?.[0];
     const incrementButton = markup.match(/<button[^>]*aria-label="Increase Standard Adult tickets"[^>]*>/)?.[0];
