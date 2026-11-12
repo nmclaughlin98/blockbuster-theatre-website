@@ -1,8 +1,8 @@
 import { useEffect } from 'react';
 import { MovieGrid } from '../../movies';
 import { Layout, SectionHeader } from '../../shared';
-import { PageLoader } from '../../shared/PageLoader/PageLoader';
 import { useMovies } from '../shared/useMovies';
+import { ComingSoonSkeleton } from './ComingSoonSkeleton';
 
 export function ComingSoon() {
   const { movies, loading, error } = useMovies();
@@ -17,7 +17,7 @@ export function ComingSoon() {
   if (loading) {
     return (
       <Layout current="coming" loading>
-        <PageLoader label="Loading coming soon movies" />
+        <ComingSoonSkeleton />
       </Layout>
     );
   }

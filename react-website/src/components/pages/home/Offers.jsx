@@ -29,7 +29,7 @@ export function Offers() {
 
   return (
     <section className="offers">
-      <SectionHeader title="Special Cinema Offers" />
+      <SectionHeader title="Special Offers" />
       {state.loading && <p role="status">Loading special offers...</p>}
       {state.error && <p className="form-notice" role="alert">{state.error}</p>}
       {!state.loading && !state.error && !state.offers.length

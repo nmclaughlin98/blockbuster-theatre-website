@@ -1,0 +1,474 @@
+.page {
+    width: 100%;
+    min-height: 55vh;
+    padding: var(--section-space) var(--page-gutter) 4rem;
+}
+
+.content {
+    width: 100%;
+    max-width: var(--content-width);
+    margin: 0 auto;
+}
+
+.sectionHeading {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    border-bottom: 1px solid var(--border-subtle);
+    padding-bottom: 1rem;
+}
+
+.nowShowingSection {
+    min-height: 55vh;
+}
+
+.nowShowingTitle {
+    width: min(100%, 18rem);
+    height: clamp(2rem, 3.5vw, 2.7rem);
+}
+
+.nowShowingDescription {
+    width: min(75vw, 38rem);
+    height: 0.85rem;
+    margin-block: 0.45rem;
+}
+
+.nowShowingAction {
+    width: 6rem;
+    height: 2rem;
+    border-radius: var(--radius-md);
+}
+
+.headingText {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+    min-width: 0;
+}
+
+.centeredHeading {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    border-bottom: 0;
+    padding-bottom: 0;
+}
+
+.headerAction {
+    flex: 0 0 auto;
+    width: 8rem;
+    height: 2.5rem;
+}
+
+.title {
+    width: min(100%, 24rem);
+    height: clamp(1.75rem, 4vw, 2.75rem);
+}
+
+.subtitle {
+    width: min(75%, 32rem);
+    height: 0.8rem;
+}
+
+.collectionGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, clamp(8.125rem, 38vw, 12.5rem)), 1fr));
+    gap: clamp(0.8rem, 1.5vw, 0.9rem);
+    width: 100%;
+    margin: 0 auto;
+}
+
+.poster {
+    aspect-ratio: 2 / 3;
+    border-radius: var(--radius-md);
+}
+
+.collectionCard {
+    position: relative;
+    aspect-ratio: 2 / 3;
+    overflow: hidden;
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+}
+
+.collectionArtwork {
+    position: absolute;
+    inset: 0 0 auto;
+    width: 100%;
+    height: 42%;
+    border-radius: 0;
+}
+
+.collectionCardContent {
+    position: absolute;
+    inset: 42% 0 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: clamp(0.5rem, 1.5vw, 0.85rem);
+}
+
+.collectionTitle {
+    width: 80%;
+    height: 1rem;
+}
+
+.collectionDescription {
+    width: 100%;
+    height: 0.65rem;
+}
+
+.collectionDescriptionShort {
+    width: 68%;
+}
+
+.switch {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    width: min(100%, 28rem);
+    gap: 0.25rem;
+    margin: 0 0 1.5rem;
+    padding: 0.25rem;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+}
+
+.switchItem {
+    height: 2.85rem;
+    border-radius: var(--radius-sm);
+}
+
+.filterLabel {
+    width: 8rem;
+    height: 0.8rem;
+    margin: 0 0.3rem 0.9rem;
+    display: block;
+}
+
+.searchLabel {
+    width: 10rem;
+}
+
+.sortLabel {
+    width: 6rem;
+}
+
+.filterField {
+    height: 3.05rem;
+    border-radius: var(--radius-full);
+}
+
+.genreChip {
+    flex: 0 0 auto;
+    width: 5rem;
+    height: 2.53rem;
+    border-radius: var(--radius-full);
+}
+
+.collectionHero {
+    position: relative;
+    display: flex;
+    align-items: flex-end;
+    min-height: clamp(22rem, 48vw, 38rem);
+    overflow: hidden;
+}
+
+.collectionHeroArtwork {
+    position: absolute;
+    inset: 0;
+    border-radius: 0;
+}
+
+.collectionHero .collectionHeroArtwork {
+    background: linear-gradient(180deg, #292a30 0%, #17181d 66%, var(--bg-main) 100%);
+}
+
+.collectionHero .collectionHeroArtwork::after {
+    display: none;
+}
+
+.collectionHeroContent {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: var(--content-width);
+    margin: 0 auto;
+    padding: 0 var(--page-gutter) 3rem;
+}
+
+.collectionHeroTitle {
+    width: min(80%, 34rem);
+    height: clamp(2.5rem, 7vw, 5rem);
+    margin-bottom: 1rem;
+}
+
+.collectionHeroDescription {
+    width: min(85%, 40rem);
+    height: 0.9rem;
+    margin-bottom: 0.7rem;
+}
+
+.collectionHeroDescriptionShort {
+    width: min(60%, 28rem);
+}
+
+.collectionBody {
+    width: 100%;
+    max-width: var(--content-width);
+    margin: 0 auto;
+    padding: var(--section-space) var(--page-gutter) 4rem;
+}
+
+.backButton {
+    width: 8rem;
+    height: 2.5rem;
+    margin-bottom: 2rem;
+}
+
+.detailHeroArtwork {
+    position: absolute;
+    inset: 0;
+    border-radius: 0;
+    background: linear-gradient(180deg, #292a30 0%, #17181d 66%, var(--bg-main) 100%);
+}
+
+.detailHeroArtwork::after {
+    display: none;
+}
+
+.detailTitle {
+    width: min(200%, 38rem);
+    height: clamp(2.5rem, 5vw, 4rem);
+}
+
+.ratingPlaceholder {
+    display: flex;
+    align-items: center;
+    gap: 0.875rem;
+    margin-bottom: 1.5rem;
+}
+
+.ratingBadge {
+    width: 3.125rem;
+    height: 3.125rem;
+    border-radius: var(--radius-sm);
+}
+
+.runtimePlaceholder {
+    width: 7.5rem;
+    height: 1rem;
+}
+
+.detailMetadataLine {
+    display: block;
+    height: 0.8rem;
+}
+
+.detailMetadataDirector {
+    width: min(100%, 23rem);
+}
+
+.detailMetadataCast {
+    width: min(100%, 62rem);
+}
+
+.detailMetadataRelease {
+    width: min(100%, 14rem);
+}
+
+.detailSubheading {
+    width: min(70%, 16rem);
+    height: clamp(1.7rem, 2vw, 2.4rem);
+}
+
+.synopsisLines {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+}
+
+.synopsisLine {
+    width: min(100%, 78rem);
+    height: 0.85rem;
+}
+
+.synopsisLineShort {
+    width: min(72%, 56rem);
+}
+
+.asideHeading {
+    width: min(85%, 15rem);
+    height: clamp(1.7rem, 2vw, 2rem);
+}
+
+.dayLabel {
+    width: min(100%, 5rem);
+    height: 0.9rem;
+}
+
+.showtimeChip {
+    width: 100%;
+    min-width: 0;
+    min-height: 3.75rem;
+    border-radius: var(--radius-sm);
+}
+
+.bookNow {
+    width: 9.5rem;
+    height: 3rem;
+    margin: 1.25rem auto 0;
+    border-radius: var(--radius-md);
+}
+
+.countdownValue {
+    width: 2.75rem;
+    height: 1.8rem;
+}
+
+.countdownLabel {
+    width: 2.5rem;
+    height: 0.5rem;
+}
+
+.scheduleTimes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.7rem;
+}
+
+.dayTabs {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.dayTab {
+    height: 3.5rem;
+}
+
+.timetableHeader {
+    margin-bottom: 2rem;
+}
+
+.timetableHeader .title,
+.timetableHeader .subtitle {
+    margin-right: auto;
+    margin-left: auto;
+}
+
+.timetableToolbar {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.searchField {
+    width: min(100%, 24rem);
+    height: 2.75rem;
+}
+
+.downloadButton {
+    width: 9rem;
+    height: 2.75rem;
+}
+
+.scheduleList {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+}
+
+.scheduleRow {
+    display: grid;
+    grid-template-columns: minmax(10rem, 0.8fr) minmax(0, 2fr);
+    align-items: center;
+    gap: 1.5rem;
+    min-height: 6rem;
+    padding: 1.25rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+}
+
+.scheduleInfo {
+    display: flex;
+    flex-direction: column;
+    gap: 0.7rem;
+}
+
+.scheduleTitle {
+    width: min(100%, 14rem);
+    height: 1.1rem;
+}
+
+.scheduleGenre {
+    width: min(70%, 8rem);
+    height: 0.7rem;
+}
+
+.scheduleTimes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.65rem;
+}
+
+.scheduleTime {
+    width: 5rem;
+    height: 2.25rem;
+}
+
+@media (max-width: 760px) {
+    .scheduleRow {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .dayTabs {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 560px) {
+    .sectionHeading {
+        align-items: flex-start;
+    }
+
+    .headerAction {
+        width: 5.5rem;
+    }
+
+    .collectionHero {
+        min-height: 24rem;
+    }
+
+    .collectionHeroContent {
+        padding-bottom: 2rem;
+    }
+
+    .timetableToolbar {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .searchField,
+    .downloadButton {
+        width: 100%;
+    }
+
+    .dayTabs {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+    .collectionHero .collectionHeroArtwork::after {
+        display: none;
+    }
+}

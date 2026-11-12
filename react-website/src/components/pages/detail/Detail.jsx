@@ -2,10 +2,10 @@ import styles from './Detail.module.css';
 import { useEffect, useState } from 'react';
 import { Countdown, movieSlug } from '../../movies/index.js';
 import { asset, Layout, ShowtimeChip } from '../../shared';
-import { PageLoader } from '../../shared/PageLoader/PageLoader';
 import { createBookingHref } from '../shared/showtimeNavigation';
 import { getUpcomingScreeningDates } from '../shared/bookingApi';
 import { useMovieDetail } from './useMovieDetail';
+import { DetailSkeleton } from './DetailSkeleton';
 
 function formatPeople(people) {
     if (Array.isArray(people))
@@ -226,7 +226,7 @@ export function Detail({ comingSoon = false }) {
     if (loading) {
         return (
             <Layout className={styles.root} loading>
-                <PageLoader label="Loading movie details" />
+                <DetailSkeleton comingSoon={comingSoon} />
             </Layout>
         );
     }

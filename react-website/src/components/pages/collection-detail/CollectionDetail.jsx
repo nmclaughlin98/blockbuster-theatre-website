@@ -2,10 +2,10 @@ import styles from './CollectionDetail.module.css';
 import { useEffect, useMemo } from 'react';
 import { MovieGrid } from '../../movies';
 import { DirectionalButton, Layout, SectionHeader } from '../../shared';
-import { PageLoader } from '../../shared/PageLoader/PageLoader';
 import { CollectionArtwork } from '../collections/CollectionArtwork';
 import { sortMoviesByReleaseDate } from '../collections/collectionSort';
 import { useCollection } from '../collections/useCollection';
+import { CollectionDetailSkeleton } from './CollectionDetailSkeleton';
 
 export function CollectionDetail() {
   const collectionId = new URLSearchParams(window.location.search).get('collection') || '';
@@ -19,7 +19,7 @@ export function CollectionDetail() {
   if (loading) {
     return (
       <Layout className={styles.root} current="now" loading>
-        <PageLoader label="Loading collection" />
+        <CollectionDetailSkeleton />
       </Layout>
     );
   }

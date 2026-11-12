@@ -2,8 +2,8 @@ import styles from './NowShowing.module.css';
 import { useEffect, useMemo, useState } from 'react';
 import { MovieGrid } from '../../movies';
 import { DirectionalButton, Layout, SectionHeader } from '../../shared';
-import { PageLoader } from '../../shared/PageLoader/PageLoader';
 import { CollectionsView } from '../collections/Collections';
+import { NowShowingSkeleton } from './NowShowingSkeleton';
 import { NowShowingSwitch } from './NowShowingSwitch';
 import { useCollections } from '../collections/useCollections';
 import { useMovies } from '../shared/useMovies';
@@ -120,7 +120,7 @@ export function NowShowing({ initialView }) {
     if (pageLoading) {
         return (
             <Layout className={styles.root} current="now" loading>
-                <PageLoader label={view === 'movies' ? 'Loading now showing movies' : 'Loading collections'} />
+                <NowShowingSkeleton view={view} />
             </Layout>
         );
     }

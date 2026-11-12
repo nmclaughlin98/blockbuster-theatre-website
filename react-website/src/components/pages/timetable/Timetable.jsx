@@ -2,7 +2,6 @@ import styles from './Timetable.module.css';
 import { useEffect, useMemo, useState } from 'react';
 import { movieId, movieSlug } from '../../movies';
 import { CenteredHeadingBlock, Layout, ShowtimeChip } from '../../shared';
-import { PageLoader } from '../../shared/PageLoader/PageLoader';
 import {
     getMoviesForDates,
     getUpcomingScreeningDates,
@@ -12,6 +11,7 @@ import {
 import { createBookingHref } from '../shared/showtimeNavigation';
 import { useMovies } from '../shared/useMovies';
 import { openTimetablePdf } from './timetablePdf';
+import { TimetableSkeleton } from './TimetableSkeleton';
 
 const maxShowtimeButtons = 4;
 
@@ -162,7 +162,7 @@ export function Timetable() {
     if (loading) {
         return (
             <Layout className={styles.root} current="now" loading>
-                <PageLoader label="Loading movie timetable" />
+                <TimetableSkeleton />
             </Layout>
         );
     }
