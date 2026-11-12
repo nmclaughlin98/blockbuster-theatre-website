@@ -5,6 +5,7 @@ import {
   ComingSoon,
   Detail,
   Home,
+  Login,
   NowShowing,
   Timetable,
 } from './components/pages';
@@ -22,6 +23,7 @@ export default function App() {
   else if (path.includes('movie-detail')) page = <Detail />;
   else if (path.includes('nowshowing')) page = <NowShowing />;
   else if (path.includes('comingsoon')) page = <ComingSoon />;
+  else if (path.includes('login')) page = <Login />;
   else if (path.includes('timetable')) page = <Timetable />;
   else if (path.includes('about')) page = <About />;
 

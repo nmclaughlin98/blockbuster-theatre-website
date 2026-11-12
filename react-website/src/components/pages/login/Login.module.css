@@ -1,0 +1,104 @@
+.root {
+    min-height: 100%;
+}
+
+.page {
+    display: grid;
+    place-items: center;
+    align-items: center;
+    padding: clamp(10rem, 6vw, 4rem) var(--page-gutter);
+}
+
+.card {
+    width: min(100%, 28rem);
+    padding: clamp(1.5rem, 5vw, 2.5rem);
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+}
+
+.title {
+    margin: 0;
+    color: var(--text-primary);
+    font-family: var(--font-heading);
+    font-size: clamp(2rem, 5vw, 2.5rem);
+    line-height: 1.1;
+    text-align: center;
+}
+
+.description {
+    margin: 0.75rem 0 2rem;
+    color: var(--text-secondary);
+    text-align: center;
+}
+
+.form {
+    display: grid;
+    gap: 1.25rem;
+}
+
+.field {
+    display: grid;
+    gap: 0.5rem;
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    font-weight: 600;
+}
+
+.input {
+    width: 100%;
+    padding: 0.85rem 1rem;
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    background: var(--bg-surface-elevated);
+    color: var(--text-primary);
+    font: inherit;
+    font-weight: 400;
+}
+
+.input:focus-visible {
+    border-color: var(--accent-red);
+    box-shadow: 0 0 16px var(--accent-glow);
+}
+
+.submit {
+    width: 100%;
+    min-height: 3rem;
+    padding: 0.75rem 1rem;
+    border: 0;
+    border-radius: var(--radius-full);
+    background: var(--accent-red);
+    color: #fff;
+    font-family: var(--font-heading);
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background-color 160ms ease, transform 160ms ease;
+}
+
+.submit:hover {
+    background: var(--accent-red-hover);
+    transform: translateY(-2px);
+}
+
+.submit:focus-visible {
+    outline: 2px solid var(--text-primary);
+    outline-offset: 3px;
+}
+
+.submit:disabled,
+.submit:disabled:hover {
+    opacity: 0.65;
+    cursor: wait;
+    transform: none;
+}
+
+.notice {
+    margin: 1rem 0 0;
+    color: var(--text-muted);
+    font-size: 0.875rem;
+    text-align: center;
+}

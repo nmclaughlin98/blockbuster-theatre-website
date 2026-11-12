@@ -1,4 +1,5 @@
 import { MOVIES_API_URL } from '../../../config.js';
+import { getCognitoAccessToken } from '../../../auth/cognitoAuth.js';
 
 export const CINEMA_SEAT_CAPACITY = 71;
 
@@ -16,7 +17,14 @@ export function getApiErrorMessage(data) {
 }
 
 async function requestJson(path, options = {}, expectedStatus) {
-  const response = await fetch(`${MOVIES_API_URL}${path}`, options);
+  const accessToken = await getCognitoAccessToken();
+  let requestOptions = options;
+  if (accessToken) {
+    const headers = new Headers(options.headers);
+    headers.set('Authorization', `Bearer ${accessToken}`);
+    requestOptions = { ...options, headers };
+  }
+  const response = await fetch(`${MOVIES_API_URL}${path}`, requestOptions);
   let data;
 
   try {

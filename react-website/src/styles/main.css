@@ -310,40 +310,67 @@ header {
     background: var(--accent-red-hover);
 }
 
-.nav-cta-btn {
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    gap: 6px !important;
-    padding: 10px 22px !important;
-    font-family: var(--font-heading) !important;
-    font-weight: 800 !important;
-    font-size: 0.9rem !important;
-    letter-spacing: 0.04em !important;
-    text-transform: uppercase !important;
-    border-radius: var(--radius-full) !important;
-    background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%) !important;
-    color: #0c0d12 !important;
-    border: 1px solid rgba(251, 191, 36, 0.6) !important;
-    box-shadow: 0 4px 16px rgba(245, 158, 11, 0.35) !important;
-    transition: all var(--transition) !important;
-    cursor: pointer !important;
-    margin-left: 6px !important;
+.primary-nav .menu li .nav-cta-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 22px;
+    border: 2px solid var(--accent-red);
+    border-radius: var(--radius-full);
+    color: #fff;
+    font-family: var(--font-heading);
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    transition: all var(--transition);
     touch-action: manipulation;
 }
 
-.nav-cta-btn:hover {
-    background: linear-gradient(135deg, #fde68a 0%, #fbbf24 100%) !important;
-    color: #000 !important;
-    transform: translateY(-2px) !important;
-    box-shadow: 0 6px 24px rgba(245, 158, 11, 0.6) !important;
+.primary-nav .menu li .nav-cta-btn:hover {
+    background: var(--accent-red-hover-transparent);
+    color: #fff;
+    transform: translateY(-2px);
 }
 
-.nav-cta-btn.current {
-    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important;
-    color: #fff !important;
-    box-shadow: 0 4px 20px rgba(217, 119, 6, 0.5) !important;
-    border-color: rgba(251, 191, 36, 0.8) !important;
+.primary-nav .menu li .nav-cta-btn.current {
+    background: var(--accent-red-dark);
+    border-color: var(--accent-red-dark);
+}
+
+.booking-shortcut {
+    position: fixed;
+    right: clamp(0.75rem, 3vw, 1.75rem);
+    bottom: calc(clamp(0.75rem, 3vw, 1.75rem) + 3rem + 0.75rem);
+    z-index: 997;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 3rem;
+    padding: 0 1.25rem;
+    border: 1px solid rgba(251, 191, 36, 0.6);
+    border-radius: var(--radius-full);
+    background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+    box-shadow: 0 4px 16px rgba(245, 158, 11, 0.35);
+    color: #0c0d12;
+    font-family: var(--font-heading);
+    font-size: 0.9rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-decoration: none;
+    text-transform: uppercase;
+    transition: all var(--transition);
+    touch-action: manipulation;
+}
+
+.booking-shortcut:hover {
+    background: linear-gradient(135deg, #fde68a 0%, #fbbf24 100%);
+    box-shadow: 0 6px 24px rgba(245, 158, 11, 0.6);
+    color: #000;
+    transform: translateY(-2px);
+}
+
+.booking-shortcut:focus-visible {
+    outline: 2px solid var(--text-primary);
+    outline-offset: 3px;
 }
 
 .hamburger {
@@ -994,6 +1021,15 @@ html.seat-selection-dragging {
     stroke: currentColor;
     stroke-width: 2.5;
     fill: none;
+}
+
+@media (max-width: 650px) {
+    .booking-shortcut {
+        bottom: calc(clamp(0.75rem, 3vw, 1.75rem) + 2.75rem + 0.75rem);
+        min-height: 2.75rem;
+        padding-inline: 1rem;
+        font-size: 0.85rem;
+    }
 }
 
 .trailer-fallback {

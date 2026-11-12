@@ -25,14 +25,6 @@
 
 }
 
-@media (min-width: 966px) and (max-width: 1024px){
-
-.nav-cta-btn{
-        margin-left: 0 !important;
-    }
-
-}
-
 @media (max-width: 965px){
 
 .countdown-timer{
@@ -108,9 +100,10 @@
         box-shadow: 0 10px 22px var(--accent-glow);
     }
 
-.nav-cta-btn{
+.primary-nav .menu li .nav-cta-btn{
+        width: 100%;
+        padding: 12px 23px;
         font-size: 1.05rem;
-        padding: 12px 23px !important;
     }
 
 .form-group{
@@ -315,9 +308,9 @@ select{
         font-size: 0.75rem;
     }
 
-.nav-cta-btn{
-        padding: 7px 12px !important;
-        font-size: 0.75rem !important;
+.primary-nav .menu li .nav-cta-btn{
+        padding: 7px 12px;
+        font-size: 0.75rem;
     }
 
 }

@@ -4,7 +4,9 @@
 
 The movies API base URL is written to the gitignored `src/config.js` before each development server start and production build. `VITE_MOVIES_API_URL` is required; there is no hardcoded URL fallback.
 
-For local development, create `.env.local` and set `VITE_MOVIES_API_URL` to the API invoke base URL. Include a stage path if the API uses one, but do not append a route such as `/movies`. You can also use mode-specific `.env.development.local` and `.env.production.local` files. For GitHub Pages deployments, add a repository Actions variable named `VITE_MOVIES_API_URL` under Settings → Secrets and variables → Actions → Variables. The deployment workflow requires this variable and passes it into the production build.
+For local development, copy `.env.example` to `.env.local`. Set `VITE_MOVIES_API_URL` to the API invoke base URL, including a stage path if the API uses one, but do not append a route such as `/movies`. Set `VITE_COGNITO_REGION`, `VITE_COGNITO_USER_POOL_ID`, and `VITE_COGNITO_USER_POOL_CLIENT_ID` using the backend stack's region and `UserPoolId` / `UserPoolClientId` outputs. The current backend region is `eu-west-2`. The public app client must have no client secret. You can also use mode-specific `.env.development.local` and `.env.production.local` files. For GitHub Pages deployments, add all four `VITE_...` values as repository Actions variables under Settings → Secrets and variables → Actions → Variables; the deploy workflow validates and passes them into the production build.
+
+The Login page signs in provisioned accounts directly with Cognito using Amplify's SRP flow. Amplify manages the session; frontend API requests use its access token as a bearer token. No sign-up flow or backend password endpoint is used. MFA verification codes and Cognito's required-new-password challenge are supported; other account recovery/setup steps direct users to the theatre administrator.
 
 ## Wallet passes
 

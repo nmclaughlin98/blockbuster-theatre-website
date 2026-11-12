@@ -4,6 +4,7 @@ export { CollectionDetail } from './collection-detail/CollectionDetail';
 export { ComingSoon } from './coming-soon/ComingSoon';
 export { Detail } from './detail/Detail';
 export { Home } from './home/Home';
+export { Login } from './login/Login';
 export { NowShowing } from './now-showing/NowShowing';
 export { Timetable } from './timetable/Timetable';
 export { useMovies } from './shared/useMovies';

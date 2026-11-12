@@ -50,11 +50,11 @@ function Navigation({ current, open, onNavigate }) {
                 ))}
                 <li>
                     <a
-                        className={`nav-cta-btn ${current === 'booking' ? 'current' : ''}`}
-                        href="./bookNow.html"
+                        className={`nav-cta-btn ${current === 'login' ? 'current' : ''}`}
+                        href="./login.html"
                         onClick={(e) => handleBlurClick(e, onNavigate)}
                     >
-                        Book Tickets
+                        Login
                     </a>
                 </li>
             </ul>
