@@ -16,8 +16,10 @@ export function getApiErrorMessage(data) {
   return message || null;
 }
 
-async function requestJson(path, options = {}, expectedStatus) {
-  const accessToken = await getCognitoAccessToken();
+async function requestJson(path, options = {}, expectedStatus, accessTokenOverride) {
+  const accessToken = accessTokenOverride === undefined
+    ? await getCognitoAccessToken()
+    : accessTokenOverride;
   let requestOptions = options;
   if (accessToken) {
     const headers = new Headers(options.headers);
@@ -139,12 +141,18 @@ export function createGuestBookingPayload({
   return payload;
 }
 
-export async function createGuestBooking(payload) {
-  const data = await requestJson('/api/v1/bookings/guest', {
+export async function createBooking(payload, accessTokenOverride) {
+  const accessToken = accessTokenOverride === undefined
+    ? await getCognitoAccessToken()
+    : accessTokenOverride;
+  const endpoint = accessToken
+    ? '/api/v1/bookings/account'
+    : '/api/v1/bookings/guest';
+  const data = await requestJson(endpoint, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
-  }, 201);
+  }, 201, accessToken);
   if (!data || typeof data !== 'object' || Array.isArray(data)
     || typeof data.bookingId !== 'string' || !data.bookingId
     || typeof data.bookingRef !== 'string' || !data.bookingRef
@@ -173,9 +181,13 @@ export async function createGuestBooking(payload) {
     || typeof data.confirmationEmailSent !== 'boolean'
     || (data.conversionToken != null && typeof data.conversionToken !== 'string')
     || (data.conversionTokenExpiresAt != null && typeof data.conversionTokenExpiresAt !== 'string')) {
-    throw new Error('The booking service returned invalid guest booking details.');
+    throw new Error('The booking service returned invalid booking details.');
   }
   return { ...data, seats: sortSeatIds(data.seats) };
+}
+
+export async function createGuestBooking(payload) {
+  return createBooking(payload);
 }
 
 export async function convertGuestAccount(conversionToken, password) {

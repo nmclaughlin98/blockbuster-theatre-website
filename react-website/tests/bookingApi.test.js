@@ -3,6 +3,7 @@ import test from 'node:test';
 import { MOVIES_API_URL } from '../src/config.js';
 import {
   createCheckoutPayload,
+  createBooking,
   createGuestBooking,
   createGuestBookingPayload,
   convertGuestAccount,
@@ -406,6 +407,47 @@ test('posts the exact guest booking payload to the versioned endpoint', async ()
     assert.equal(JSON.parse(request.options.body).userId, undefined);
     assert.equal(JSON.parse(request.options.body).paymentToken, undefined);
     assert.deepEqual(booking, { ...bookingDetails, seats: ['F10', 'F11'] });
+  } finally {
+    restoreFetch();
+  }
+});
+
+test('posts signed-in bookings to the account endpoint with the access token', async () => {
+  const bookingDetails = {
+    bookingId: 'bk_990123',
+    bookingRef: 'BBT-883214',
+    showtimeId: '559924_2026-11-01_1215',
+    date: '2026-11-01',
+    movieTitle: 'Inception',
+    seats: ['F10'],
+    tickets: [{ tierId: 'adult', quantity: 1 }],
+    totalAmount: 12,
+    currency: 'GBP',
+    customerEmail: 'customer@example.com',
+    confirmationEmailSent: true,
+  };
+  let request;
+  const restoreFetch = mockFetch(async (url, options) => {
+    request = { url: new URL(url), options };
+    return new Response(JSON.stringify(bookingDetails), { status: 201 });
+  });
+
+  try {
+    const payload = createGuestBookingPayload({
+      showtimeId: '559924_2026-11-01_1215',
+      date: '2026-11-01',
+      seats: ['F10'],
+      email: 'customer@example.com',
+      customerName: 'Niall McLaughlin',
+      tickets: [{ tierId: 'adult', quantity: 1 }],
+    });
+    const booking = await createBooking(payload, 'signed-in-access-token');
+
+    assert.equal(request.url.pathname, '/api/v1/bookings/account');
+    assert.equal(request.options.headers.get('Authorization'), 'Bearer signed-in-access-token');
+    assert.deepEqual(JSON.parse(request.options.body), payload);
+    assert.equal(JSON.parse(request.options.body).userId, undefined);
+    assert.deepEqual(booking, bookingDetails);
   } finally {
     restoreFetch();
   }
