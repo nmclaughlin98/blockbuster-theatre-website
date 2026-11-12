@@ -512,7 +512,7 @@ export function TicketSelection({ initialData = {}, onNext, onToast }) {
         <label htmlFor="booking-movie">Select Film or Special Offer</label>
         <select
           id="booking-movie"
-          className="form-control"
+          className="form-control sort-select"
           aria-busy={selectionLoading}
           disabled={selectionLoading}
           value={selectedSelection ? selectionKey(selectedSelection) : ''}
