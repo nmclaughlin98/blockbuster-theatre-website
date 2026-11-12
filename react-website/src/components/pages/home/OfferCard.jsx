@@ -37,6 +37,7 @@ export function OfferCard({ offer, featuredMovie, isSlowConnection }) {
         {offer.tagline && <p className={styles.description}>{offer.tagline}</p>}
         {offer.priceDescription && <p className={styles.description}>{offer.priceDescription}</p>}
       </div>
+      <span className={styles.chevron} aria-hidden="true">›</span>
     </a>
   );
 }

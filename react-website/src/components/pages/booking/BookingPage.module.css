@@ -1,11 +1,11 @@
 /* Booking page styles, scoped to this page. */
-@keyframes booking-button-spin{
+@keyframes booking-button-spin {
     to {
         transform: rotate(360deg);
     }
 }
 
-@keyframes seat-tooltip-enter{
+@keyframes seat-tooltip-enter {
     from {
         opacity: 0;
         transform: translateY(3px) scale(0.96);
@@ -17,12 +17,12 @@
     }
 }
 
-.root :global(.booking-form) :global(.form-button){
+.root :global(.booking-form) :global(.form-button) {
     min-height: 3.5rem;
     line-height: 1;
 }
 
-.root :global(.wallet-badge-btn){
+.root :global(.wallet-badge-btn) {
     background-color: transparent;
     border: none;
     padding: 0;
@@ -39,12 +39,12 @@
     margin-bottom: 2rem
 }
 
-.root :global(.wallet-badge-btn):hover{
+.root :global(.wallet-badge-btn):hover {
     opacity: 0.9;
     transform: translateY(-1px);
 }
 
-.root :global(.wallet-badge-btn) img{
+.root :global(.wallet-badge-btn) img {
     width: 100%;
     height: 100%;
     display: block;
@@ -52,7 +52,7 @@
     object-fit: fill;
 }
 
-.root :global(.wallet-pass-actions){
+.root :global(.wallet-pass-actions) {
     display: flex;
     justify-content: center;
     width: 100%;
@@ -62,7 +62,7 @@
     margin: 20px auto;
 }
 
-.root :global(.wallet-pass-actions) :global(.wallet-badge-btn){
+.root :global(.wallet-pass-actions) :global(.wallet-badge-btn) {
     flex: 1 1 190px;
     width: 100%;
     max-width: 190px;
@@ -70,12 +70,12 @@
     margin-bottom: 0;
 }
 
-.root :global(.wallet-badge-btn):disabled{
+.root :global(.wallet-badge-btn):disabled {
     cursor: wait;
     opacity: 0.6;
 }
 
-.root :global(.booking-section){
+.root :global(.booking-section) {
     width: 100%;
     max-width: 60rem;
     margin: 0 auto;
@@ -83,12 +83,12 @@
     touch-action: manipulation;
 }
 
-.root :global(.booking-title-block){
+.root :global(.booking-title-block) {
     text-align: center;
     margin-bottom: 36px;
 }
 
-.root :global(.booking-title-block) h1{
+.root :global(.booking-title-block) h1 {
     font-family: var(--font-display);
     font-size: clamp(1.1rem, 7vw, 3.5em);
     text-transform: uppercase;
@@ -98,12 +98,12 @@
     -webkit-text-fill-color: transparent;
 }
 
-.root :global(.booking-title-block) p{
+.root :global(.booking-title-block) p {
     color: var(--text-secondary);
     font-size: clamp(0.8rem, 4vw, 1.1rem);
 }
 
-.root :global(#progressbar){
+.root :global(#progressbar) {
     --progress-step-size: clamp(2.75rem, 5vw, 3rem);
     --progress-line-offset: clamp(1.5rem, 2.5vw, 1.5rem);
     display: flex;
@@ -115,7 +115,7 @@
     scroll-margin-top: calc(var(--header-height) + 1rem);
 }
 
-.root :global(#progressbar)::before{
+.root :global(#progressbar)::before {
     content: '';
     position: absolute;
     top: calc(var(--progress-line-offset) - 1.5px);
@@ -126,7 +126,7 @@
     z-index: 1;
 }
 
-.root :global(#progressbar) li{
+.root :global(#progressbar) li {
     position: relative;
     z-index: 2;
     text-align: center;
@@ -139,7 +139,7 @@
     transition: all var(--transition);
 }
 
-.root :global(#progressbar) li::before{
+.root :global(#progressbar) li::before {
     content: '';
     width: var(--progress-step-size);
     height: var(--progress-step-size);
@@ -155,42 +155,42 @@
     transition: all var(--transition);
 }
 
-.root :global(#progressbar){
+.root :global(#progressbar) {
     counter-reset: none;
 }
 
-.root :global(#progressbar) li:nth-child(1)::before{
+.root :global(#progressbar) li:nth-child(1)::before {
     content: '1';
 }
 
-.root :global(#progressbar) li:nth-child(2)::before{
+.root :global(#progressbar) li:nth-child(2)::before {
     content: '2';
 }
 
-.root :global(#progressbar) li:nth-child(3)::before{
+.root :global(#progressbar) li:nth-child(3)::before {
     content: '3';
 }
 
-.root :global(#progressbar) li:nth-child(4)::before{
+.root :global(#progressbar) li:nth-child(4)::before {
     content: '4';
 }
 
-.root :global(#progressbar) li:nth-child(5)::before{
+.root :global(#progressbar) li:nth-child(5)::before {
     content: '5';
 }
 
-.root :global(#progressbar) li:global(.active){
+.root :global(#progressbar) li:global(.active) {
     color: #fff;
 }
 
-.root :global(#progressbar) li:global(.active)::before{
+.root :global(#progressbar) li:global(.active)::before {
     background: var(--accent-red);
     border-color: var(--accent-red);
     color: #fff;
     box-shadow: 0 0 20px var(--accent-glow);
 }
 
-.root :global(#progressbar) li:global(.completed)::before{
+.root :global(#progressbar) li:global(.completed)::before {
     content: '✓';
     background: var(--accent-green);
     border-color: var(--accent-green);
@@ -198,7 +198,7 @@
     box-shadow: 0 0 10px var(--accent-green);
 }
 
-.root :global(.booking-form){
+.root :global(.booking-form) {
     background: var(--bg-surface);
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-xl);
@@ -209,41 +209,41 @@
     touch-action: manipulation;
 }
 
-.root :global(.date-time-group){
+.root :global(.date-time-group) {
     display: grid;
     grid-template-columns: 1fr 1.3fr;
     gap: 2rem;
 }
 
 .root :global(.date-time-group) :global(.react-datepicker-wrapper),
-.root :global(.date-time-group) :global(.react-datepicker__input-container){
+.root :global(.date-time-group) :global(.react-datepicker__input-container) {
     display: block;
     width: 100%;
 }
 
-.root :global(.date-time-group) :global(.react-datepicker__input-container) input{
+.root :global(.date-time-group) :global(.react-datepicker__input-container) input {
     box-sizing: border-box;
     width: 100%;
 }
 
-.root :global(.step-header){
+.root :global(.step-header) {
     margin-bottom: 28px;
     text-align: center;
 }
 
-.root :global(.step-header) h2{
+.root :global(.step-header) h2 {
     font-family: var(--font-heading);
     font-size: clamp(1.3rem, 4vw, 2.5rem);
     color: #fff;
     margin-bottom: 10px;
 }
 
-.root :global(.step-header) p{
+.root :global(.step-header) p {
     color: var(--text-secondary);
     font-size: clamp(0.9rem, 2vw, 1.1rem);
 }
 
-.root :global(.form-control){
+.root :global(.form-control) {
     max-width: 100%;
     width: 100%;
     padding: 14px 18px;
@@ -259,16 +259,16 @@
     max-height: 300px;
 }
 
-.root :global(.subtotal-item){
+.root :global(.subtotal-item) {
     font-size: clamp(0.8rem, 4.3vw, 1.7rem);
 }
 
-.root :global(.form-control):focus{
+.root :global(.form-control):focus {
     border-color: var(--accent-red);
     box-shadow: 0 0 16px var(--accent-glow);
 }
 
-.root :global(.showtime-chips){
+.root :global(.showtime-chips) {
     display: flex;
     gap: clamp(7px, 1vw, 16px);
     flex-wrap: wrap;
@@ -276,27 +276,27 @@
     align-items: center;
 }
 
-.root :global(.showtime-placeholder){
+.root :global(.showtime-placeholder) {
     font-size: clamp(0.9rem, 2vw, 1rem);
 }
 
-.root :global(.booking-loading){
+.root :global(.booking-loading) {
     display: inline-flex;
     align-items: center;
     gap: 0.65rem;
     min-height: 2rem;
 }
 
-.root :global(.booking-loading) :global(.loader){
+.root :global(.booking-loading) :global(.loader) {
     --size: 0.4px;
 }
 
-.root :global(.booking-showtime-chip){
+.root :global(.booking-showtime-chip) {
     position: relative;
     overflow: visible;
 }
 
-.root :global(.ticket-row){
+.root :global(.ticket-row) {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -307,28 +307,28 @@
     margin-bottom: 12px;
 }
 
-.root :global(.ticket-info) h4{
+.root :global(.ticket-info) h4 {
     font-size: 1.3rem;
     color: #fff;
     font-weight: 600;
 }
 
-.root :global(.ticket-info) span{
+.root :global(.ticket-info) span {
     font-size: 0.80rem;
     color: var(--text-secondary);
 }
 
-.root :global(.ticket-counter){
+.root :global(.ticket-counter) {
     display: flex;
     align-items: center;
     gap: 14px;
 }
 
-.root :global(.ticket-counter) strong{
+.root :global(.ticket-counter) strong {
     font-size: 1.1rem;
 }
 
-.root :global(.counter-btn){
+.root :global(.counter-btn) {
     width: 36px;
     height: 36px;
     border-radius: var(--radius-full);
@@ -345,19 +345,19 @@
     touch-action: manipulation;
 }
 
-.root :global(.counter-btn):hover{
+.root :global(.counter-btn):hover {
     background: var(--accent-red);
     border-color: var(--accent-red);
 }
 
-.root :global(.counter-val){
+.root :global(.counter-val) {
     font-size: 1.0rem;
     font-weight: 700;
     width: 24px;
     text-align: center;
 }
 
-.root :global(.booking-subtotal-bar){
+.root :global(.booking-subtotal-bar) {
     margin-top: 50px;
     margin-bottom: 24px;
     padding: 16px 24px;
@@ -370,7 +370,7 @@
     font-size: 1.2rem;
 }
 
-.root :global(.booking-subtotal-values){
+.root :global(.booking-subtotal-values) {
     font-family: var(--font-display);
     display: flex;
     width: 100%;
@@ -380,38 +380,38 @@
     text-align: left;
 }
 
-.root :global(.subtotal-metric){
+.root :global(.subtotal-metric) {
     display: inline-flex;
     align-items: baseline;
     min-width: 0;
     gap: 8px;
 }
 
-.root :global(.subtotal-metric)>span{
+.root :global(.subtotal-metric)>span {
     color: var(--text-secondary);
     font-weight: 500;
 }
 
-.root :global(.booking-subtotal-bar) strong{
+.root :global(.booking-subtotal-bar) strong {
     color: var(--accent-red);
 }
 
-.root :global(.booking-continue-button){
+.root :global(.booking-continue-button) {
     display: flex;
     width: fit-content;
     margin: 16px 0 0 auto;
 }
 
-.root :global(.booking-continue-button):global(.is-loading){
+.root :global(.booking-continue-button):global(.is-loading) {
     cursor: wait;
 }
 
-.root :global(.booking-continue-button):global(.is-loading):hover{
+.root :global(.booking-continue-button):global(.is-loading):hover {
     box-shadow: none;
     transform: none;
 }
 
-.root :global(.booking-button-spinner){
+.root :global(.booking-button-spinner) {
     width: 0.9rem;
     height: 0.9rem;
     flex: 0 0 auto;
@@ -421,12 +421,12 @@
     animation: booking-button-spin 0.75s linear infinite;
 }
 
-.root :global(.booking-field-loading){
+.root :global(.booking-field-loading) {
     color: var(--text-muted);
     font-size: 0.85rem;
 }
 
-.root :global(.seating-plan){
+.root :global(.seating-plan) {
     margin: 20px auto 30px auto;
     padding: clamp(0.75rem, 3vw, 1.25rem);
     background: rgba(10, 12, 18, 0.7);
@@ -437,13 +437,13 @@
     touch-action: manipulation;
 }
 
-.root :global(.screen-container){
+.root :global(.screen-container) {
     perspective: 400px;
     margin-bottom: 36px;
     text-align: center;
 }
 
-.root :global(.screen){
+.root :global(.screen) {
     height: 20px;
     width: 80%;
     margin: 0 auto;
@@ -454,7 +454,7 @@
     position: relative;
 }
 
-.root :global(.screen-text){
+.root :global(.screen-text) {
     font-family: var(--font-heading);
     font-size: 0.8rem;
     letter-spacing: 0.3em;
@@ -463,7 +463,7 @@
     margin-top: 10px;
 }
 
-.root :global(.seat-selection-status){
+.root :global(.seat-selection-status) {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -480,19 +480,19 @@
     text-align: center;
 }
 
-.root :global(.seat-selection-status--complete){
+.root :global(.seat-selection-status--complete) {
     border-color: var(--accent-green);
     background: rgba(11, 77, 41, 0.13);
     color: var(--accent-green);
 }
 
-.root :global(.seat-selection-status--warning){
+.root :global(.seat-selection-status--warning) {
     border-color: rgba(204, 145, 112, 0.38);
     background: rgba(204, 145, 112, 0.12);
     color: #e2b49b;
 }
 
-.root :global(.seat-legend){
+.root :global(.seat-legend) {
     display: flex;
     justify-content: center;
     gap: 24px;
@@ -500,7 +500,7 @@
     flex-wrap: wrap;
 }
 
-.root :global(.legend-item){
+.root :global(.legend-item) {
     display: flex;
     align-items: center;
     gap: 10px;
@@ -509,14 +509,14 @@
     color: var(--text-secondary);
 }
 
-.root :global(.seat-grid){
+.root :global(.seat-grid) {
     display: flex;
     flex-direction: column;
     gap: 10px;
     align-items: center;
 }
 
-.root :global(.seat-row){
+.root :global(.seat-row) {
     display: flex;
     gap: 8px;
     align-items: center;
@@ -524,14 +524,14 @@
     flex-shrink: 0;
 }
 
-.root :global(.row-label){
+.root :global(.row-label) {
     font-size: 0.8rem;
     font-weight: 700;
     color: var(--text-muted);
     width: 20px;
 }
 
-.root :global(.seat){
+.root :global(.seat) {
     width: clamp(25px, 4vw, 40px);
     height: clamp(25px, 4vw, 40px);
     background: #2a2f45;
@@ -544,18 +544,18 @@
     justify-content: center;
 }
 
-.root :global(.seat-grid) :global(.seat){
+.root :global(.seat-grid) :global(.seat) {
     touch-action: none;
     user-select: none;
     -webkit-user-select: none;
 }
 
-.root :global(.seat):hover:not(:global(.booked-seat)):not(:global(.seat-spacer)){
+.root :global(.seat):hover:not(:global(.booked-seat)):not(:global(.seat-spacer)) {
     background: #3e4668;
     transform: scale(1.15);
 }
 
-.root :global(.seat-hover-tooltip){
+.root :global(.seat-hover-tooltip) {
     position: fixed;
     z-index: 3000;
     display: flex;
@@ -574,45 +574,45 @@
     animation: seat-tooltip-enter 140ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
 }
 
-.root :global(.seat-hover-tooltip) strong{
+.root :global(.seat-hover-tooltip) strong {
     font-size: clamp(0.9rem, 1vw, 1.14rem);
     letter-spacing: 0.08em;
 }
 
-.root :global(.seat):global(.selected-seat){
+.root :global(.seat):global(.selected-seat) {
     background: var(--accent-red) !important;
     box-shadow: 0 0 12px rgba(207, 85, 101, 0.3);
 }
 
-.root :global(.seat):global(.booked-seat){
+.root :global(.seat):global(.booked-seat) {
     background: #181922;
     cursor: not-allowed;
     opacity: 0.45;
 }
 
-.root :global(.seat):global(.booked-seat)::after{
+.root :global(.seat):global(.booked-seat)::after {
     content: '×';
     color: #64748b;
     font-size: 1.5rem;
 }
 
-.root :global(.seat):global(.seat-accessible){
+.root :global(.seat):global(.seat-accessible) {
     background: #1e3a5f;
 }
 
-.root :global(.seat-accessible-icon){
+.root :global(.seat-accessible-icon) {
     width: clamp(25px, 4vw, 25px);
     height: clamp(25px, 4vw, 25px);
     object-fit: contain;
     opacity: 1.0;
 }
 
-.root :global(.seat-spacer){
+.root :global(.seat-spacer) {
     background: transparent !important;
     cursor: default !important;
 }
 
-.root :global(.legend-seat){
+.root :global(.legend-seat) {
     width: clamp(1.2rem, 4vw, 1.8rem);
     height: clamp(1.2em, 4vw, 1.8rem);
     display: grid;
@@ -621,12 +621,12 @@
     background: #2a2f45;
 }
 
-.root :global(.legend-seat):global(.booked-seat){
+.root :global(.legend-seat):global(.booked-seat) {
     background: #181922;
     opacity: 0.5;
 }
 
-.root :global(.legend-seat):global(.booked-seat)::after{
+.root :global(.legend-seat):global(.booked-seat)::after {
     content: '×';
     color: #64748b;
     font-size: 1.1rem;
@@ -634,7 +634,7 @@
     line-height: 1;
 }
 
-.root :global(.legend-seat):global(.seat-accessible) img{
+.root :global(.legend-seat):global(.seat-accessible) img {
     box-sizing: border-box;
     width: 85%;
     height: 85%;
@@ -642,15 +642,15 @@
     object-fit: contain;
 }
 
-.root :global(.legend-seat):global(.selected-seat){
+.root :global(.legend-seat):global(.selected-seat) {
     background: var(--accent-red);
 }
 
-.root :global(.legend-seat):global(.seat-accessible){
+.root :global(.legend-seat):global(.seat-accessible) {
     background: #1e3a5f;
 }
 
-.root :global(.selected-seats-badge){
+.root :global(.selected-seats-badge) {
     margin-top: clamp(20px, 2vw, 40px);
     text-align: center;
     font-weight: 700;
@@ -658,7 +658,7 @@
     font-size: clamp(0.8rem, 1vw, 1.1rem);
 }
 
-.root :global(.selected-seats-badge) strong{
+.root :global(.selected-seats-badge) strong {
     margin-left: clamp(5px, 0.5vw, 7px);
     color: #fff;
     font-weight: 600;
@@ -668,7 +668,7 @@
 
 }
 
-.root :global(.form-actions){
+.root :global(.form-actions) {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -677,7 +677,7 @@
     flex-wrap: wrap;
 }
 
-.root :global(.review-details-grid){
+.root :global(.review-details-grid) {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 16px;
@@ -685,7 +685,7 @@
     margin-bottom: 20px;
 }
 
-.root :global(.ticket-pass){
+.root :global(.ticket-pass) {
     background: #181b29;
     border-radius: var(--radius-lg);
     border: 1px solid var(--border-subtle);
@@ -696,7 +696,7 @@
     overflow: hidden;
 }
 
-.root :global(.ticket-pass-header){
+.root :global(.ticket-pass-header) {
     background: linear-gradient(135deg, var(--accent-red) 0%, var(--accent-red-dark) 100%);
     padding: 20px clamp(15px, 2vw, 20px);
     display: flex;
@@ -704,7 +704,7 @@
     justify-content: space-between;
 }
 
-.root :global(.ticket-pass-brand){
+.root :global(.ticket-pass-brand) {
     font-family: var(--font-display);
     font-size: clamp(1.2rem, 2vw, 1.4rem);
     letter-spacing: 0.05em;
@@ -714,7 +714,7 @@
     letter-spacing: 0.12em;
 }
 
-.root :global(.ticket-pass-status){
+.root :global(.ticket-pass-status) {
     background: rgba(0, 0, 0, 0.35);
     padding: 10px 15px;
     border-radius: var(--radius-full);
@@ -724,11 +724,11 @@
     color: #fff;
 }
 
-.root :global(.ticket-pass-body){
+.root :global(.ticket-pass-body) {
     padding: 20px;
 }
 
-.root :global(.ticket-movie-title){
+.root :global(.ticket-movie-title) {
     font-family: var(--font-heading);
     font-size: 1.5rem;
     font-weight: 700;
@@ -736,7 +736,7 @@
     margin-bottom: 16px;
 }
 
-.root :global(.ticket-details-grid){
+.root :global(.ticket-details-grid) {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 16px;
@@ -744,24 +744,24 @@
     margin-bottom: 20px;
 }
 
-.root :global(.ticket-detail-item){
+.root :global(.ticket-detail-item) {
     display: flex;
     flex-direction: column;
 }
 
-.root :global(.ticket-detail-item) span{
+.root :global(.ticket-detail-item) span {
     font-size: 0.75rem;
     text-transform: uppercase;
     color: var(--text-muted);
     letter-spacing: 0.05em;
 }
 
-.root :global(.ticket-detail-item) strong{
+.root :global(.ticket-detail-item) strong {
     font-size: 1rem;
     color: #fff;
 }
 
-.root :global(.ticket-perforation){
+.root :global(.ticket-perforation) {
     position: relative;
     height: 20px;
     display: flex;
@@ -770,7 +770,7 @@
 }
 
 .root :global(.ticket-perforation)::before,
-.root :global(.ticket-perforation)::after{
+.root :global(.ticket-perforation)::after {
     content: '';
     position: absolute;
     width: 20px;
@@ -780,20 +780,20 @@
     top: 0;
 }
 
-.root :global(.ticket-perforation)::before{
+.root :global(.ticket-perforation)::before {
     left: -10px;
 }
 
-.root :global(.ticket-perforation)::after{
+.root :global(.ticket-perforation)::after {
     right: -10px;
 }
 
-.root :global(.ticket-perforation-line){
+.root :global(.ticket-perforation-line) {
     width: 100%;
     border-top: 2px dashed rgba(255, 255, 255, 0.15);
 }
 
-.root :global(.ticket-barcode-area){
+.root :global(.ticket-barcode-area) {
     padding-top: 16px;
     display: flex;
     flex-direction: column;
@@ -801,14 +801,14 @@
     gap: 10px;
 }
 
-.root :global(.ticket-booking-ref){
+.root :global(.ticket-booking-ref) {
     font-family: 'Courier New', Courier, monospace;
     font-size: 0.85rem;
     color: var(--text-secondary);
     letter-spacing: 0.1em;
 }
 
-.root :global(.guest-conversion-card){
+.root :global(.guest-conversion-card) {
     margin: 28px 0;
     padding: clamp(18px, 4vw, 28px);
     background: var(--bg-surface);
@@ -816,50 +816,50 @@
     border-radius: var(--radius-lg);
 }
 
-.root :global(.guest-conversion-card) :global(.step-header){
+.root :global(.guest-conversion-card) :global(.step-header) {
     margin-bottom: 20px;
 }
 
-.root :global(.guest-name-grid){
+.root :global(.guest-name-grid) {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: var(--layout-gap);
 }
 
-.root :global(.guest-details-error){
+.root :global(.guest-details-error) {
     margin: 0.5rem 0 0;
     color: #ff6b78;
     font-size: clamp(0.85rem, 3vw, 1rem);
     line-height: 1.5;
 }
 
-.root :global(.guest-details-form) input[aria-invalid="true"]{
+.root :global(.guest-details-form) input[aria-invalid="true"] {
     border-color: #ff4558;
     box-shadow: 0 0 0 1px rgba(255, 69, 88, 0.7);
 }
 
-.root :global(.guest-details-form) input[aria-invalid="true"]:focus{
+.root :global(.guest-details-form) input[aria-invalid="true"]:focus {
     border-color: #ff4558;
     box-shadow: 0 0 0 2px rgba(255, 69, 88, 0.45), 0 0 16px rgba(255, 69, 88, 0.3);
 }
 
-.root :global(.seat-cell){
+.root :global(.seat-cell) {
     display: contents;
 }
 
-.root button:global(.seat){
+.root button:global(.seat) {
     border: 0;
     padding: 0;
     color: inherit;
 }
 
-@media (max-width: 1024px){
+@media (max-width: 1024px) {
 
-.root :global(#progressbar) li{
+    .root :global(#progressbar) li {
         font-size: 0.75rem;
     }
 
-.root :global(#progressbar) li::before{
+    .root :global(#progressbar) li::before {
         width: 34px;
         height: 34px;
         line-height: 32px;
@@ -867,45 +867,45 @@
 
 }
 
-@media (max-width: 965px){
+@media (max-width: 965px) {
 
-.root :global(.ticket-row){
+    .root :global(.ticket-row) {
         padding: 16px 10px;
     }
 
-.root :global(.date-time-group),
-.root :global(.guest-name-grid){
+    .root :global(.date-time-group),
+    .root :global(.guest-name-grid) {
         grid-template-columns: 1fr;
     }
 
 }
 
-@media (max-width: 530px){
+@media (max-width: 530px) {
 
-.root :global(.form-actions){
+    .root :global(.form-actions) {
         flex-direction: column-reverse;
         align-items: stretch;
     }
 
-.root :global(.form-actions) :global(.form-button) :global(.wallet-badge-btn){
+    .root :global(.form-actions) :global(.form-button) :global(.wallet-badge-btn) {
         width: 100%;
     }
 
-.root :global(.ticket-counter){
+    .root :global(.ticket-counter) {
         gap: 10px;
     }
 
-.root :global(.ticket-details-grid){
+    .root :global(.ticket-details-grid) {
         grid-template-columns: 1fr;
     }
 
-.root :global(.booking-subtotal-bar){
+    .root :global(.booking-subtotal-bar) {
         box-sizing: border-box;
         display: block;
         padding: 10px;
     }
 
-.root :global(.subtotal-item){
+    .root :global(.subtotal-item) {
         text-align: center;
         align-content: center;
         box-sizing: border-box;
@@ -914,92 +914,92 @@
         font-size: clamp(0.8rem, 4.3vw, 1.5rem);
     }
 
-.root :global(.booking-subtotal-bar) :global(.booking-subtotal-values){
+    .root :global(.booking-subtotal-bar) :global(.booking-subtotal-values) {
         display: flex;
         justify-content: space-between;
         gap: 8px 20px;
     }
 
-.root :global(.booking-continue-button){
+    .root :global(.booking-continue-button) {
         margin-top: 12px;
     }
 
 }
 
-.root :global(.booking-section){
+.root :global(.booking-section) {
     padding: clamp(1.5rem, 4vw, 2.5rem) var(--page-gutter) clamp(3rem, 7vw, 5rem);
 }
 
-.root :global(.booking-form) fieldset{
+.root :global(.booking-form) fieldset {
     width: 100%;
     min-width: 0;
 }
 
-.root :global(.ticket-row){
+.root :global(.ticket-row) {
     gap: 0.75rem;
 }
 
-.root :global(.ticket-info){
+.root :global(.ticket-info) {
     flex: 1 1 12rem;
     min-width: 0;
 }
 
-.root :global(.ticket-counter){
+.root :global(.ticket-counter) {
     flex-wrap: nowrap;
     gap: clamp(0.5rem, 2vw, 0.875rem);
 }
 
-.root :global(.booking-subtotal-bar){
+.root :global(.booking-subtotal-bar) {
     flex-wrap: wrap;
     gap: 1rem;
     padding: clamp(0.75rem, 3vw, 1rem) clamp(0.875rem, 4vw, 1.5rem);
     font-size: clamp(1rem, 3vw, 1.4rem);
 }
 
-.root :global(.booking-subtotal-bar)>*{
+.root :global(.booking-subtotal-bar)>* {
     min-width: 0;
 }
 
-.root :global(#progressbar) li{
+.root :global(#progressbar) li {
     min-width: 0;
     font-size: clamp(0.4rem, 2.8vw, 0.8rem);
     overflow-wrap: anywhere;
 }
 
-.root :global(#progressbar) li::before{
+.root :global(#progressbar) li::before {
     width: clamp(1.875rem, 5vw, 2.5rem);
     height: clamp(1.875rem, 5vw, 2.5rem);
     line-height: clamp(1.75rem, 4.75vw, 2.375rem);
 }
 
-.root :global(#progressbar)::before{
+.root :global(#progressbar)::before {
     top: clamp(0.9375rem, 2.5vw, 1.25rem);
     left: 10%;
     right: 10%;
 }
 
-.root :global(.ticket-details-grid){
+.root :global(.ticket-details-grid) {
     grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
-.root :global(.seating-plan){
+.root :global(.seating-plan) {
     max-width: 100%;
     overflow-x: auto;
     overscroll-behavior-x: contain;
 }
 
-.root :global(.seat-grid){
+.root :global(.seat-grid) {
     width: max-content;
     min-width: 100%;
 }
 
-.root :global(.seat-row){
+.root :global(.seat-row) {
     gap: clamp(0.1875rem, 1vw, 0.5rem);
 }
 
-@media (max-width: 974px){
+@media (max-width: 974px) {
 
-.root :global(.showtime-chips){
+    .root :global(.showtime-chips) {
         display: grid;
         grid-template-columns: repeat(2, minmax(0, 1fr));
         width: 100%;
@@ -1007,121 +1007,121 @@
 
 }
 
-@media (min-width: 651px) and (max-width: 965px){
+@media (min-width: 651px) and (max-width: 965px) {
 
-.root :global(.date-time-group),
-.root :global(.guest-name-grid){
+    .root :global(.date-time-group),
+    .root :global(.guest-name-grid) {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
 }
 
-@media (max-width: 870px){
+@media (max-width: 870px) {
 
-.root :global(.date-time-group){
+    .root :global(.date-time-group) {
         grid-template-columns: minmax(0, 1fr);
         gap: 0;
     }
 
-.root :global(.showtime-chips){
+    .root :global(.showtime-chips) {
         display: grid;
         grid-template-columns: repeat(2, minmax(0, 1fr));
         width: 100%;
         gap: 0.8rem
     }
 
-.root :global(.showtime-chips)> :not(:global(.booking-showtime-chip)){
+    .root :global(.showtime-chips)> :not(:global(.booking-showtime-chip)) {
         grid-column: 1 / -1;
     }
 
-.root :global(.showtime-chips) :global(.booking-showtime-chip){
+    .root :global(.showtime-chips) :global(.booking-showtime-chip) {
         box-sizing: border-box;
         width: 100%;
     }
 
-.root :global(.booking-showtime-chip) :global(.time-chip-time){
+    .root :global(.booking-showtime-chip) :global(.time-chip-time) {
         font-size: 1.1rem;
     }
 
-.root :global(.booking-showtime-chip) :global(.time-chip-screen){
+    .root :global(.booking-showtime-chip) :global(.time-chip-screen) {
         font-size: 0.8rem;
     }
 
 }
 
-@media (max-width: 768px){
+@media (max-width: 768px) {
 
-.root :global(.legend-item){
+    .root :global(.legend-item) {
         gap: 4px;
         font-size: 0.7rem;
     }
 
-.root :global(.seat-accessible-icon){
+    .root :global(.seat-accessible-icon) {
         width: 19px;
         height: 19px;
     }
 
-.root :global(.booking-form){
+    .root :global(.booking-form) {
         padding: 20px clamp(17px, 7vw, 20px);
     }
 
 }
 
-@media (max-width: 650px){
+@media (max-width: 650px) {
 
-.root :global(.seat-grid){
+    .root :global(.seat-grid) {
         width: 100%;
         min-width: 0;
     }
 
-.root :global(.seat-row){
+    .root :global(.seat-row) {
         width: 97%;
     }
 
-.root :global(.date-time-group),
-.root :global(.guest-name-grid){
+    .root :global(.date-time-group),
+    .root :global(.guest-name-grid) {
         grid-template-columns: minmax(0, 1fr);
         gap: 0;
     }
 
-.root :global(.ticket-info){
+    .root :global(.ticket-info) {
         flex: 1 1 0;
     }
 
-.root :global(.ticket-counter){
+    .root :global(.ticket-counter) {
         flex: 0 0 auto;
     }
 
 }
 
-@media (max-width: 480px){
+@media (max-width: 480px) {
 
-.root :global(.selected-seats-badge){
+    .root :global(.selected-seats-badge) {
         margin-bottom: 10px;
     }
 
-.root :global(.date-time-group){
+    .root :global(.date-time-group) {
         display: block;
         margin-bottom: 30px;
     }
 
-.root :global(.seat-legend){
+    .root :global(.seat-legend) {
         column-gap: 18px;
     }
 
-.root :global(.seat){
+    .root :global(.seat) {
         width: 22px;
         height: 22px;
     }
 
-.root :global(.seat-legend-container){
+    .root :global(.seat-legend-container) {
         display: flex;
         justify-content: center;
         /* Keeps the whole legend dead-center */
         width: 100%;
     }
 
-.root :global(.seat-legend){
+    .root :global(.seat-legend) {
         display: grid;
         grid-template-columns: repeat(2, auto);
         /* Compact columns based on text size */
@@ -1133,7 +1133,7 @@
         /* Prevents overflow on smaller devices */
     }
 
-.root :global(.legend-item){
+    .root :global(.legend-item) {
         display: flex;
         align-items: center;
         gap: 0.5rem;
@@ -1141,29 +1141,29 @@
         font-size: clamp(0.8rem, 3.1vw, 1.0rem);
     }
 
-.root :global(.counter-btn){
+    .root :global(.counter-btn) {
         flex: 0 0 clamp(2rem, 10vw, 2.25rem);
         width: clamp(2rem, 10vw, 2.25rem);
         height: clamp(2rem, 10vw, 2.25rem);
     }
 
-.root :global(.counter-val){
+    .root :global(.counter-val) {
         flex: 0 0 1.5rem;
     }
 
-.root :global(.seating-plan){
+    .root :global(.seating-plan) {
         width: calc(100% + 2rem);
         margin-inline: -1rem;
         max-width: none;
         padding: 0.5rem;
     }
 
-.root :global(.row-label){
+    .root :global(.row-label) {
         flex: 0 0 0.875rem;
         width: 0.875rem;
     }
 
-.root :global(.seat){
+    .root :global(.seat) {
         flex: 1 1 0;
         min-width: 0;
         width: auto;
@@ -1171,49 +1171,49 @@
         aspect-ratio: 1;
     }
 
-.root :global(.ticket-details-grid){
+    .root :global(.ticket-details-grid) {
         grid-template-columns: minmax(0, 1fr);
     }
 
-.root :global(.screen-text){
+    .root :global(.screen-text) {
         font-size: clamp(0.62rem, 2.5vw, 0.8rem);
         letter-spacing: clamp(0.08em, 1vw, 0.3em);
     }
 
-.root :global(.form-actions){
+    .root :global(.form-actions) {
         align-items: stretch;
     }
 
-.root :global(.form-actions) :global(.form-button){
+    .root :global(.form-actions) :global(.form-button) {
         width: 100%;
     }
 
 }
 
-@media (max-width: 390px){
+@media (max-width: 390px) {
 
-.root :global(.ticket-row){
+    .root :global(.ticket-row) {
         flex-direction: column;
         align-items: center;
         gap: 0.5rem;
         text-align: center;
     }
 
-.root :global(.ticket-info){
+    .root :global(.ticket-info) {
         flex: none;
         width: 100%;
         text-align: center;
     }
 
-.root :global(.ticket-counter){
+    .root :global(.ticket-counter) {
         justify-content: center;
     }
 
 }
 
-@media (max-width: 380px){
+@media (max-width: 380px) {
 
-.root :global(.row-label){
+    .root :global(.row-label) {
         display: none;
     }
 
