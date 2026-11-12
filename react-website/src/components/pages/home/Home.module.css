@@ -304,9 +304,22 @@
 .root :global(.offers-grid),
 .root :global(.offers) :global(.col-container){
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 18.75rem), 1fr));
     gap: clamp(1rem, 2vw, 1.75rem);
     margin-top: 32px;
+}
+
+.root :global(.offers-grid){
+    grid-template-columns: 1fr;
+}
+
+.root :global(.offers) :global(.col-container){
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 18.75rem), 1fr));
+}
+
+@media (min-width: 768px){
+    .root :global(.offers-grid){
+        grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr));
+    }
 }
 
 .root :global(.offers)>p{

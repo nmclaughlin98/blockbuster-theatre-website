@@ -1,9 +1,10 @@
 .card {
     display: flex;
+    flex-direction: row;
     align-items: center;
-    gap: 1.25rem;
-    padding: 1rem;
-    padding-right: 2.75rem;
+    gap: clamp(0.8rem, 2vw, 1.25rem);
+    padding: 0.7rem;
+    padding-right: 2.4rem;
     color: inherit;
     text-decoration: none;
     background: var(--bg-card);
@@ -69,8 +70,9 @@
 
 .poster {
     display: block;
-    width: 100px;
-    height: 150px;
+    width: clamp(100px, 35%, 200px);
+    height: auto;
+    max-height: 300px;
     aspect-ratio: 2 / 3;
     object-fit: cover;
     flex-shrink: 0;
@@ -89,15 +91,16 @@
 
 .title {
     font-family: var(--font-heading);
-    font-size: clamp(1.2rem, 1.8vw, 1.6rem);
+    font-size: clamp(1.3rem, 1.8vw, 2rem);
     font-weight: 700;
     color: #fff;
     line-height: 1.2;
     margin: 0 0 clamp(8px, 1vw, 12px);
+    margin-bottom: clamp(1rem, 2vw, 3rem);
 }
 
 .description {
-    color: #cbd5e1;
+    color: var(--text-secondary);
     font-size: clamp(0.7rem, 1vw, 1rem);
     line-height: 1.35;
     margin: 0 0 clamp(6px, 1vw, 10px);
@@ -105,31 +108,7 @@
 
 .featuredMovie {
     font-family: var(--font-body);
-    font-size: clamp(0.8rem, 1.4vw, 1rem);
+    font-size: clamp(0.8rem, 3.5vw, 1.3rem);
     font-weight: 700;
-}
-
-@media (min-width: 768px) {
-    .card {
-        gap: 1.5rem;
-        padding: 1.25rem;
-        padding-right: 3rem;
-    }
-
-    .poster {
-        width: 150px;
-        height: 225px;
-    }
-
-    .title {
-        font-size: clamp(1.35rem, 2vw, 1.8rem);
-    }
-
-    .description {
-        font-size: clamp(0.9rem, 1.2vw, 1.1rem);
-    }
-
-    .featuredMovie {
-        font-size: clamp(0.9rem, 1.2vw, 1.1rem);
-    }
+    margin-bottom: clamp(1rem, 2vw, 3rem);
 }
