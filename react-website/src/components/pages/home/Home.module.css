@@ -309,81 +309,10 @@
     margin-top: 32px;
 }
 
-.root :global(.offers) :global(.col){
-    background: var(--bg-card);
-    border: 1px solid var(--border-subtle);
-    border-radius: var(--radius-lg);
-    padding: 28px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    position: relative;
-    overflow: hidden;
-    transition: all var(--transition);
-}
-
-.root :global(.offers) :global(.col)::before{
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 4px;
-    background: linear-gradient(90deg, var(--accent-red), var(--accent-gold));
-    opacity: 0;
-    transition: opacity var(--transition);
-}
-
-.root :global(.offers) :global(.col):hover{
-    transform: translateY(-6px);
-    border-color: var(--border-highlight);
-    box-shadow: var(--shadow-md);
-}
-
-.root :global(.offers) :global(.col):hover::before{
-    opacity: 1;
-}
-
-.root :global(.offers) :global(.poster):global(.icon){
-    width: 140px;
-    height: 200px;
-    object-fit: cover;
-    border-radius: var(--radius-md);
-    margin-bottom: 20px;
-    box-shadow: var(--shadow-sm);
-}
-
-.root :global(.offers) h2{
-    font-family: var(--font-heading);
-    font-size: clamp(1.4rem, 2vw, 1.75rem);
-    color: #fff;
-    margin-bottom: clamp(8px, 1vw, 12px);
-}
-
-.root :global(.offers) p{
+.root :global(.offers)>p{
     color: var(--text-secondary);
     font-size: clamp(0.8rem, 1vw, 0.9rem);
     margin-bottom: clamp(6px, 1vw, 10px);
-}
-
-.root :global(.offers) :global(.featured-movie){
-    font-family: var(--font-body);
-    font-size: clamp(1.0rem, 1vw, 1.2rem);
-    font-weight: 700;
-    color: var(--text-secondary);
-    margin-bottom: clamp(6px, 1vw, 20px);
-}
-
-.root :global(.offers) p:last-child{
-    font-weight: 700;
-    color: var(--accent-gold);
-    margin-top: clamp(8px, 1vw, 16px);
-}
-
-.root :global(.offers) :global(.button){
-    margin-top: clamp(12px, 1vw, 20px);
-    transition: all var(--transition);
 }
 
 .root :global(.modal-backdrop){

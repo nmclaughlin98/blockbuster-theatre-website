@@ -1,16 +1,13 @@
 import { useEffect, useState } from 'react';
-import { asset } from '../../shared';
-import { getPosterSrc, getPosterSrcSet } from '../../../utils/posterImages';
 import { useNetworkSpeed } from '../../../utils/useNetworkSpeed';
 import { getFilmSelections } from '../shared/bookingApi';
 import { useMovies } from '../shared/useMovies';
+import { OfferCard } from './OfferCard';
 
 export function Offers() {
   const { movies } = useMovies();
   const isSlowConnection = useNetworkSpeed();
   const [state, setState] = useState({ offers: [], loading: true, error: null });
-  const [failedPosterIds, setFailedPosterIds] = useState(() => new Set());
-  const fallbackPoster = asset('assets/images/logo/png/logo-full.png');
 
   useEffect(() => {
     const controller = new AbortController();
@@ -41,35 +38,13 @@ export function Offers() {
           const featuredMovie = movies.find((movie) => (
             String(movie.movieId) === String(offer.featuredMovieId)
           ));
-          const imageFailed = failedPosterIds.has(String(offer.id));
-          const displayLabel = offer.displayLabel ?? offer.title;
           return (
-            <div className="col" key={`${offer.type}:${offer.id}`}>
-              {featuredMovie?.poster && (
-                <img
-                  className="poster icon"
-                  src={imageFailed
-                    ? fallbackPoster
-                    : getPosterSrc(featuredMovie.poster, isSlowConnection)}
-                  srcSet={!imageFailed
-                    ? getPosterSrcSet(featuredMovie.poster, isSlowConnection)
-                    : undefined}
-                  sizes="140px"
-                  alt={`${displayLabel} featuring ${featuredMovie.title}`}
-                  onError={() => setFailedPosterIds((previous) => {
-                    const offerId = String(offer.id);
-                    return previous.has(offerId) ? previous : new Set(previous).add(offerId);
-                  })}
-                />
-              )}
-              <h2>{displayLabel}</h2>
-              {featuredMovie && <p className="featured-movie">Featuring: {featuredMovie.title}</p>}
-              {offer.tagline && <p>{offer.tagline}</p>}
-              {offer.priceDescription && <p>{offer.priceDescription}</p>}
-              <a className="button" href={`./bookNow.html?offerId=${encodeURIComponent(offer.offerId)}`}>
-                {offer.ctaLabel ?? 'Claim Offer'}
-              </a>
-            </div>
+            <OfferCard
+              key={`${offer.type}:${offer.id}`}
+              offer={offer}
+              featuredMovie={featuredMovie}
+              isSlowConnection={isSlowConnection}
+            />
           );
         })}
       </div>
