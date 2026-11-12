@@ -124,10 +124,6 @@
         font-size: clamp(1.2rem, 6.7vw, 2rem);
     }
 
-    .toast-notification {
-        width: 100%;
-    }
-
 }
 
 header {
@@ -327,6 +323,78 @@ header {
 
     html.nav-menu-open {
         overflow-y: hidden;
+    }
+
+}
+
+@media only screen
+    and (min-width: 900px)
+    and (max-width: 980px)
+    and (orientation: landscape)
+    and (-webkit-min-device-pixel-ratio: 3) {
+
+    .primary-nav,
+    .primary-nav.open {
+        display: flex;
+        position: static;
+        top: auto;
+        left: auto;
+        right: auto;
+        background: transparent;
+        border-bottom: 0;
+        padding: 0;
+        z-index: auto;
+        box-shadow: none;
+        overflow: visible;
+        opacity: 1;
+        transform: none;
+        visibility: visible;
+        pointer-events: auto;
+        transition: none;
+    }
+
+    .primary-nav .menu,
+    .primary-nav.open .menu {
+        flex-direction: row;
+        width: auto;
+        gap: 4px;
+        padding: 0;
+        min-height: 0;
+        overflow: visible;
+    }
+
+    .primary-nav .menu li {
+        opacity: 1;
+    }
+
+    .primary-nav .menu li a {
+        width: auto;
+        padding: 9px 8px;
+        font-size: 0.8rem;
+    }
+
+    .primary-nav .menu li .nav-cta-btn {
+        width: auto;
+        padding: 8px 12px;
+        font-size: 0.8rem;
+    }
+
+    .hamburger {
+        display: none;
+    }
+
+    .ham-overlay,
+    .ham-overlay.show {
+        display: none;
+    }
+
+    .movie-body-layout {
+        grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+        gap: var(--layout-gap);
+    }
+
+    html.nav-menu-open {
+        overflow-y: auto;
     }
 
 }

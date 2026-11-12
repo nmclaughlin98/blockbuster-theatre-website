@@ -1,14 +1,16 @@
 import { useEffect, useState } from 'react';
 import { Layout } from '../../shared';
 import { Toast } from '../../shared/Toast/Toast';
+import { useToast } from '../../shared/Toast/useToast';
 import {
   COGNITO_AUTH_STATE_CHANGE_EVENT,
   cognitoAuth,
-  getCognitoDisplayName,
+  getCognitoFirstName,
+  getCognitoFullName,
 } from '../../../auth/cognitoAuth';
 import styles from './Login.module.css';
 
-const REFRESH_SESSION_DURATION_MS = 30 * 24 * 60 * 60 * 1000;
+const REFRESH_SESSION_DURATION_MS = 1 * 24 * 60 * 60 * 1000;
 
 const codeChallenges = {
   CONFIRM_SIGN_IN_WITH_SMS_CODE: 'Enter the verification code sent to your phone.',
@@ -95,7 +97,7 @@ function getSessionExpiry(session) {
 
 function getSessionDurationMessage(expiresAt, now) {
   if (!expiresAt) {
-    return 'Your refresh session lasts up to 30 days from sign-in. Access and ID tokens refresh automatically.';
+    return 'Your refresh session lasts up to 1 day from sign-in. Access and ID tokens refresh automatically.';
   }
 
   const totalMinutes = Math.ceil((expiresAt - now) / 60000);
@@ -115,11 +117,59 @@ function getSessionDurationMessage(expiresAt, now) {
   return `Refresh session expires in ${duration}. Access and ID tokens refresh automatically every 60 minutes.`;
 }
 
+function EmailInput({ disabled }) {
+  return (
+    <input
+      className={styles.input}
+      id="login-email"
+      type="email"
+      name="email"
+      autoComplete="username"
+      placeholder="john@example.com"
+      required
+      disabled={disabled}
+    />
+  );
+}
+
+function PasswordInput({ disabled }) {
+  const [isVisible, setIsVisible] = useState(false);
+
+  return (
+    <div className={styles.passwordInput}>
+      <input
+        className={styles.input}
+        id="login-password"
+        type={isVisible ? 'text' : 'password'}
+        name="password"
+        autoComplete="current-password"
+        placeholder="Enter your password"
+        required
+        disabled={disabled}
+      />
+      <button
+        className={styles.passwordToggle}
+        type="button"
+        aria-label={isVisible ? 'Hide password' : 'Show password'}
+        aria-pressed={isVisible}
+        disabled={disabled}
+        onClick={() => setIsVisible((visible) => !visible)}
+      >
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <path d="M2.25 12s3.5-6.25 9.75-6.25 9.75 6.25 9.75 6.25-3.5 6.25-9.75 6.25S2.25 12 2.25 12Z" />
+          <circle cx="12" cy="12" r="2.75" />
+          {isVisible && <path d="m3 3 18 18" />}
+        </svg>
+      </button>
+    </div>
+  );
+}
+
 export function Login({
   authClient = cognitoAuth,
   onAuthenticated = navigateToHome,
 } = {}) {
-  const [toastMessage, setToastMessage] = useState('');
+  const { toast, setToastMessage } = useToast();
   const [statusMessage, setStatusMessage] = useState('Sign in with your existing account.');
   const [challenge, setChallenge] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -144,13 +194,12 @@ export function Login({
         if (active && session.tokens?.accessToken) {
           setSessionExpiresAt(getSessionExpiry(session));
           setCurrentTime(Date.now());
-          setDisplayName(getCognitoDisplayName(session));
+          setDisplayName(getCognitoFullName(session));
           setIsAuthenticated(true);
           setStatusMessage('You are already logged in.');
-          setToastMessage('Already logged in.');
         }
       } catch (error) {
-        if (active) setToastMessage(getSignInErrorMessage(error));
+        if (active) setToastMessage(getSignInErrorMessage(error), 'warning');
       } finally {
         if (active) setIsSessionChecking(false);
       }
@@ -160,7 +209,7 @@ export function Login({
     return () => {
       active = false;
     };
-  }, [authClient]);
+  }, [authClient, setToastMessage]);
 
   useEffect(() => {
     if (!isRedirecting) return undefined;
@@ -203,14 +252,14 @@ export function Login({
         if (!session.tokens?.accessToken) {
           throw new Error('Cognito returned a session without an access token.');
         }
-        const name = getCognitoDisplayName(session);
+        const name = getCognitoFirstName(session);
         const now = Date.now();
         setDisplayName(name);
         setSessionExpiresAt(getSessionExpiry(session));
         setCurrentTime(now);
         setIsAuthenticated(true);
         window.dispatchEvent(new window.Event(COGNITO_AUTH_STATE_CHANGE_EVENT));
-        setToastMessage('Login successful.');
+        setToastMessage('Login successful.', 'success');
         setStatusMessage(name
           ? `Welcome back, ${name}. Redirecting to the home page...`
           : 'Login successful. Redirecting to the home page...');
@@ -229,9 +278,9 @@ export function Login({
 
       const message = getNextStepMessage(result.nextStep?.signInStep);
       setStatusMessage(message);
-      setToastMessage(message);
+      setToastMessage(message, 'warning');
     } catch (error) {
-      setToastMessage(getSignInErrorMessage(error));
+      setToastMessage(getSignInErrorMessage(error), 'warning');
     } finally {
       setIsLoading(false);
     }
@@ -249,9 +298,9 @@ export function Login({
       setSessionExpiresAt(null);
       setIsAuthenticated(false);
       setStatusMessage('You are signed out.');
-      setToastMessage('Logged out successfully.');
+      setToastMessage('Logged out successfully.', 'success');
     } catch {
-      setToastMessage('Logout error. Please try again.');
+      setToastMessage('Logout error. Please try again.', 'warning');
     } finally {
       setIsLoading(false);
     }
@@ -284,18 +333,10 @@ export function Login({
             </div>
           ) : (
             <form className={styles.form} autoComplete="on" onSubmit={handleSubmit} aria-busy={isBusy}>
-              <label className={styles.field}>
-                <span>Email address</span>
-                <input
-                  className={styles.input}
-                  type="email"
-                  name="email"
-                  autoComplete="username"
-                  placeholder="john@example.com"
-                  required
-                  disabled={isBusy}
-                />
-              </label>
+              <div className={styles.field}>
+                <label htmlFor="login-email">Email address</label>
+                <EmailInput disabled={isBusy} />
+              </div>
               {challenge ? (
                 <label className={styles.field}>
                   <span>{challenge.label}</span>
@@ -310,18 +351,10 @@ export function Login({
                   />
                 </label>
               ) : (
-                <label className={styles.field}>
-                  <span>Password</span>
-                  <input
-                    className={styles.input}
-                    type="password"
-                    name="password"
-                    autoComplete="current-password"
-                    placeholder="Enter your password"
-                    required
-                    disabled={isBusy}
-                  />
-                </label>
+                <div className={styles.field}>
+                  <label htmlFor="login-password">Password</label>
+                  <PasswordInput disabled={isBusy} />
+                </div>
               )}
               <button className={styles.submit} type="submit" disabled={isBusy}>
                 {isLoading ? 'Signing in...' : isRedirecting ? 'Success!'
@@ -337,7 +370,11 @@ export function Login({
             </p>
           )}
         </div>
-        <Toast message={toastMessage} onDismiss={() => setToastMessage('')} />
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onDismiss={() => setToastMessage('')}
+        />
       </section>
     </Layout>
   );

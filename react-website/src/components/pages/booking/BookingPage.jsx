@@ -2,6 +2,7 @@ import styles from './BookingPage.module.css';
 import { useEffect, useState } from 'react';
 import { CenteredHeadingBlock, Layout } from '../../shared';
 import { Toast } from '../../shared/Toast/Toast';
+import { useToast } from '../../shared/Toast/useToast';
 import { BookingConfirmation } from './BookingConfirmation';
 import { GuestDetails } from './GuestDetails';
 import { PaymentStep } from './PaymentStep';
@@ -23,7 +24,7 @@ const initialBooking = {
 export function Booking() {
   const [step, setStep] = useState(0);
   const [booking, setBooking] = useState(initialBooking);
-  const [toastMessage, setToastMessage] = useState('');
+  const { toast, setToastMessage } = useToast();
 
   useEffect(() => {
     document.title = 'Blockbuster Theatre - Book Now';
@@ -107,7 +108,11 @@ export function Booking() {
             />
           )}
         </form>
-        <Toast message={toastMessage} onDismiss={() => setToastMessage('')} />
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onDismiss={() => setToastMessage('')}
+        />
       </section>
     </Layout>
   );

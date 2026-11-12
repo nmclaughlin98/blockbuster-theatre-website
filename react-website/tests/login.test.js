@@ -74,6 +74,36 @@ async function renderHeader(authClient) {
   };
 }
 
+test('toggles password visibility without clearing its value', async () => {
+  const page = await renderLogin({
+    fetchAuthSession: async () => ({ tokens: undefined }),
+  });
+  const passwordInput = page.container.querySelector('[name="password"]');
+  const toggle = page.container.querySelector('[aria-label="Show password"]');
+  passwordInput.value = 'secret-password';
+
+  assert.equal(passwordInput.type, 'password');
+  assert.equal(toggle.getAttribute('aria-pressed'), 'false');
+
+  await act(async () => {
+    toggle.dispatchEvent(new window.MouseEvent('click', { bubbles: true }));
+  });
+
+  assert.equal(passwordInput.type, 'text');
+  assert.equal(passwordInput.value, 'secret-password');
+  assert.equal(page.container.querySelector('[aria-label="Hide password"]').getAttribute('aria-pressed'), 'true');
+
+  await act(async () => {
+    page.container.querySelector('[aria-label="Hide password"]').dispatchEvent(
+      new window.MouseEvent('click', { bubbles: true }),
+    );
+  });
+
+  assert.equal(passwordInput.type, 'password');
+  assert.equal(passwordInput.value, 'secret-password');
+  await page.unmount();
+});
+
 test('signs in with SRP, waits for the session, and navigates after success', async () => {
   let resolveSignIn;
   const signInPromise = new Promise((resolve) => {
@@ -115,6 +145,9 @@ test('signs in with SRP, waits for the session, and navigates after success', as
   });
   assert.equal(submitButton.disabled, true);
   assert.match(page.container.textContent, /Login successful\./);
+  const successToast = page.container.querySelector('[data-type="success"]');
+  assert.ok(successToast);
+  assert.equal(successToast.querySelector('svg path').getAttribute('d'), 'm5 12.5 4.5 4.5L19 7.5');
   assert.equal(page.container.querySelector('h1').textContent.trim(), 'Welcome back');
   assert.equal(authenticated, false);
   await act(async () => new Promise((resolve) => window.setTimeout(resolve, 1250)));
@@ -138,6 +171,7 @@ test('shows a safe invalid-credentials message for Cognito sign-in errors', asyn
 
   await page.submit();
   assert.match(page.container.textContent, /Invalid login\./);
+  assert.ok(page.container.querySelector('[data-type="warning"]'));
   assert.doesNotMatch(page.container.textContent, /Do not expose provider details/);
   assert.equal(page.container.querySelector('button[type="submit"]').disabled, false);
   await page.unmount();

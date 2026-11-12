@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import {
     COGNITO_AUTH_STATE_CHANGE_EVENT,
     cognitoAuth,
-    getCognitoDisplayName,
+    getCognitoFirstName,
 } from '../../../auth/cognitoAuth';
 import { asset } from '../asset/asset';
 
@@ -112,7 +112,7 @@ export function Header({ current, authClient = cognitoAuth }) {
                 const isAuthenticated = Boolean(session.tokens?.accessToken);
                 setAccount({
                     isAuthenticated,
-                    displayName: isAuthenticated ? getCognitoDisplayName(session) : '',
+                    displayName: isAuthenticated ? getCognitoFirstName(session) : '',
                 });
             } catch (error) {
                 if (active && currentRequestId === requestId) {

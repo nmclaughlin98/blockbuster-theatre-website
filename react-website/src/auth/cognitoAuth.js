@@ -85,7 +85,15 @@ export async function getCognitoAccessToken() {
   return session.tokens?.accessToken?.toString() ?? null;
 }
 
-export function getCognitoDisplayName(session) {
+export function getCognitoFirstName(session) {
+  const claims = session.tokens?.idToken?.payload ?? {};
+  return [claims.given_name]
+    .filter((name) => typeof name === 'string' && name.trim())
+    .map((name) => name.trim())
+    .join(' ');
+}
+
+export function getCognitoFullName(session) {
   const claims = session.tokens?.idToken?.payload ?? {};
   return [claims.given_name, claims.family_name]
     .filter((name) => typeof name === 'string' && name.trim())

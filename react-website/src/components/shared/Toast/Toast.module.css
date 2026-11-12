@@ -1,0 +1,78 @@
+.toastNotification {
+    position: fixed;
+    right: var(--page-gutter);
+    bottom: var(--page-gutter);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    max-width: calc(100vw - var(--page-gutter) - var(--page-gutter));
+    padding: 16px 24px;
+    overflow-wrap: anywhere;
+    border: 1.4px solid var(--border-accent);
+    border-left: 4px solid var(--accent-red);
+    border-radius: var(--radius-md);
+    background-color: var(--bg-surface);
+    box-shadow: var(--shadow-lg);
+    color: #fff;
+    font-weight: 600;
+    opacity: 0;
+    transform: translateY(100px);
+    transition:
+        transform 0.35s cubic-bezier(0.7, 0, 0.84, 0),
+        opacity 0.35s cubic-bezier(0.7, 0, 0.84, 0);
+}
+
+.toastNotification span {
+    display: inline-block;
+    font-size: clamp(1rem, 1vw, 1.1rem);
+    white-space: pre-line;
+}
+
+.warning {
+    border-color: var(--accent-red);
+    border-left-color: var(--accent-red);
+}
+
+.warning .icon {
+    color: #ff6f03;
+}
+
+.success {
+    border-color: var(--accent-green);
+    border-left-color: var(--accent-green);
+}
+
+.success .icon {
+    color: var(--accent-green);
+}
+
+.icon {
+    flex: 0 0 auto;
+    width: clamp(1.4rem, 1vw, 1.6rem);
+    height: clamp(1.4rem, 1vw, 1.6rem);
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.warning .icon circle {
+    fill: currentColor;
+    stroke: none;
+}
+
+.show {
+    opacity: 1;
+    transform: translateY(0);
+    transition:
+        transform 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+        opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@media (max-width: 530px) {
+    .toastNotification {
+        width: 100%;
+    }
+}
