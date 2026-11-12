@@ -8,7 +8,6 @@ import {
   getCognitoFirstName,
   getCognitoFullName,
 } from '../../../auth/cognitoAuth';
-import { randomSignupMessages, rickRoll, signupMessages } from './signupMessages';
 import styles from './Login.module.css';
 
 const REFRESH_SESSION_DURATION_MS = 1 * 24 * 60 * 60 * 1000;
@@ -47,7 +46,7 @@ function getNextStepMessage(signInStep) {
     return 'A password reset is required. Please contact the theatre to reset your account.';
   }
   if (signInStep === 'CONFIRM_SIGN_UP') {
-    return 'This account needs confirmation. Self sign-up is disabled; please contact the theatre.';
+    return 'This account needs confirmation. Please verify your email before logging in.';
   }
   if (signInStep === 'CONTINUE_SIGN_IN_WITH_MFA_SELECTION') {
     return 'Choose an MFA method to continue. This account needs help from the theatre administrator.';
@@ -64,7 +63,7 @@ function getSignInErrorMessage(error) {
     return 'Invalid login. Check your email and password.';
   }
   if (error?.name === 'UserNotConfirmedException') {
-    return 'Login unsuccessful. This account needs confirmation; contact the theatre administrator.';
+    return 'Login unsuccessful. Please confirm your email address before logging in.';
   }
   if (error?.name === 'CodeMismatchException' || error?.name === 'ExpiredCodeException') {
     return 'Invalid verification code. Please try again.';
@@ -180,24 +179,7 @@ export function Login({
   const [displayName, setDisplayName] = useState('');
   const [sessionExpiresAt, setSessionExpiresAt] = useState(null);
   const [currentTime, setCurrentTime] = useState(0);
-  const [signupClickCount, setSignupClickCount] = useState(0);
   const isBusy = isLoading || isRedirecting;
-
-  function handleSignupClick() {
-    const clickNumber = signupClickCount + 1;
-    setSignupClickCount(clickNumber);
-
-    if (clickNumber === 20) {
-      setToastMessage('');
-      window.open(rickRoll, '_blank', 'noopener,noreferrer');
-      return;
-    }
-
-    const message = clickNumber <= 2
-      ? signupMessages[clickNumber - 1]
-      : randomSignupMessages[Math.floor(Math.random() * randomSignupMessages.length)];
-    setToastMessage(message, 'warning');
-  }
 
   useEffect(() => {
     document.title = 'Blockbuster Theatre - Login';
@@ -380,14 +362,9 @@ export function Login({
                     : challenge?.kind === 'new-password' ? 'Set password' : 'Login'}
               </button>
               {!challenge && (
-                <button
-                  className={styles.signupLink}
-                  type="button"
-                  onClick={handleSignupClick}
-                  disabled={isBusy || signupClickCount >= 20}
-                >
-                  Sign up coming soon.
-                </button>
+                <a className={styles.signupLink} href="./signup.html">
+                  Sign up
+                </a>
               )}
             </form>
           )}

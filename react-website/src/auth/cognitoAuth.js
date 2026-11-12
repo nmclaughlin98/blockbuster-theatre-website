@@ -1,8 +1,10 @@
 import { Amplify } from 'aws-amplify';
 import {
+  confirmSignUp,
   confirmSignIn,
   fetchAuthSession,
   signIn,
+  signUp,
   signOut,
 } from 'aws-amplify/auth';
 
@@ -63,6 +65,16 @@ export async function signInWithCognito({ username, password }) {
   });
 }
 
+export async function signUpWithCognito({ username, password, options }) {
+  configureCognitoAuth();
+  return signUp({ username, password, options });
+}
+
+export async function confirmCognitoSignUp({ username, confirmationCode }) {
+  configureCognitoAuth();
+  return confirmSignUp({ username, confirmationCode });
+}
+
 export async function confirmCognitoSignIn(challengeResponse) {
   configureCognitoAuth();
   return confirmSignIn({ challengeResponse });
@@ -103,6 +115,8 @@ export function getCognitoFullName(session) {
 
 export const cognitoAuth = {
   signIn: signInWithCognito,
+  signUp: signUpWithCognito,
+  confirmSignUp: confirmCognitoSignUp,
   confirmSignIn: confirmCognitoSignIn,
   fetchAuthSession: getCognitoSession,
   signOut: signOutFromCognito,

@@ -6,5 +6,6 @@ export { Detail } from './detail/Detail';
 export { Home } from './home/Home';
 export { Login } from './login/Login';
 export { NowShowing } from './now-showing/NowShowing';
+export { Signup } from './login/Signup';
 export { Timetable } from './timetable/Timetable';
 export { useMovies } from './shared/useMovies';

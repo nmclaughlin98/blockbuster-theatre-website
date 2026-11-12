@@ -26,11 +26,6 @@ const vite = await createServer({
   logLevel: 'silent',
 });
 const { Login } = await vite.ssrLoadModule('/src/components/pages/login/Login.jsx');
-const {
-  randomSignupMessages,
-  rickRoll,
-  signupMessages,
-} = await vite.ssrLoadModule('/src/components/pages/login/signupMessages.js');
 const { Header } = await vite.ssrLoadModule('/src/components/shared/Header/Header.jsx');
 const { COGNITO_AUTH_STATE_CHANGE_EVENT } = await vite.ssrLoadModule('/src/auth/cognitoAuth.js');
 after(() => vite.close());
@@ -109,50 +104,13 @@ test('toggles password visibility without clearing its value', async () => {
   await page.unmount();
 });
 
-test('shows two fixed messages, random follow-ups, then opens the rickroll on click 20', async () => {
+test('links to the signup page', async () => {
   const page = await renderLogin({
     fetchAuthSession: async () => ({ tokens: undefined }),
-    signIn: async () => assert.fail('Sign-up link must not submit the login form'),
   });
-  const signupButton = Array.from(page.container.querySelectorAll('button')).find(
-    (button) => button.textContent.trim() === 'Sign up coming soon.',
-  );
-
-  assert.ok(signupButton);
-  assert.equal(signupButton.type, 'button');
-
-  const originalRandom = Math.random;
-  const originalOpen = window.open;
-  const openedUrls = [];
-  Math.random = () => 0;
-  window.open = (...args) => openedUrls.push(args);
-
-  try {
-    for (let clickNumber = 1; clickNumber <= 19; clickNumber += 1) {
-      await act(async () => {
-        signupButton.dispatchEvent(new window.MouseEvent('click', { bubbles: true }));
-      });
-
-      const toast = page.container.querySelector('[data-type="warning"]');
-      assert.ok(toast);
-      if (clickNumber <= 2) {
-        assert.ok(toast.textContent.includes(signupMessages[clickNumber - 1]));
-      } else {
-        assert.ok(randomSignupMessages.includes(toast.textContent.trim()));
-      }
-    }
-
-    await act(async () => {
-      signupButton.dispatchEvent(new window.MouseEvent('click', { bubbles: true }));
-    });
-
-    assert.deepEqual(openedUrls, [[rickRoll, '_blank', 'noopener,noreferrer']]);
-    assert.equal(signupButton.disabled, true);
-  } finally {
-    Math.random = originalRandom;
-    window.open = originalOpen;
-    await page.unmount();
-  }
+  const signupLink = page.container.querySelector('a[href="./signup.html"]');
+  assert.equal(signupLink.textContent.trim(), 'Sign up');
+  await page.unmount();
 });
 
 test('signs in with SRP, waits for the session, and navigates after success', async () => {

@@ -148,14 +148,9 @@
 
 .signupLink {
     justify-self: center;
-    padding: 0;
-    border: 0;
-    background: transparent;
     color: var(--accent-red);
-    font: inherit;
     text-decoration: underline;
     text-underline-offset: 0.2em;
-    cursor: pointer;
 }
 
 .signupLink:hover {
@@ -166,11 +161,6 @@
     border-radius: var(--radius-sm);
     outline: 2px solid var(--accent-red);
     outline-offset: 4px;
-}
-
-.signupLink:disabled {
-    cursor: wait;
-    opacity: 0.65;
 }
 
 .notice {
