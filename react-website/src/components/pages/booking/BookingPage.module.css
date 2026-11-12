@@ -537,6 +537,17 @@
     opacity: 1.0;
 }
 
+.root :global(.seat):global(.my-booked-seat) {
+    background: #176b62;
+    opacity: 0.9;
+}
+
+.root :global(.seat):global(.my-booked-seat)::after {
+    content: '✓';
+    color: #c8fff3;
+    font-size: 1.15rem;
+}
+
 .root :global(.seat-spacer) {
     background: transparent !important;
     cursor: default !important;
@@ -562,6 +573,16 @@
     font-size: 1.1rem;
     font-weight: 700;
     line-height: 1;
+}
+
+.root :global(.legend-seat):global(.my-booked-seat) {
+    background: #176b62;
+    opacity: 0.9;
+}
+
+.root :global(.legend-seat):global(.my-booked-seat)::after {
+    content: '✓';
+    color: #c8fff3;
 }
 
 .root :global(.legend-seat):global(.seat-accessible) img {

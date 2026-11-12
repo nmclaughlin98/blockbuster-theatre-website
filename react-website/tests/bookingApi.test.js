@@ -7,6 +7,7 @@ import {
   createGuestBooking,
   createGuestBookingPayload,
   convertGuestAccount,
+  getBookedSeatDetails,
   getBookedSeats,
   getBookingSelections,
   getFilmSelections,
@@ -319,6 +320,61 @@ test('rejects booked-seat data returned for another screening', async () => {
       getBookedSeats('559924_2026-11-01_1215', '2026-11-01'),
       /different screening/,
     );
+  } finally {
+    restoreFetch();
+  }
+});
+
+test('loads signed-in booked seats and identifies the current user seats', async () => {
+  let request;
+  const restoreFetch = mockFetch(async (url, options) => {
+    request = { url: new URL(url), options };
+    return new Response(JSON.stringify({
+      showtimeId: '559924_2026-11-01_1215',
+      date: '2026-11-01',
+      bookedSeats: ['A2', 'B4', 'C2'],
+      myBookedSeats: ['C2', 'A2'],
+    }));
+  });
+
+  try {
+    assert.deepEqual(
+      await getBookedSeatDetails(
+        '559924_2026-11-01_1215',
+        '2026-11-01',
+        undefined,
+        'signed-in-access-token',
+      ),
+      { bookedSeats: ['A2', 'B4', 'C2'], myBookedSeats: ['A2', 'C2'] },
+    );
+    assert.equal(request.url.pathname, '/api/v1/bookings/account');
+    assert.deepEqual(Object.fromEntries(request.url.searchParams), {
+      showtimeId: '559924_2026-11-01_1215',
+      date: '2026-11-01',
+    });
+    assert.ok(request.options.headers.get('Authorization'));
+  } finally {
+    restoreFetch();
+  }
+});
+
+test('does not request personal seat details for guest bookings', async () => {
+  let requestedUrl;
+  const restoreFetch = mockFetch(async (url) => {
+    requestedUrl = new URL(url);
+    return new Response(JSON.stringify({
+      showtimeId: '559924_2026-11-01_1215',
+      date: '2026-11-01',
+      bookedSeats: ['B4'],
+    }));
+  });
+
+  try {
+    assert.deepEqual(
+      await getBookedSeatDetails('559924_2026-11-01_1215', '2026-11-01', undefined, null),
+      { bookedSeats: ['B4'], myBookedSeats: [] },
+    );
+    assert.equal(requestedUrl.pathname, '/api/v1/bookings/guest');
   } finally {
     restoreFetch();
   }

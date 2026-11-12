@@ -103,6 +103,41 @@ export async function getBookedSeats(showtimeId, date, signal) {
   return data.bookedSeats;
 }
 
+export async function getBookedSeatDetails(showtimeId, date, signal, accessTokenOverride) {
+  if (!isShowtimeIdForDate(showtimeId, date)) {
+    throw new Error('The selected showtime ID does not match the screening date.');
+  }
+
+  const accessToken = accessTokenOverride === undefined
+    ? await getCognitoAccessToken()
+    : accessTokenOverride;
+  const endpoint = accessToken
+    ? '/api/v1/bookings/account'
+    : '/api/v1/bookings/guest';
+  const query = new URLSearchParams({ showtimeId, date });
+  const data = await requestJson(`${endpoint}?${query.toString()}`, { signal }, undefined, accessToken);
+  if (data.showtimeId !== showtimeId || data.date !== date) {
+    throw new Error('The booking service returned seat availability for a different screening.');
+  }
+  if (!Array.isArray(data.bookedSeats) || data.bookedSeats.some((seat) => (
+    typeof seat !== 'string' || !/^[A-G](?:[1-9]|1[01])$/.test(seat)
+  ))) {
+    throw new Error('The booking service returned an invalid booked seat list.');
+  }
+  const myBookedSeats = accessToken ? data.myBookedSeats : [];
+  if (!Array.isArray(myBookedSeats) || myBookedSeats.some((seat) => (
+    typeof seat !== 'string'
+    || !/^[A-G](?:[1-9]|1[01])$/.test(seat)
+    || !data.bookedSeats.includes(seat)
+  ))) {
+    throw new Error('The booking service returned an invalid personal booked seat list.');
+  }
+  return {
+    bookedSeats: data.bookedSeats,
+    myBookedSeats: sortSeatIds([...new Set(myBookedSeats)]),
+  };
+}
+
 export function createGuestBookingPayload({
   showtimeId, date, seats, email, customerName, tickets, offerId,
 }) {

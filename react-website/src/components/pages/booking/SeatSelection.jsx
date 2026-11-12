@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { asset } from '../../shared';
-import { getBookedSeats, sortSeatIds } from '../shared/bookingApi';
+import { getBookedSeatDetails, sortSeatIds } from '../shared/bookingApi';
 import { BookingLoader, StepActions, StepHeader } from './BookingStepComponents';
 
 const accessibleSeats = new Set(['A1', 'A5', 'A6', 'A10']);
@@ -31,7 +31,7 @@ export function SeatSelection({ initialData, onBack, onNext, onToast }) {
   const seatDragRef = useRef(null);
   const [refresh, setRefresh] = useState(0);
   const [bookedSeatState, setBookedSeatState] = useState({
-    requestKey: '', bookedSeats: [], loading: false, error: null,
+    requestKey: '', bookedSeats: [], myBookedSeats: [], loading: false, error: null,
   });
 
   const showtime = initialData.showtime;
@@ -42,6 +42,9 @@ export function SeatSelection({ initialData, onBack, onNext, onToast }) {
     : '';
   const bookedSeats = bookedSeatState.requestKey === requestKey
     ? bookedSeatState.bookedSeats
+    : [];
+  const myBookedSeats = bookedSeatState.requestKey === requestKey
+    ? bookedSeatState.myBookedSeats
     : [];
   const bookedSeatsLoading = Boolean(requestKey && (
     bookedSeatState.requestKey !== requestKey || bookedSeatState.loading
@@ -71,15 +74,19 @@ export function SeatSelection({ initialData, onBack, onNext, onToast }) {
     if (!requestKey) return undefined;
 
     const controller = new AbortController();
-    getBookedSeats(showtimeId, date, controller.signal)
-      .then((items) => {
+    getBookedSeatDetails(showtimeId, date, controller.signal)
+      .then(({ bookedSeats: items, myBookedSeats: mine }) => {
         if (!controller.signal.aborted) {
-          setBookedSeatState({ requestKey, bookedSeats: items, loading: false, error: null });
+          setBookedSeatState({
+            requestKey, bookedSeats: items, myBookedSeats: mine, loading: false, error: null,
+          });
         }
       })
       .catch((error) => {
         if (!controller.signal.aborted) {
-          setBookedSeatState({ requestKey, bookedSeats: [], loading: false, error: error.message });
+          setBookedSeatState({
+            requestKey, bookedSeats: [], myBookedSeats: [], loading: false, error: error.message,
+          });
         }
       });
 
@@ -234,6 +241,12 @@ export function SeatSelection({ initialData, onBack, onNext, onToast }) {
             <div className="legend-item"><div className="legend-seat selected-seat" /><span>Selected</span></div>
             <div className="legend-item"><div className="legend-seat" /><span>Available</span></div>
             <div className="legend-item"><div className="legend-seat booked-seat" /><span>Unavailable</span></div>
+            {myBookedSeats.length > 0 && (
+              <div className="legend-item">
+                <div className="legend-seat booked-seat my-booked-seat" />
+                <span>Your booking</span>
+              </div>
+            )}
             <div className="legend-item">
               <div className="legend-seat seat-accessible">
                 <img src={asset('assets/images/icons/accessible.png')} alt="" />
@@ -259,6 +272,7 @@ export function SeatSelection({ initialData, onBack, onNext, onToast }) {
                 {Array.from({ length: row === 'G' ? 11 : 10 }, (_, seatIndex) => {
                   const seatId = `${row}${seatIndex + 1}`;
                   const isBooked = bookedSeats.includes(seatId);
+                  const isMyBookedSeat = myBookedSeats.includes(seatId);
                   const isAccessible = accessibleSeats.has(seatId);
                   const isSelected = selectedSeats.includes(seatId);
                   return (
@@ -271,11 +285,11 @@ export function SeatSelection({ initialData, onBack, onNext, onToast }) {
                     >
                       {row !== 'G' && seatIndex === 5 && <span className="seat seat-spacer" aria-hidden="true" />}
                       <button
-                        className={`seat ${isAccessible ? 'seat-accessible' : ''} ${isBooked ? 'booked-seat' : ''} ${isSelected ? 'selected-seat' : ''}`}
+                        className={`seat ${isAccessible ? 'seat-accessible' : ''} ${isBooked ? 'booked-seat' : ''} ${isMyBookedSeat ? 'my-booked-seat' : ''} ${isSelected ? 'selected-seat' : ''}`}
                         type="button"
                         data-seat-id={seatId}
                         disabled={isBooked || bookedSeatsLoading || Boolean(bookedSeatsError)}
-                        aria-label={`Seat ${seatId}${isAccessible ? ', accessible' : ''}${isBooked ? ', booked' : ''}${isSelected ? ', selected' : ''}`}
+                        aria-label={`Seat ${seatId}${isAccessible ? ', accessible' : ''}${isMyBookedSeat ? ', in your booking' : isBooked ? ', booked' : ''}${isSelected ? ', selected' : ''}`}
                         aria-pressed={isSelected}
                         onPointerDown={(event) => startSeatDrag(seatId, event)}
                         onClick={(event) => {
