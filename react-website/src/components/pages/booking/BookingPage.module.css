@@ -275,65 +275,16 @@
     overflow: visible;
 }
 
-.root :global(.ticket-row) {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 16px 20px;
-    background: var(--bg-surface-elevated);
-    border: 1px solid var(--border-subtle);
-    border-radius: var(--radius-md);
-    margin-bottom: 12px;
+.root .ticketTypeGrid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1rem;
 }
 
-.root :global(.ticket-info) h4 {
-    font-size: 1.3rem;
-    color: #fff;
-    font-weight: 600;
-}
-
-.root :global(.ticket-info) span {
-    font-size: 0.80rem;
-    color: var(--text-secondary);
-}
-
-.root :global(.ticket-counter) {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-}
-
-.root :global(.ticket-counter) strong {
-    font-size: 1.1rem;
-}
-
-.root :global(.counter-btn) {
-    width: 36px;
-    height: 36px;
-    border-radius: var(--radius-full);
-    background: rgba(255, 255, 255, 0.08);
-    border: 1px solid var(--border-subtle);
-    color: #fff;
-    font-size: 1.2rem;
-    font-weight: 700;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all var(--transition);
-    touch-action: manipulation;
-}
-
-.root :global(.counter-btn):hover {
-    background: var(--accent-red);
-    border-color: var(--accent-red);
-}
-
-.root :global(.counter-val) {
-    font-size: 1.0rem;
-    font-weight: 700;
-    width: 24px;
-    text-align: center;
+@media (min-width: 768px) {
+    .root .ticketTypeGrid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
 }
 
 .root :global(.booking-subtotal-bar) {
@@ -848,10 +799,6 @@
 
 @media (max-width: 965px) {
 
-    .root :global(.ticket-row) {
-        padding: 16px 10px;
-    }
-
     .root :global(.date-time-group),
     .root :global(.guest-name-grid) {
         grid-template-columns: 1fr;
@@ -868,10 +815,6 @@
 
     .root :global(.form-actions) :global(.form-button) :global(.wallet-badge-btn) {
         width: 100%;
-    }
-
-    .root :global(.ticket-counter) {
-        gap: 10px;
     }
 
     .root :global(.ticket-details-grid) {
@@ -908,20 +851,6 @@
 .root :global(.booking-form) fieldset {
     width: 100%;
     min-width: 0;
-}
-
-.root :global(.ticket-row) {
-    gap: 0.75rem;
-}
-
-.root :global(.ticket-info) {
-    flex: 1 1 12rem;
-    min-width: 0;
-}
-
-.root :global(.ticket-counter) {
-    flex-wrap: nowrap;
-    gap: clamp(0.5rem, 2vw, 0.875rem);
 }
 
 .root :global(.booking-subtotal-bar) {
@@ -1059,14 +988,6 @@
         gap: 0;
     }
 
-    .root :global(.ticket-info) {
-        flex: 1 1 0;
-    }
-
-    .root :global(.ticket-counter) {
-        flex: 0 0 auto;
-    }
-
 }
 
 @media (max-width: 480px) {
@@ -1116,16 +1037,6 @@
         font-size: clamp(0.8rem, 3.1vw, 1.0rem);
     }
 
-    .root :global(.counter-btn) {
-        flex: 0 0 clamp(2rem, 10vw, 2.25rem);
-        width: clamp(2rem, 10vw, 2.25rem);
-        height: clamp(2rem, 10vw, 2.25rem);
-    }
-
-    .root :global(.counter-val) {
-        flex: 0 0 1.5rem;
-    }
-
     .root :global(.seating-plan) {
         width: calc(100% + 2rem);
         margin-inline: -1rem;
@@ -1166,23 +1077,6 @@
 }
 
 @media (max-width: 390px) {
-
-    .root :global(.ticket-row) {
-        flex-direction: column;
-        align-items: center;
-        gap: 0.5rem;
-        text-align: center;
-    }
-
-    .root :global(.ticket-info) {
-        flex: none;
-        width: 100%;
-        text-align: center;
-    }
-
-    .root :global(.ticket-counter) {
-        justify-content: center;
-    }
 
 }
 

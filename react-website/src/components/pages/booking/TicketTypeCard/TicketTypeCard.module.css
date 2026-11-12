@@ -1,0 +1,131 @@
+.card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    min-width: 0;
+    padding: 1rem;
+    background: #191e2d;
+    border: 1px solid #2a2f3d;
+    border-radius: 14px;
+    transition: background-color 160ms ease, border-color 160ms ease;
+}
+
+.card:hover {
+    background: #1c2232;
+    border-color: #363d4e;
+}
+
+.info {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.title {
+    margin: 0;
+    color: #f4f5f8;
+    font-family: var(--font-display);
+    font-size: clamp(1.15rem, 2vw, 1.5rem);
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.metadata {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    column-gap: 0.4rem;
+    margin: 0.65rem 0 0;
+    color: #98a1b3;
+    font-size: 0.875rem;
+    line-height: 1.4;
+}
+
+.price {
+    margin-top: 0.7rem;
+    font-weight: 500;
+    white-space: nowrap;
+    font-family: var(--font-display);
+    letter-spacing: 0.06em;
+}
+
+.separator {
+    color: #98a1b3;
+}
+
+.description {
+    min-width: 0;
+}
+
+.stepper {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    padding: 0.25rem;
+    background: rgba(12, 14, 21, 0.5);
+    border: 1px solid #363d4e;
+    border-radius: 999px;
+}
+
+.stepperButton {
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    color: #f4f5f8;
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid transparent;
+    border-radius: 999px;
+    font: inherit;
+    font-size: 1.2rem;
+    font-weight: 700;
+    cursor: pointer;
+    touch-action: manipulation;
+    transition: background-color 160ms ease, border-color 160ms ease, color 160ms ease;
+}
+
+.stepperButton:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: #596174;
+}
+
+.stepperButton:focus-visible {
+    outline: 2px solid #ff4968;
+    outline-offset: 2px;
+}
+
+.stepperButton:disabled {
+    color: #737b8c;
+    background: rgba(255, 255, 255, 0.02);
+    cursor: not-allowed;
+}
+
+.quantity {
+    min-width: 2.25rem;
+    color: #f4f5f8;
+    font-size: 1rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    text-align: center;
+}
+
+@media (max-width: 420px) {
+    .card {
+        gap: 0.65rem;
+        padding: 1rem;
+    }
+
+    .metadata {
+        font-size: 0.875rem;
+    }
+
+    .stepperButton {
+        width: 36px;
+        height: 36px;
+    }
+
+    .quantity {
+        min-width: 1.75rem;
+    }
+}

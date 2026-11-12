@@ -12,9 +12,11 @@ import {
 } from '../shared/bookingApi';
 import { movieSlug } from '../../movies';
 import { DatePicker, DirectionalButton, ShowtimeChip } from '../../shared';
+import styles from './BookingPage.module.css';
 import { AvailabilityIndicator } from './AvailabilityIndicator';
-import { getFirstAvailableDate } from './bookingDates';
+import { getFirstAvailableDate, getSingleAvailableShowtime } from './bookingDates';
 import { StepHeader } from './BookingStepComponents';
+import { TicketTypeCard } from './TicketTypeCard/TicketTypeCard';
 
 const weekdayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
@@ -71,6 +73,13 @@ function toCalendarDate(isoDate) {
 
 function toIsoDate(date) {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+}
+
+function getCurrencySymbol(currency) {
+  return new Intl.NumberFormat('en-GB', {
+    style: 'currency',
+    currency: currency || 'GBP',
+  }).formatToParts(0).find((part) => part.type === 'currency')?.value || '£';
 }
 
 function getAvailabilityLevel(availability) {
@@ -132,6 +141,7 @@ export function TicketSelection({ initialData = {}, onNext, onToast }) {
   const initialSelectionResolvedRef = useRef(Boolean(initialData.selection));
   const calendarAvailabilityCacheRef = useRef(new Map());
   const pendingFirstAvailableDateRef = useRef('');
+  const pendingShowtimeAutoSelectDateRef = useRef('');
 
   const selectionStateMatchesDate = selectionState.date === dateOverride;
   const selections = selectionState.selections;
@@ -210,7 +220,9 @@ export function TicketSelection({ initialData = {}, onNext, onToast }) {
       pendingFirstAvailableDateRef.current = '';
 
       const firstAvailableDate = getFirstAvailableDate(dates, availableShowtimes);
-      if (!firstAvailableDate || firstAvailableDate === dateOverrideRef.current) return;
+      if (!firstAvailableDate) return;
+      pendingShowtimeAutoSelectDateRef.current = firstAvailableDate;
+      if (firstAvailableDate === dateOverrideRef.current) return;
 
       dateOverrideRef.current = firstAvailableDate;
       setDateOverride(firstAvailableDate);
@@ -265,6 +277,17 @@ export function TicketSelection({ initialData = {}, onNext, onToast }) {
         };
         calendarAvailabilityCacheRef.current.set(requestKey, result);
         setCalendarAvailabilityState({ requestKey, availability, loading: false, error: null });
+        const pendingDate = pendingShowtimeAutoSelectDateRef.current;
+        if (pendingDate && pendingDate === dateOverrideRef.current) {
+          pendingShowtimeAutoSelectDateRef.current = '';
+          const showtime = getSingleAvailableShowtime(
+            availableShowtimes[pendingDate],
+            availableSeatsByShowtimeId,
+          );
+          if (showtime) {
+            setSelectedScreening({ date: pendingDate, showtimeId: showtime.showtimeId });
+          }
+        }
       })
       .catch((error) => {
         if (!controller.signal.aborted) {
@@ -368,9 +391,27 @@ export function TicketSelection({ initialData = {}, onNext, onToast }) {
   }, [checkoutRequestKey, pricing, day, time, tickets]);
 
   function changeSelection(value) {
+    const cachedAvailability = calendarAvailabilityCacheRef.current.get(value);
+    const firstAvailableDate = cachedAvailability
+      ? getFirstAvailableDate(dates, cachedAvailability.showtimesByDate)
+      : '';
+    const autoSelectedShowtime = firstAvailableDate
+      ? getSingleAvailableShowtime(
+        cachedAvailability.showtimesByDate[firstAvailableDate],
+        cachedAvailability.availableSeatsByShowtimeId,
+      )
+      : null;
+
     setSelectedKey(value);
-    pendingFirstAvailableDateRef.current = value;
-    setSelectedScreening(null);
+    pendingFirstAvailableDateRef.current = cachedAvailability ? '' : value;
+    pendingShowtimeAutoSelectDateRef.current = '';
+    if (firstAvailableDate) {
+      dateOverrideRef.current = firstAvailableDate;
+      setDateOverride(firstAvailableDate);
+    }
+    setSelectedScreening(autoSelectedShowtime
+      ? { date: firstAvailableDate, showtimeId: autoSelectedShowtime.showtimeId }
+      : null);
     setTickets({});
     setPricingState({ requestKey: '', pricing: null, loading: false, error: null });
     setValidationState({ requestKey: '', quote: null, loading: false, error: null });
@@ -378,9 +419,20 @@ export function TicketSelection({ initialData = {}, onNext, onToast }) {
 
   function changeDate(isoDate) {
     pendingFirstAvailableDateRef.current = '';
+    const cachedAvailability = calendarAvailabilityCacheRef.current.get(calendarAvailabilityRequestKey);
+    const availableShowtime = selectedSelection && cachedAvailability
+      ? getSingleAvailableShowtime(
+        cachedAvailability.showtimesByDate[isoDate],
+        cachedAvailability.availableSeatsByShowtimeId,
+      )
+      : null;
+    pendingShowtimeAutoSelectDateRef.current = selectedSelection && !cachedAvailability ? isoDate : '';
     dateOverrideRef.current = isoDate;
+    setTickets({});
     setDateOverride(isoDate);
-    setSelectedScreening(null);
+    setSelectedScreening(availableShowtime
+      ? { date: isoDate, showtimeId: availableShowtime.showtimeId }
+      : null);
     setPricingState({ requestKey: '', pricing: null, loading: false, error: null });
     setValidationState({ requestKey: '', quote: null, loading: false, error: null });
   }
@@ -388,6 +440,7 @@ export function TicketSelection({ initialData = {}, onNext, onToast }) {
   function changeTime(showtime) {
     if (showtime.showtimeId === selectedScreening?.showtimeId && date === selectedScreening?.date) return;
 
+    pendingShowtimeAutoSelectDateRef.current = '';
     setSelectedScreening({ date, showtimeId: showtime.showtimeId });
     setTickets({});
     setPricingState({ requestKey: '', pricing: null, loading: false, error: null });
@@ -396,7 +449,7 @@ export function TicketSelection({ initialData = {}, onNext, onToast }) {
 
   function changeTicketCount(tierId, amount) {
     if (amount > 0 && totalTickets >= 50) {
-      onToast('Maximum of 10 tickets allowed.');
+      onToast('Maximum of 50 tickets allowed.');
       return;
     }
     if (amount < 0 && !tickets[tierId]) return;
@@ -618,17 +671,21 @@ export function TicketSelection({ initialData = {}, onNext, onToast }) {
         {pricingError && <p className="form-notice" role="alert">{pricingError}</p>}
         {!pricingLoading && !pricingError && selectedSelection && time && !pricing?.ticketTiers.length
           && <p className="form-notice" role="status">No ticket types are available for this showtime.</p>}
-        {pricing?.ticketTiers.map((tier) => (
-          <div className="ticket-row" key={tier.id}>
-            <div className="ticket-info"><h4>{tier.label}</h4><span>{tier.description}</span></div>
-            <div className="ticket-counter">
-              <strong>{new Intl.NumberFormat('en-GB', { style: 'currency', currency: tier.currency || 'GBP' }).format(tier.price)}</strong>
-              <button className="counter-btn" type="button" aria-label={`Decrease ${tier.label}`} onClick={() => changeTicketCount(tier.id, -1)}>−</button>
-              <span className="counter-val" aria-live="polite">{tickets[tier.id] || 0}</span>
-              <button className="counter-btn" type="button" aria-label={`Increase ${tier.label}`} onClick={() => changeTicketCount(tier.id, 1)}>+</button>
-            </div>
-          </div>
-        ))}
+        <div className={styles.ticketTypeGrid}>
+          {pricing?.ticketTiers.map((tier) => (
+            <TicketTypeCard
+              key={tier.id}
+              id={String(tier.id)}
+              title={tier.label}
+              price={tier.price}
+              currencySymbol={getCurrencySymbol(tier.currency)}
+              description={tier.description}
+              quantity={tickets[tier.id] || 0}
+              onIncrement={(id) => changeTicketCount(id, 1)}
+              onDecrement={(id) => changeTicketCount(id, -1)}
+            />
+          ))}
+        </div>
         {validation?.error && <p className="form-notice" role="alert">{validation.error}</p>}
       </div>
       <div className="booking-subtotal-bar">
