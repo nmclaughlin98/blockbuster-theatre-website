@@ -198,7 +198,7 @@ export function Timetable() {
 
     return (
         <Layout className={styles.root} current="now">
-            <div id="timetablePrintArea">
+            <section id="timetablePrintArea">
                 <CenteredHeadingBlock
                     className="timetable-banner"
                     title="Weekly Movie Timetable"
@@ -230,8 +230,8 @@ export function Timetable() {
                             ? filteredMovies.map((movie) => <TimetableMovie movie={movie} day={day}
                                 key={movieId(movie)} />)
                             : <p>No movies available for this search and day.</p>}
-                </div>
             </div>
+            </section>
         </Layout>
     );
 }

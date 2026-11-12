@@ -553,7 +553,7 @@ export function TicketSelection({ initialData = {}, onNext, onToast }) {
             popperClassName="booking-date-popper"
             portalId="booking-date-picker-portal"
             inputMode="none"
-            showPopperArrow={false}
+            showPopperArrow
             dayClassName={(calendarDate) => {
               const availability = calendarAvailability?.[toIsoDate(calendarDate)];
               return calendarAvailabilityReady
