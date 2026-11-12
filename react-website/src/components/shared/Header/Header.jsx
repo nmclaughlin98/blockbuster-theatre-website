@@ -1,4 +1,9 @@
 import { useEffect, useState } from 'react';
+import {
+    COGNITO_AUTH_STATE_CHANGE_EVENT,
+    cognitoAuth,
+    getCognitoDisplayName,
+} from '../../../auth/cognitoAuth';
 import { asset } from '../asset/asset';
 
 const links = [
@@ -33,7 +38,7 @@ function Brand({ onClick }) {
     );
 }
 
-function Navigation({ current, open, onNavigate }) {
+function Navigation({ current, open, onNavigate, isAuthenticated, displayName }) {
     return (
         <nav className={`nav primary-nav ${open ? 'open' : ''}`}>
             <ul className="menu">
@@ -53,8 +58,21 @@ function Navigation({ current, open, onNavigate }) {
                         className={`nav-cta-btn ${current === 'login' ? 'current' : ''}`}
                         href="./login.html"
                         onClick={(e) => handleBlurClick(e, onNavigate)}
+                        aria-label={isAuthenticated ? `Account for ${displayName || 'signed-in user'}` : 'Log in'}
                     >
-                        Login
+                        {isAuthenticated && (
+                            <svg
+                                className="nav-account-icon"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                aria-hidden="true"
+                                focusable="false"
+                            >
+                                <circle cx="12" cy="8" r="3.5" />
+                                <path d="M5 20c0-3.9 3.1-7 7-7s7 3.1 7 7" />
+                            </svg>
+                        )}
+                        <span>{isAuthenticated ? displayName || 'Account' : 'Login'}</span>
                     </a>
                 </li>
             </ul>
@@ -76,9 +94,41 @@ function MenuButton({ open, onClick }) {
     );
 }
 
-export function Header({ current }) {
+export function Header({ current, authClient = cognitoAuth }) {
     const [open, setOpen] = useState(false);
+    const [account, setAccount] = useState({ isAuthenticated: false, displayName: '' });
     const closeMenu = () => setOpen(false);
+
+    useEffect(() => {
+        let active = true;
+        let requestId = 0;
+
+        async function updateAccount() {
+            const currentRequestId = ++requestId;
+            try {
+                const session = await authClient.fetchAuthSession();
+                if (!active || currentRequestId !== requestId) return;
+
+                const isAuthenticated = Boolean(session.tokens?.accessToken);
+                setAccount({
+                    isAuthenticated,
+                    displayName: isAuthenticated ? getCognitoDisplayName(session) : '',
+                });
+            } catch (error) {
+                if (active && currentRequestId === requestId) {
+                    setAccount({ isAuthenticated: false, displayName: '' });
+                    console.error('Unable to check the Cognito session for the header.', error);
+                }
+            }
+        }
+
+        updateAccount();
+        window.addEventListener(COGNITO_AUTH_STATE_CHANGE_EVENT, updateAccount);
+        return () => {
+            active = false;
+            window.removeEventListener(COGNITO_AUTH_STATE_CHANGE_EVENT, updateAccount);
+        };
+    }, [authClient]);
 
     useEffect(() => {
         if (!open) return undefined;
@@ -94,7 +144,13 @@ export function Header({ current }) {
         <>
             <header>
                 <Brand onClick={closeMenu} />
-                <Navigation current={current} open={open} onNavigate={closeMenu} />
+                <Navigation
+                    current={current}
+                    open={open}
+                    onNavigate={closeMenu}
+                    isAuthenticated={account.isAuthenticated}
+                    displayName={account.displayName}
+                />
                 <MenuButton open={open} onClick={() => setOpen((value) => !value)} />
             </header>
             <div

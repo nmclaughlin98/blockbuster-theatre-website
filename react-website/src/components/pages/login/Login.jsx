@@ -1,7 +1,11 @@
 import { useEffect, useState } from 'react';
 import { Layout } from '../../shared';
 import { Toast } from '../../shared/Toast/Toast';
-import { cognitoAuth } from '../../../auth/cognitoAuth';
+import {
+  COGNITO_AUTH_STATE_CHANGE_EVENT,
+  cognitoAuth,
+  getCognitoDisplayName,
+} from '../../../auth/cognitoAuth';
 import styles from './Login.module.css';
 
 const REFRESH_SESSION_DURATION_MS = 30 * 24 * 60 * 60 * 1000;
@@ -82,14 +86,6 @@ function navigateToHome() {
   window.location.assign('/');
 }
 
-function getDisplayName(session) {
-  const claims = session.tokens?.idToken?.payload ?? {};
-  return [claims.given_name, claims.family_name]
-    .filter((name) => typeof name === 'string' && name.trim())
-    .map((name) => name.trim())
-    .join(' ');
-}
-
 function getSessionExpiry(session) {
   const authTime = Number(session.tokens?.idToken?.payload?.auth_time);
   return Number.isFinite(authTime) && authTime > 0
@@ -148,7 +144,7 @@ export function Login({
         if (active && session.tokens?.accessToken) {
           setSessionExpiresAt(getSessionExpiry(session));
           setCurrentTime(Date.now());
-          setDisplayName(getDisplayName(session));
+          setDisplayName(getCognitoDisplayName(session));
           setIsAuthenticated(true);
           setStatusMessage('You are already logged in.');
           setToastMessage('Already logged in.');
@@ -207,12 +203,13 @@ export function Login({
         if (!session.tokens?.accessToken) {
           throw new Error('Cognito returned a session without an access token.');
         }
-        const name = getDisplayName(session);
+        const name = getCognitoDisplayName(session);
         const now = Date.now();
         setDisplayName(name);
         setSessionExpiresAt(getSessionExpiry(session));
         setCurrentTime(now);
         setIsAuthenticated(true);
+        window.dispatchEvent(new window.Event(COGNITO_AUTH_STATE_CHANGE_EVENT));
         setToastMessage('Login successful.');
         setStatusMessage(name
           ? `Welcome back, ${name}. Redirecting to the home page...`
@@ -247,6 +244,7 @@ export function Login({
     setToastMessage('');
     try {
       await authClient.signOut();
+      window.dispatchEvent(new window.Event(COGNITO_AUTH_STATE_CHANGE_EVENT));
       setDisplayName('');
       setSessionExpiresAt(null);
       setIsAuthenticated(false);

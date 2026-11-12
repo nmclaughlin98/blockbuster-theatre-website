@@ -325,6 +325,16 @@ header {
     touch-action: manipulation;
 }
 
+.primary-nav .menu li .nav-account-icon {
+    width: 1.15rem;
+    height: 1.15rem;
+    margin-right: 0.5rem;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
 .primary-nav .menu li .nav-cta-btn:hover {
     background: var(--accent-red-hover-transparent);
     color: #fff;

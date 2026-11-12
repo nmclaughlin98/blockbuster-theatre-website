@@ -26,6 +26,8 @@ const vite = await createServer({
   logLevel: 'silent',
 });
 const { Login } = await vite.ssrLoadModule('/src/components/pages/login/Login.jsx');
+const { Header } = await vite.ssrLoadModule('/src/components/shared/Header/Header.jsx');
+const { COGNITO_AUTH_STATE_CHANGE_EVENT } = await vite.ssrLoadModule('/src/auth/cognitoAuth.js');
 after(() => vite.close());
 
 async function renderLogin(authClient, onAuthenticated = () => {}) {
@@ -47,6 +49,24 @@ async function renderLogin(authClient, onAuthenticated = () => {}) {
         await Promise.resolve();
       });
     },
+    async unmount() {
+      await act(async () => root.unmount());
+      container.remove();
+    },
+  };
+}
+
+async function renderHeader(authClient) {
+  const container = document.createElement('div');
+  document.body.append(container);
+  const root = createRoot(container);
+  await act(async () => {
+    root.render(createElement(Header, { authClient }));
+    await new Promise((resolve) => setTimeout(resolve, 0));
+  });
+
+  return {
+    container,
     async unmount() {
       await act(async () => root.unmount());
       container.remove();
@@ -284,5 +304,31 @@ test('shows a logout button for an existing Cognito session', async () => {
   assert.match(page.container.textContent, /Logged out successfully\./);
   assert.doesNotMatch(page.container.textContent, /Signed in as Jane Doe/);
   assert.ok(page.container.querySelector('form'));
+  await page.unmount();
+});
+
+test('shows the signed-in name and account icon in the header', async () => {
+  let session = {
+    tokens: {
+      accessToken: { toString: () => 'access-token' },
+      idToken: { payload: { given_name: 'Jane', family_name: 'Doe' } },
+    },
+  };
+  const page = await renderHeader({
+    fetchAuthSession: async () => session,
+  });
+
+  const accountLink = page.container.querySelector('.nav-cta-btn');
+  assert.equal(accountLink.textContent.trim(), 'Jane Doe');
+  assert.equal(accountLink.getAttribute('aria-label'), 'Account for Jane Doe');
+  assert.ok(accountLink.querySelector('.nav-account-icon'));
+
+  session = { tokens: undefined };
+  await act(async () => {
+    window.dispatchEvent(new window.Event(COGNITO_AUTH_STATE_CHANGE_EVENT));
+    await new Promise((resolve) => setTimeout(resolve, 0));
+  });
+  assert.equal(accountLink.textContent.trim(), 'Login');
+  assert.equal(accountLink.querySelector('.nav-account-icon'), null);
   await page.unmount();
 });

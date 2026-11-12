@@ -13,6 +13,8 @@ const config = {
   userPoolClientId: environment.VITE_COGNITO_USER_POOL_CLIENT_ID?.trim(),
 };
 
+export const COGNITO_AUTH_STATE_CHANGE_EVENT = 'cognito-auth-state-change';
+
 let isConfigured = false;
 
 function getCognitoConfig(allowMissing = false) {
@@ -81,6 +83,14 @@ export async function getCognitoAccessToken() {
 
   const session = await getCognitoSession();
   return session.tokens?.accessToken?.toString() ?? null;
+}
+
+export function getCognitoDisplayName(session) {
+  const claims = session.tokens?.idToken?.payload ?? {};
+  return [claims.given_name, claims.family_name]
+    .filter((name) => typeof name === 'string' && name.trim())
+    .map((name) => name.trim())
+    .join(' ');
 }
 
 export const cognitoAuth = {
