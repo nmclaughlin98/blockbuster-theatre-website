@@ -8,6 +8,7 @@ import {
   getCognitoFirstName,
   getCognitoFullName,
 } from '../../../auth/cognitoAuth';
+import { randomSignupMessages, rickRoll, signupMessages } from './signupMessages';
 import styles from './Login.module.css';
 
 const REFRESH_SESSION_DURATION_MS = 1 * 24 * 60 * 60 * 1000;
@@ -179,7 +180,24 @@ export function Login({
   const [displayName, setDisplayName] = useState('');
   const [sessionExpiresAt, setSessionExpiresAt] = useState(null);
   const [currentTime, setCurrentTime] = useState(0);
+  const [signupClickCount, setSignupClickCount] = useState(0);
   const isBusy = isLoading || isRedirecting;
+
+  function handleSignupClick() {
+    const clickNumber = signupClickCount + 1;
+    setSignupClickCount(clickNumber);
+
+    if (clickNumber === 20) {
+      setToastMessage('');
+      window.open(rickRoll, '_blank', 'noopener,noreferrer');
+      return;
+    }
+
+    const message = clickNumber <= 2
+      ? signupMessages[clickNumber - 1]
+      : randomSignupMessages[Math.floor(Math.random() * randomSignupMessages.length)];
+    setToastMessage(message, 'warning');
+  }
 
   useEffect(() => {
     document.title = 'Blockbuster Theatre - Login';
@@ -361,6 +379,16 @@ export function Login({
                   : challenge?.kind === 'code' ? 'Verify code'
                     : challenge?.kind === 'new-password' ? 'Set password' : 'Login'}
               </button>
+              {!challenge && (
+                <button
+                  className={styles.signupLink}
+                  type="button"
+                  onClick={handleSignupClick}
+                  disabled={isBusy || signupClickCount >= 20}
+                >
+                  Sign up coming soon.
+                </button>
+              )}
             </form>
           )}
           {!isSessionChecking && <p className={styles.notice} role="status">{statusMessage}</p>}
