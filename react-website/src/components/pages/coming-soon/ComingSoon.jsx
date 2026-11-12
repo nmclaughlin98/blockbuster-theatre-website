@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { MovieGrid } from '../../movies';
 import { Layout, SectionHeader } from '../../shared';
-import { PageLoader } from '../../shared/PageLoader';
+import { PageLoader } from '../../shared/PageLoader/PageLoader';
 import { useMovies } from '../shared/useMovies';
 
 export function ComingSoon() {

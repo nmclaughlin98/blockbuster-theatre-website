@@ -1,8 +1,8 @@
 import styles from './Timetable.module.css';
 import { useEffect, useMemo, useState } from 'react';
 import { movieId, movieSlug } from '../../movies';
-import { Layout, ShowtimeChip } from '../../shared';
-import { PageLoader } from '../../shared/PageLoader';
+import { CenteredHeadingBlock, Layout, ShowtimeChip } from '../../shared';
+import { PageLoader } from '../../shared/PageLoader/PageLoader';
 import {
     getMoviesForDates,
     getUpcomingScreeningDates,
@@ -199,10 +199,12 @@ export function Timetable() {
     return (
         <Layout className={styles.root} current="now">
             <div id="timetablePrintArea">
-                <section className="page-banner">
-                    <h1>Weekly Movie Timetable</h1>
-                    <p id="weekCommencingLabel">Schedule for Week Commencing {weekCommencing}</p>
-                </section>
+                <CenteredHeadingBlock
+                    className="timetable-banner"
+                    title="Weekly Movie Timetable"
+                    description={`Schedule for Week Commencing ${weekCommencing}`}
+                    descriptionId="weekCommencingLabel"
+                />
                 <TimetableControls
                     days={days}
                     day={day}

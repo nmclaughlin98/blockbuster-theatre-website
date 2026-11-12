@@ -2,7 +2,7 @@ import styles from './NowShowing.module.css';
 import { useEffect, useMemo, useState } from 'react';
 import { MovieGrid } from '../../movies';
 import { DirectionalButton, Layout, SectionHeader } from '../../shared';
-import { PageLoader } from '../../shared/PageLoader';
+import { PageLoader } from '../../shared/PageLoader/PageLoader';
 import { CollectionsView } from '../collections/Collections';
 import { NowShowingSwitch } from './NowShowingSwitch';
 import { useCollections } from '../collections/useCollections';

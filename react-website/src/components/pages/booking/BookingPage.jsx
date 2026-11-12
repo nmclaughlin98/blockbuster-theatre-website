@@ -1,7 +1,7 @@
 import styles from './BookingPage.module.css';
 import { useEffect, useState } from 'react';
-import { Layout } from '../../shared';
-import { Toast } from '../../shared/Toast';
+import { CenteredHeadingBlock, Layout } from '../../shared';
+import { Toast } from '../../shared/Toast/Toast';
 import { BookingConfirmation } from './BookingConfirmation';
 import { GuestDetails } from './GuestDetails';
 import { PaymentStep } from './PaymentStep';
@@ -57,10 +57,10 @@ export function Booking() {
   return (
     <Layout className={styles.root} current="booking">
       <section className="booking-section">
-        <div className="booking-title-block">
-          <h1>Book Your Tickets</h1>
-          <p>Reserve the best seats in the house with our interactive seat picker.</p>
-        </div>
+        <CenteredHeadingBlock
+          title="Book Your Tickets"
+          description="Reserve the best seats in the house with our interactive seat picker."
+        />
         <ProgressBar currentStep={step} />
         <form className="booking-form" onSubmit={(event) => event.preventDefault()}>
           {step === 0 && (

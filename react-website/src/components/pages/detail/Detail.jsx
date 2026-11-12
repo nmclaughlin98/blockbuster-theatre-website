@@ -2,7 +2,7 @@ import styles from './Detail.module.css';
 import { useEffect, useState } from 'react';
 import { Countdown, movieSlug } from '../../movies/index.js';
 import { asset, Layout, ShowtimeChip } from '../../shared';
-import { PageLoader } from '../../shared/PageLoader';
+import { PageLoader } from '../../shared/PageLoader/PageLoader';
 import { createBookingHref } from '../shared/showtimeNavigation';
 import { getUpcomingScreeningDates } from '../shared/bookingApi';
 import { useMovieDetail } from './useMovieDetail';

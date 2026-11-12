@@ -1,0 +1,58 @@
+.banner {
+    position: relative;
+    width: 100%;
+    max-width: var(--content-width);
+    margin: 0 auto;
+    text-align: center;
+    padding: 0;
+    margin-bottom: 1.5rem;
+
+}
+
+.banner::before {
+    position: absolute;
+    inset: 18px 18% auto;
+    background: radial-gradient(circle, rgba(255, 51, 75, 0.25), transparent 68%);
+    filter: blur(28px);
+    content: '';
+    pointer-events: none;
+}
+
+.banner>.title {
+    all: unset;
+    box-sizing: border-box;
+    display: block;
+    position: relative;
+    width: 100%;
+    margin: 0 0 8px;
+    color: #fff;
+    text-align: center;
+    font-family: var(--font-display);
+    font-size: clamp(1.8rem, 5vw, 4rem);
+    font-weight: 800;
+    line-height: 1.2;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    overflow-wrap: anywhere;
+    background: linear-gradient(135deg, #fff 30%, #ffb0ba 55%, #ffd7d7 100%);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.description {
+    position: relative;
+    margin: 0;
+    margin-top: 1rem;
+    color: var(--text-secondary);
+    font-family: var(--font-body);
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.6;
+}
+
+@media (max-width: 480px) {
+    .banner>.title {
+        font-size: clamp(1.65rem, 8vw, 2.5rem);
+    }
+}

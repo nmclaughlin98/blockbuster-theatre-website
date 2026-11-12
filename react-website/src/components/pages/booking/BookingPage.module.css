@@ -79,28 +79,7 @@
     width: 100%;
     max-width: 60rem;
     margin: 0 auto;
-    padding: 40px 20px 80px 20px;
     touch-action: manipulation;
-}
-
-.root :global(.booking-title-block) {
-    text-align: center;
-    margin-bottom: 36px;
-}
-
-.root :global(.booking-title-block) h1 {
-    font-family: var(--font-display);
-    font-size: clamp(1.1rem, 7vw, 3.5em);
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    background: linear-gradient(135deg, #fff 50%, #ff8a99);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-}
-
-.root :global(.booking-title-block) p {
-    color: var(--text-secondary);
-    font-size: clamp(0.8rem, 4vw, 1.1rem);
 }
 
 .root :global(#progressbar) {
@@ -109,7 +88,7 @@
     display: flex;
     justify-content: space-between;
     position: relative;
-    margin: 0 auto 40px auto;
+    margin: 0 auto 30px auto;
     padding: 0;
     max-width: 800px;
     scroll-margin-top: calc(var(--header-height) + 1rem);
@@ -202,7 +181,7 @@
     background: var(--bg-surface);
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-xl);
-    padding: clamp(24px, 5vw, 28px);
+    padding: clamp(19px, 5vw, 20px);
     box-shadow: var(--shadow-lg);
     position: relative;
     overflow: hidden;
@@ -924,10 +903,6 @@
         margin-top: 12px;
     }
 
-}
-
-.root :global(.booking-section) {
-    padding: clamp(1.5rem, 4vw, 2.5rem) var(--page-gutter) clamp(3rem, 7vw, 5rem);
 }
 
 .root :global(.booking-form) fieldset {

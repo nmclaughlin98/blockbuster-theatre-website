@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { asset } from './asset';
+import { asset } from '../asset/asset';
 
 const links = [
     ['Home', '/', 'home'],

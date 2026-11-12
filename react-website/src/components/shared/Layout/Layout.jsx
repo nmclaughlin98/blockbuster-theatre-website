@@ -1,6 +1,6 @@
-import { BackToTop } from './BackToTop';
-import { Footer } from './Footer';
-import { Header } from './Header';
+import { BackToTop } from '../BackToTop/BackToTop';
+import { Footer } from '../Footer/Footer';
+import { Header } from '../Header/Header';
 
 export function Layout({ current, children, loading = false, className }) {
   return (
