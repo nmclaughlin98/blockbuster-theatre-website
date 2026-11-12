@@ -71,7 +71,7 @@ export function NowShowing({ initialView }) {
     }, [view]);
 
     const { movies, loading, error } = useMovies();
-    const collectionState = useCollections(view === 'collections');
+    const collectionState = useCollections(true);
     const [search, setSearch] = useState('');
     const [sort, setSort] = useState('title-asc');
     const [genre, setGenre] = useState('all');
@@ -85,7 +85,7 @@ export function NowShowing({ initialView }) {
         )].sort((a, b) => a.localeCompare(b)),
     ], [movies]);
 
-    const pageLoading = view === 'movies' ? loading : collectionState.loading;
+    const pageLoading = loading || !collectionState.initialLoadComplete;
 
     function changeView(nextView) {
         setView(nextView);
