@@ -371,6 +371,14 @@
     .columns {
         grid-template-columns: minmax(0, 1fr);
     }
+
+    .profileColumn {
+        display: contents;
+    }
+
+    .securityCard {
+        order: 1;
+    }
 }
 
 @media (max-width: 480px) {

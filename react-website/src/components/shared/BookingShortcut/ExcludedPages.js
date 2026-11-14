@@ -1,1 +1,1 @@
-export const excludedPages = ['booking', 'login'];
+export const excludedPages = ['booking', 'login', 'account'];
