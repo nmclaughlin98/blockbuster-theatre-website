@@ -147,12 +147,23 @@ export async function getAccountBookings(accessToken, signal) {
       || typeof booking.bookingId !== 'string' || !booking.bookingId
       || (booking.bookingRef !== undefined
         && (typeof booking.bookingRef !== 'string' || !booking.bookingRef))
+      || (booking.movieId !== undefined
+        && (typeof booking.movieId !== 'string' || !/^\d+$/.test(booking.movieId)))
       || typeof booking.movieTitle !== 'string' || !booking.movieTitle
       || !/^\d{4}-\d{2}-\d{2}$/.test(booking.date)
       || Number.isNaN(date.getTime()) || date.toISOString().slice(0, 10) !== booking.date
       || typeof booking.time !== 'string' || !/^(?:[01]\d|2[0-3]):[0-5]\d$/.test(booking.time)
       || typeof booking.screen !== 'string' || !booking.screen
-      || !Array.isArray(booking.seats) || booking.seats.some((seat) => typeof seat !== 'string');
+      || !Array.isArray(booking.seats) || booking.seats.some((seat) => typeof seat !== 'string')
+      || (booking.guestName !== undefined
+        && (typeof booking.guestName !== 'string' || !booking.guestName.trim()))
+      || (booking.ticketCount !== undefined
+        && (!Number.isSafeInteger(booking.ticketCount) || booking.ticketCount < 1
+          || booking.ticketCount !== booking.seats.length))
+      || (booking.totalAmount !== undefined
+        && (typeof booking.totalAmount !== 'number' || !Number.isFinite(booking.totalAmount) || booking.totalAmount < 0))
+      || (booking.currency !== undefined
+        && (typeof booking.currency !== 'string' || !/^[A-Z]{3}$/.test(booking.currency)));
   })) {
     throw new Error('The booking service returned invalid account booking details.');
   }

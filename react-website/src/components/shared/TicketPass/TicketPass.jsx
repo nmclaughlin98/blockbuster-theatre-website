@@ -18,14 +18,15 @@ function formatScreeningDate(date, time) {
 }
 
 export function TicketPass({
-  movieTitle, date, time, screen, seats, bookingRef, guestName, ticketCount, total, headerAction, className = '',
+  movieTitle, date, time, screen, seats, bookingRef, guestName, ticketCount, total, headerAction,
+  isShowBookingConfirmedIndicator = true, className = '',
 }) {
   return (
     <div className={`${styles.root} ${className}`.trim()}>
       <div className={styles.header}>
         <div className={styles.brand}>BLOCKBUSTER<br />THEATRE</div>
         <div className={styles.headerActions}>
-          <div className={styles.status}>Booking confirmed</div>
+          {isShowBookingConfirmedIndicator && <div className={styles.status}>Booking confirmed</div>}
           {headerAction}
         </div>
       </div>

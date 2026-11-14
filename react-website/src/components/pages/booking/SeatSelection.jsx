@@ -238,15 +238,15 @@ export function SeatSelection({ initialData, onBack, onNext, onToast }) {
         <div className="screen-container"><div className="screen" /><div className="screen-text">MAIN CINEMA SCREEN</div></div>
         <div className="seat-legend-container">
           <div className="seat-legend">
-            <div className="legend-item"><div className="legend-seat selected-seat" /><span>Selected</span></div>
-            <div className="legend-item"><div className="legend-seat" /><span>Available</span></div>
-            <div className="legend-item"><div className="legend-seat booked-seat" /><span>Unavailable</span></div>
             {myBookedSeats.length > 0 && (
               <div className="legend-item">
                 <div className="legend-seat booked-seat my-booked-seat" />
-                <span>Your booking</span>
+                <span>Your seats</span>
               </div>
             )}
+            <div className="legend-item"><div className="legend-seat selected-seat" /><span>Selected</span></div>
+            <div className="legend-item"><div className="legend-seat" /><span>Available</span></div>
+            <div className="legend-item"><div className="legend-seat booked-seat" /><span>Unavailable</span></div>
             <div className="legend-item">
               <div className="legend-seat seat-accessible">
                 <img src={asset('assets/images/icons/accessible.png')} alt="" />

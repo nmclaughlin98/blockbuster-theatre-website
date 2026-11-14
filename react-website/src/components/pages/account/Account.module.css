@@ -314,6 +314,13 @@
     border-radius: var(--radius-sm);
     background: var(--bg-main);
     color: var(--text-secondary);
+    overflow: hidden;
+}
+
+.posterPlaceholder img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 
 .posterPlaceholder svg {

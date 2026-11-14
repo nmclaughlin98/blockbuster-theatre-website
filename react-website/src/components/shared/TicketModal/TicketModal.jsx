@@ -45,6 +45,12 @@ export function TicketModal({ booking, onClose }) {
           screen={booking.screen}
           seats={booking.seats}
           bookingRef={booking.bookingRef}
+          guestName={booking.guestName}
+          ticketCount={booking.ticketCount}
+          total={booking.totalAmount !== undefined && booking.currency !== undefined
+            ? new Intl.NumberFormat('en-GB', { style: 'currency', currency: booking.currency }).format(booking.totalAmount)
+            : undefined}
+          isShowBookingConfirmedIndicator={false}
           headerAction={(
             <button ref={closeButtonRef} className={styles.close} type="button" onClick={onClose} aria-label="Close ticket">
               &times;

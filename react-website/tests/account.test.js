@@ -92,12 +92,73 @@ test('shows account bookings, switches to history, and logs out', async () => {
   await page.unmount();
 });
 
-test('opens the selected booking ticket and closes with Escape, backdrop or close button', async () => {
-  const first = { ...makeBooking('first', '2099-01-01', '10:00'), bookingRef: 'BBT-111111', seats: ['A1', 'A2'] };
-  const second = { ...makeBooking('second', '2099-01-02', '19:30'), bookingRef: 'BBT-222222', screen: '5', seats: ['F10', 'F11'] };
+test('loads appropriately sized posters once per movie and falls back when unavailable', async () => {
+  const calls = [];
   const page = await render(Account, {
     authClient: { fetchAuthSession: async () => session },
-    loadBookings: async () => [first, second],
+    loadBookings: async () => [
+      { ...makeBooking('first', '2099-01-01', '10:00'), movieId: '1003596' },
+      { ...makeBooking('second', '2099-01-02', '10:00'), movieId: '1003596' },
+      { ...makeBooking('missing', '2099-01-03', '10:00'), movieId: '42' },
+      makeBooking('legacy', '2099-01-04', '10:00'),
+      { ...makeBooking('past', '2020-01-01', '10:00'), movieId: '43' },
+    ],
+    loadMovieDetail: async (movieId) => {
+      calls.push(movieId);
+      if (movieId === '42') throw new Error('Movie not found');
+      if (movieId === '43') return { poster: 'https://image.tmdb.org/t/p/original/history.jpg' };
+      return { poster: 'https://image.tmdb.org/t/p/original/jzPwsojjFStf5lR5Nm07w2hH56G.jpg' };
+    },
+  });
+  assert.deepEqual(calls, ['1003596', '42', '43']);
+  const posters = [...page.container.querySelectorAll('img[alt$=" poster"]')];
+  assert.equal(posters.length, 2);
+  assert.equal(posters[0].getAttribute('src'), 'https://image.tmdb.org/t/p/w185/jzPwsojjFStf5lR5Nm07w2hH56G.jpg');
+  assert.equal(posters[0].getAttribute('alt'), 'Film first poster');
+  assert.equal(page.container.querySelectorAll('[aria-label="Poster unavailable"]').length, 2);
+
+  await act(async () => posters[0].dispatchEvent(new window.Event('error')));
+  assert.equal(page.container.querySelectorAll('[aria-label="Poster unavailable"]').length, 3);
+  assert.equal(page.container.querySelectorAll('img[alt$=" poster"]').length, 1);
+  await act(async () => [...page.container.querySelectorAll('button')].find((button) => button.textContent === 'History').click());
+  assert.equal(page.container.querySelector('img[alt="Film past poster"]').getAttribute('src'), 'https://image.tmdb.org/t/p/w185/history.jpg');
+  await page.unmount();
+});
+
+test('shows bookings while posters load and discards results after the session changes', async () => {
+  let signedIn = true;
+  let resolvePoster;
+  let posterSignal;
+  const page = await render(Account, {
+    authClient: { fetchAuthSession: async () => signedIn ? session : {} },
+    loadBookings: async () => [{ ...makeBooking('private', '2099-01-01', '10:00'), movieId: '1003596' }],
+    loadMovieDetail: (_movieId, signal) => {
+      posterSignal = signal;
+      return new Promise((resolve) => { resolvePoster = resolve; });
+    },
+  });
+  assert.match(page.container.textContent, /Film private/);
+  assert.ok(page.container.querySelector('[aria-label="Poster unavailable"]'));
+
+  signedIn = false;
+  await act(async () => {
+    window.dispatchEvent(new window.Event(COGNITO_AUTH_STATE_CHANGE_EVENT));
+    resolvePoster({ poster: 'https://image.tmdb.org/t/p/original/poster.jpg' });
+    await Promise.resolve();
+  });
+  assert.equal(posterSignal.aborted, true);
+  assert.doesNotMatch(page.container.textContent, /Film private/);
+  assert.equal(page.container.querySelector('img[alt$=" poster"]'), null);
+  await page.unmount();
+});
+
+test('opens the selected booking ticket and closes with Escape, backdrop or close button', async () => {
+  const first = { ...makeBooking('first', '2099-01-01', '10:00'), bookingRef: 'BBT-111111', seats: ['A1', 'A2'], guestName: 'Alex Smith', ticketCount: 2, totalAmount: 24, currency: 'GBP' };
+  const second = { ...makeBooking('second', '2099-01-02', '19:30'), bookingRef: 'BBT-222222', screen: '5', seats: ['F10', 'F11'], guestName: 'Sam Jones', ticketCount: 2, totalAmount: 0, currency: 'GBP' };
+  const legacy = makeBooking('legacy', '2099-01-03', '10:00');
+  const page = await render(Account, {
+    authClient: { fetchAuthSession: async () => session },
+    loadBookings: async () => [first, second, legacy],
   });
   const ticketButtons = [...page.container.querySelectorAll('button')].filter((button) => button.textContent === 'View ticket');
 
@@ -105,12 +166,15 @@ test('opens the selected booking ticket and closes with Escape, backdrop or clos
   await act(async () => ticketButtons[0].click());
   let modal = document.body.querySelector('[role="dialog"]');
   assert.equal(modal.getAttribute('aria-label'), 'Your ticket');
-  assert.match(modal.textContent, /BLOCKBUSTERTHEATREBooking confirmed/);
+  assert.match(modal.textContent, /BLOCKBUSTERTHEATRE/);
+  assert.doesNotMatch(modal.textContent, /Booking confirmed/);
   assert.match(modal.textContent, /Film first/);
   assert.match(modal.textContent, /Screen 2/);
   assert.match(modal.textContent, /A1, A2/);
   assert.match(modal.textContent, /BBT-111111/);
-  assert.doesNotMatch(modal.textContent, /Guest Name|Ticket Breakdown|Total/);
+  assert.match(modal.textContent, /Guest NameAlex Smith/);
+  assert.match(modal.textContent, /Ticket Breakdown2 Tickets/);
+  assert.match(modal.textContent, /Total£24\.00/);
   const svgContainer = document.createElement('div');
   svgContainer.innerHTML = renderToStaticMarkup(createElement(QRCodeSVG, {
     value: 'BBT-111111', size: 160, level: 'M', boostLevel: false, marginSize: 4,
@@ -137,6 +201,10 @@ test('opens the selected booking ticket and closes with Escape, backdrop or clos
   assert.match(modal.textContent, /F10, F11/);
   assert.match(modal.textContent, /BBT-222222/);
   assert.match(modal.textContent, /19:30/);
+  assert.match(modal.textContent, /Guest NameSam Jones/);
+  assert.match(modal.textContent, /Ticket Breakdown2 Tickets/);
+  assert.match(modal.textContent, /Total£0\.00/);
+  assert.doesNotMatch(modal.textContent, /Alex Smith|£24\.00/);
   assert.equal(modal.querySelector('svg').getAttribute('aria-label'), 'QR code for booking reference BBT-222222');
   await act(async () => modal.parentElement.dispatchEvent(new window.MouseEvent('click', { bubbles: true })));
   assert.equal(document.body.querySelector('[role="dialog"]'), null);
@@ -144,6 +212,10 @@ test('opens the selected booking ticket and closes with Escape, backdrop or clos
   await act(async () => ticketButtons[1].click());
   await act(async () => document.body.querySelector('[aria-label="Close ticket"]').click());
   assert.equal(document.body.querySelector('[role="dialog"]'), null);
+  await act(async () => ticketButtons[2].click());
+  modal = document.body.querySelector('[role="dialog"]');
+  assert.doesNotMatch(modal.textContent, /Guest Name|Ticket Breakdown|Total/);
+  await act(async () => document.body.querySelector('[aria-label="Close ticket"]').click());
   await page.unmount();
 });
 
@@ -292,6 +364,15 @@ test('booking history request uses the session token and rejects malformed data'
     };
     await assert.rejects(getAccountBookings('access-token'), /invalid account booking details/);
     await assert.rejects(getAccountBookings(''), /Sign in/);
+    const booking = { ...makeBooking('x', '2099-01-01', '10:00'), movieId: '1003596', guestName: 'Alex Smith', ticketCount: 2, totalAmount: 0, currency: 'GBP' };
+    globalThis.fetch = async () => new Response(JSON.stringify({ bookings: [booking] }));
+    assert.deepEqual(await getAccountBookings('access-token'), [booking]);
+    globalThis.fetch = async () => new Response(JSON.stringify({ bookings: [{ ...booking, movieId: 'bad' }] }));
+    await assert.rejects(getAccountBookings('access-token'), /invalid account booking details/);
+    for (const invalid of [{ guestName: ' ' }, { ticketCount: 3 }, { totalAmount: -1 }, { currency: 'gbp' }]) {
+      globalThis.fetch = async () => new Response(JSON.stringify({ bookings: [{ ...booking, ...invalid }] }));
+      await assert.rejects(getAccountBookings('access-token'), /invalid account booking details/);
+    }
     globalThis.fetch = async () => new Response(JSON.stringify({ message: 'Not authorized' }), { status: 401 });
     await assert.rejects(getAccountBookings('access-token'), /Not authorized/);
   } finally {

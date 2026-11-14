@@ -71,3 +71,28 @@ test('confirms the backend booking reference and total when confirmation email f
     await vite.close();
   }
 });
+
+test('allows the ticket confirmation indicator to be hidden', async () => {
+  const vite = await createServer({
+    configFile: fileURLToPath(new URL('../vite.config.js', import.meta.url)),
+    server: { middlewareMode: true },
+    appType: 'custom',
+    logLevel: 'silent',
+  });
+
+  try {
+    const { TicketPass } = await vite.ssrLoadModule('/src/components/shared/TicketPass/TicketPass.jsx');
+    const props = {
+      movieTitle: 'Inception', date: '2026-11-01', time: '12:15', screen: '5',
+      seats: ['D1'], bookingRef: 'BBT-883214', headerAction: createElement('button', null, 'Close'),
+    };
+    const hidden = renderToStaticMarkup(createElement(TicketPass, { ...props, isShowBookingConfirmedIndicator: false }));
+    const visible = renderToStaticMarkup(createElement(TicketPass, { ...props, isShowBookingConfirmedIndicator: true }));
+    assert.doesNotMatch(hidden, /Booking confirmed/);
+    assert.match(hidden, /Close/);
+    assert.match(hidden, /REF: BBT-883214/);
+    assert.match(visible, /Booking confirmed/);
+  } finally {
+    await vite.close();
+  }
+});

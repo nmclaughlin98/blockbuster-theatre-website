@@ -5,7 +5,8 @@ import {
   getCognitoFullName,
 } from '../../../auth/cognitoAuth';
 import { Layout, TicketModal } from '../../shared';
-import { getAccountBookings } from '../shared/bookingApi';
+import { getPosterUrl } from '../../../utils/posterImages';
+import { getAccountBookings, getMovieDetail } from '../shared/bookingApi';
 import styles from './Account.module.css';
 
 function theatreNow() {
@@ -99,9 +100,38 @@ function navigateToLogin() {
   window.location.assign('/login');
 }
 
+function BookingPoster({ movieId, movieTitle, posterUrl }) {
+  const [failedSrc, setFailedSrc] = useState(null);
+  const src = getPosterUrl(posterUrl, 'w185') || posterUrl;
+
+  return (
+    <div className={styles.posterPlaceholder}>
+      {src && src !== failedSrc ? (
+        <img
+          src={src}
+          alt={`${movieTitle} poster`}
+          width="56"
+          height="80"
+          loading="lazy"
+          onError={() => {
+            console.warn('Unable to load booking poster image.', { movieId });
+            setFailedSrc(src);
+          }}
+        />
+      ) : (
+        <svg viewBox="0 0 24 24" fill="none" role="img" aria-label="Poster unavailable">
+          <rect x="3" y="4" width="18" height="16" rx="2" />
+          <path d="M7 4v16M17 4v16M3 9h4M3 15h4M17 9h4M17 15h4" />
+        </svg>
+      )}
+    </div>
+  );
+}
+
 export function Account({
   authClient = cognitoAuth,
   loadBookings = getAccountBookings,
+  loadMovieDetail = getMovieDetail,
   onSignedOut = navigateToLogin,
 } = {}) {
   const [account, setAccount] = useState({ status: 'loading' });
@@ -109,6 +139,7 @@ export function Account({
   const [selectedBooking, setSelectedBooking] = useState(null);
   const [signingOut, setSigningOut] = useState(false);
   const [signOutError, setSignOutError] = useState('');
+  const [posters, setPosters] = useState({});
   const closeTicket = useCallback(() => setSelectedBooking(null), []);
 
   useEffect(() => {
@@ -121,7 +152,9 @@ export function Account({
       const currentRequest = ++requestId;
       controller?.abort();
       controller = new AbortController();
+      const requestController = controller;
       setSelectedBooking(null);
+      setPosters({});
       setAccount({ status: 'loading' });
       try {
         const session = await authClient.fetchAuthSession();
@@ -133,8 +166,25 @@ export function Account({
         }
         const profile = getProfile(session);
         setAccount({ status: 'bookings-loading', profile });
-        const bookings = await loadBookings(token, controller.signal);
-        if (active && currentRequest === requestId) setAccount({ status: 'ready', profile, bookings });
+        const bookings = await loadBookings(token, requestController.signal);
+        if (!active || currentRequest !== requestId) return;
+        setAccount({ status: 'ready', profile, bookings });
+        const movieIds = [...new Set(bookings.map((booking) => booking.movieId).filter(Boolean))];
+        await Promise.all(movieIds.map(async (movieId) => {
+          try {
+            const movie = await loadMovieDetail(movieId, requestController.signal);
+            if (typeof movie.poster !== 'string') {
+              throw new Error('The movie service returned an invalid poster URL.');
+            }
+            if (movie.poster && active && currentRequest === requestId) {
+              setPosters((previous) => ({ ...previous, [movieId]: movie.poster }));
+            }
+          } catch (error) {
+            if (!requestController.signal.aborted) {
+              console.warn('Unable to load booking poster.', { movieId, error });
+            }
+          }
+        }));
       } catch (error) {
         if (!active || currentRequest !== requestId || error.name === 'AbortError') return;
         console.error('Unable to load account details.', error);
@@ -152,7 +202,7 @@ export function Account({
       controller?.abort();
       window.removeEventListener(COGNITO_AUTH_STATE_CHANGE_EVENT, loadAccount);
     };
-  }, [authClient, loadBookings]);
+  }, [authClient, loadBookings, loadMovieDetail]);
 
   async function handleSignOut() {
     if (signingOut) return;
@@ -223,12 +273,11 @@ export function Account({
                       {bookings.map((booking) => (
                         <li className={styles.booking} key={booking.bookingId}>
                           <div className={styles.bookingDetails}>
-                            <div className={styles.posterPlaceholder} role="img" aria-label="Poster unavailable">
-                              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                                <rect x="3" y="4" width="18" height="16" rx="2" />
-                                <path d="M7 4v16M17 4v16M3 9h4M3 15h4M17 9h4M17 15h4" />
-                              </svg>
-                            </div>
+                            <BookingPoster
+                              movieId={booking.movieId}
+                              movieTitle={booking.movieTitle}
+                              posterUrl={posters[booking.movieId]}
+                            />
                             <div className={styles.bookingText}>
                               <h3>{booking.movieTitle}</h3>
                               <p>{formatDate(booking.date)} at {booking.time}</p>
