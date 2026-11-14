@@ -11,5 +11,6 @@ export { SectionHeader } from './SectionHeader/SectionHeader';
 export { SkeletonBlock } from './SkeletonBlock/SkeletonBlock';
 export { ShowtimeChip } from './ShowtimeChip/ShowtimeChip';
 export { TicketModal } from './TicketModal/TicketModal';
+export { TicketPass } from './TicketPass/TicketPass';
 export { TicketQRCode } from './TicketQRCode/TicketQRCode';
 export { TrailerModal } from './TrailerModal/TrailerModal';

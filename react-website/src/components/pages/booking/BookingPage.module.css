@@ -637,62 +637,7 @@
 }
 
 .root :global(.ticket-pass) {
-    background: #181b29;
-    border-radius: var(--radius-lg);
-    border: 1px solid var(--border-subtle);
-    max-width: 530px;
     margin: 0 auto 30px auto;
-    box-shadow: var(--shadow-lg);
-    position: relative;
-    overflow: hidden;
-}
-
-.root :global(.ticket-pass-header) {
-    background: linear-gradient(135deg, var(--accent-red) 0%, var(--accent-red-dark) 100%);
-    padding: 20px clamp(15px, 2vw, 20px);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-}
-
-.root :global(.ticket-pass-brand) {
-    font-family: var(--font-display);
-    font-size: clamp(1.2rem, 2vw, 1.4rem);
-    letter-spacing: 0.05em;
-    color: #fff;
-    font-weight: 600;
-    line-height: 1.1;
-    letter-spacing: 0.12em;
-}
-
-.root :global(.ticket-pass-status) {
-    background: rgba(0, 0, 0, 0.35);
-    padding: 10px 15px;
-    border-radius: var(--radius-full);
-    font-size: clamp(0.70rem, 1vw, 0.8rem);
-    font-weight: 700;
-    text-transform: uppercase;
-    color: #fff;
-}
-
-.root :global(.ticket-pass-body) {
-    padding: 20px;
-}
-
-.root :global(.ticket-movie-title) {
-    font-family: var(--font-heading);
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: #fff;
-    margin-bottom: 16px;
-}
-
-.root :global(.ticket-details-grid) {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 16px;
-    margin-top: 30px;
-    margin-bottom: 20px;
 }
 
 .root :global(.ticket-detail-item) {
@@ -710,46 +655,6 @@
 .root :global(.ticket-detail-item) strong {
     font-size: 1rem;
     color: #fff;
-}
-
-.root :global(.ticket-perforation) {
-    position: relative;
-    height: 20px;
-    display: flex;
-    align-items: center;
-    margin: 0 -24px;
-}
-
-.root :global(.ticket-perforation)::before,
-.root :global(.ticket-perforation)::after {
-    content: '';
-    position: absolute;
-    width: 20px;
-    height: 20px;
-    background: var(--bg-surface);
-    border-radius: 50%;
-    top: 0;
-}
-
-.root :global(.ticket-perforation)::before {
-    left: -10px;
-}
-
-.root :global(.ticket-perforation)::after {
-    right: -10px;
-}
-
-.root :global(.ticket-perforation-line) {
-    width: 100%;
-    border-top: 2px dashed rgba(255, 255, 255, 0.15);
-}
-
-.root :global(.ticket-barcode-area) {
-    padding-top: 16px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 10px;
 }
 
 .root :global(.guest-conversion-card) {
@@ -831,10 +736,6 @@
         width: 100%;
     }
 
-    .root :global(.ticket-details-grid) {
-        grid-template-columns: 1fr;
-    }
-
     .root :global(.booking-subtotal-bar) {
         box-sizing: border-box;
         display: block;
@@ -894,10 +795,6 @@
     top: clamp(0.9375rem, 2.5vw, 1.25rem);
     left: 10%;
     right: 10%;
-}
-
-.root :global(.ticket-details-grid) {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .root :global(.seating-plan) {
@@ -1069,10 +966,6 @@
         width: auto;
         height: clamp(1.25rem, 7vw, 2rem);
         aspect-ratio: 1;
-    }
-
-    .root :global(.ticket-details-grid) {
-        grid-template-columns: minmax(0, 1fr);
     }
 
     .root :global(.screen-text) {

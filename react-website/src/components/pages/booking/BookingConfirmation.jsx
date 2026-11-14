@@ -1,27 +1,11 @@
 import { useState } from 'react';
-import { asset, DirectionalButton, TicketQRCode } from '../../shared';
+import { asset, DirectionalButton, TicketPass } from '../../shared';
 import {
   convertGuestAccount,
   getApiErrorMessage,
   sortSeatIds,
 } from '../shared/bookingApi';
 import { StepHeader } from './BookingStepComponents';
-
-function formatScreeningDate(date, time) {
-  const parsedDate = new Date(`${date}T00:00:00Z`);
-  const formattedDate = !Number.isNaN(parsedDate.getTime())
-    && parsedDate.toISOString().slice(0, 10) === date
-    ? new Intl.DateTimeFormat('en-GB', {
-      weekday: 'short',
-      day: 'numeric',
-      month: 'short',
-      year: 'numeric',
-      timeZone: 'UTC',
-    }).format(parsedDate).replace(',', '').replace(/^Thu(?=\s)/, 'Thurs')
-    : date;
-
-  return `${formattedDate} - ${time}`;
-}
 
 const walletPassesEnabled = import.meta.env.VITE_ENABLE_WALLET_PASSES === 'true';
 const walletPassApiUrl = import.meta.env.VITE_WALLET_PASS_API_URL?.trim()
@@ -182,25 +166,18 @@ export function BookingConfirmation({
           ? 'Your seats have been reserved. No payment was taken.'
           : 'Your reservation succeeded, but we could not send the confirmation email. No payment was taken.'}
       />
-      <div className="ticket-pass">
-        <div className="ticket-pass-header">
-          <div className="ticket-pass-brand">BLOCKBUSTER<br />THEATRE</div>
-          <div className="ticket-pass-status">BOOKING CONFIRMED</div>
-        </div>
-        <div className="ticket-pass-body">
-          <div className="ticket-movie-title">{movieTitle}</div>
-          <div className="ticket-details-grid">
-            <div className="ticket-detail-item"><span>Showtime</span><strong>{formatScreeningDate(bookingDetails.date, time)}</strong></div>
-            <div className="ticket-detail-item"><span>Screen</span><strong>Screen {screen}</strong></div>
-            <div className="ticket-detail-item"><span>Seat{ticketCount === 1 ? '' : 's'}</span><strong>{selectedSeats.join(', ')}</strong></div>
-            <div className="ticket-detail-item"><span>Guest Name</span><strong>{customer.firstName} {customer.surname}</strong></div>
-            <div className="ticket-detail-item"><span>Ticket Breakdown</span><strong>{ticketCount} Ticket{ticketCount === 1 ? '' : 's'}</strong></div>
-            <div className="ticket-detail-item"><span>Total</span><strong>{totalAmount}</strong></div>
-          </div>
-          <div className="ticket-perforation"><div className="ticket-perforation-line" /></div>
-          <div className="ticket-barcode-area"><TicketQRCode bookingRef={bookingRef} /></div>
-        </div>
-      </div>
+      <TicketPass
+        className="ticket-pass"
+        movieTitle={movieTitle}
+        date={bookingDetails.date}
+        time={time}
+        screen={screen}
+        seats={selectedSeats}
+        bookingRef={bookingRef}
+        guestName={`${customer.firstName || ''} ${customer.surname || ''}`.trim()}
+        ticketCount={ticketCount}
+        total={totalAmount}
+      />
       <div className="wallet-pass-actions">
         <button
           className="wallet-badge-btn"

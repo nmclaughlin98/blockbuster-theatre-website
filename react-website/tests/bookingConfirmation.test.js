@@ -22,7 +22,7 @@ test('confirms the backend booking reference and total when confirmation email f
       movie: { title: 'Inception' },
       time: '12:15',
       screen: '5',
-      customer: { email: 'customer@example.com' },
+      customer: { firstName: 'Alex', surname: 'Smith', email: 'customer@example.com' },
       bookingDetails: {
         bookingId: 'bk_990123',
         bookingRef: 'BBT-883214',
@@ -41,6 +41,9 @@ test('confirms the backend booking reference and total when confirmation email f
 
     assert.match(markup, /Your reservation succeeded, but we could not send the confirmation email/);
     assert.match(markup, /Sun 1 Nov 2026 - 12:15/);
+    assert.match(markup, /Booking confirmed/);
+    assert.match(markup, /Guest Name<\/span><strong>Alex Smith/);
+    assert.match(markup, /Ticket Breakdown<\/span><strong>3 Tickets/);
     assert.match(markup, /£24\.00/);
     assert.match(markup, /REF: BBT-883214/);
     const expectedCode = renderToStaticMarkup(createElement(QRCodeSVG, {

@@ -101,9 +101,13 @@ test('opens the selected booking ticket and closes with Escape, backdrop or clos
   ticketButtons[0].focus();
   await act(async () => ticketButtons[0].click());
   let modal = document.body.querySelector('[role="dialog"]');
+  assert.equal(modal.getAttribute('aria-label'), 'Your ticket');
+  assert.match(modal.textContent, /BLOCKBUSTERTHEATREBooking confirmed/);
   assert.match(modal.textContent, /Film first/);
+  assert.match(modal.textContent, /Screen 2/);
   assert.match(modal.textContent, /A1, A2/);
   assert.match(modal.textContent, /BBT-111111/);
+  assert.doesNotMatch(modal.textContent, /Guest Name|Ticket Breakdown|Total/);
   const svgContainer = document.createElement('div');
   svgContainer.innerHTML = renderToStaticMarkup(createElement(QRCodeSVG, {
     value: 'BBT-111111', size: 160, level: 'M', boostLevel: false, marginSize: 4,
@@ -126,6 +130,7 @@ test('opens the selected booking ticket and closes with Escape, backdrop or clos
   await act(async () => ticketButtons[1].click());
   modal = document.body.querySelector('[role="dialog"]');
   assert.match(modal.textContent, /Film second/);
+  assert.match(modal.textContent, /Screen 5/);
   assert.match(modal.textContent, /F10, F11/);
   assert.match(modal.textContent, /BBT-222222/);
   assert.match(modal.textContent, /19:30/);

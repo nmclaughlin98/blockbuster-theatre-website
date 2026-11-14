@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { TicketQRCode } from '../TicketQRCode/TicketQRCode';
+import { TicketPass } from '../TicketPass/TicketPass';
 import styles from './TicketModal.module.css';
 
 export function TicketModal({ booking, onClose }) {
@@ -30,10 +30,6 @@ export function TicketModal({ booking, onClose }) {
     };
   }, [onClose]);
 
-  const date = new Intl.DateTimeFormat('en-GB', {
-    weekday: 'short', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC',
-  }).format(new Date(`${booking.date}T00:00:00Z`));
-
   return createPortal(
     <div
       className={styles.backdrop}
@@ -41,26 +37,20 @@ export function TicketModal({ booking, onClose }) {
         if (event.target === event.currentTarget) onClose();
       }}
     >
-      <section className={styles.dialog} role="dialog" aria-modal="true" aria-labelledby="ticket-modal-title">
-        <div className={styles.heading}>
-          <div>
-            <p className={styles.eyebrow}>Blockbuster Theatre</p>
-            <h2 id="ticket-modal-title">Your ticket</h2>
-          </div>
-          <button ref={closeButtonRef} className={styles.close} type="button" onClick={onClose} aria-label="Close ticket">
-            &times;
-          </button>
-        </div>
-        <h3 className={styles.movieTitle}>{booking.movieTitle}</h3>
-        <dl className={styles.details}>
-          <div><dt>Showtime</dt><dd>{date} at {booking.time}</dd></div>
-          <div><dt>Screen</dt><dd>{booking.screen}</dd></div>
-          <div><dt>Seats</dt><dd>{booking.seats.join(', ')}</dd></div>
-          <div><dt>Booking reference</dt><dd>{booking.bookingRef}</dd></div>
-        </dl>
-        <div className={styles.qrArea}>
-          <TicketQRCode bookingRef={booking.bookingRef} />
-        </div>
+      <section className={styles.dialog} role="dialog" aria-modal="true" aria-label="Your ticket">
+        <TicketPass
+          movieTitle={booking.movieTitle}
+          date={booking.date}
+          time={booking.time}
+          screen={booking.screen}
+          seats={booking.seats}
+          bookingRef={booking.bookingRef}
+          headerAction={(
+            <button ref={closeButtonRef} className={styles.close} type="button" onClick={onClose} aria-label="Close ticket">
+              &times;
+            </button>
+          )}
+        />
       </section>
     </div>,
     document.body,
