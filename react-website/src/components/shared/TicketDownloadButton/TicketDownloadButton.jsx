@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import { Button } from '../Button/Button';
+import { DownloadIcon } from '../Button/icons';
 import { getCognitoAccessToken } from '../../../auth/cognitoAuth';
 import { MOVIES_API_URL } from '../../../config';
 
@@ -59,9 +61,16 @@ export function TicketDownloadButton({
 
   return (
     <>
-      <button className={className} type="button" disabled={downloading || !booking.bookingRef || !booking.bookingId} onClick={handleDownload}>
+      <Button
+        variant="secondary"
+        shape="pill"
+        leftIcon={<DownloadIcon />}
+        disabled={downloading || !booking.bookingRef || !booking.bookingId}
+        onClick={handleDownload}
+        className={className}
+      >
         {downloading ? 'Downloading...' : 'Download ticket'}
-      </button>
+      </Button>
       {error && <p className={errorClassName} role="alert">{error}</p>}
     </>
   );

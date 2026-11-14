@@ -1,6 +1,7 @@
 export { asset } from './asset/asset';
 export { BackToTop } from './BackToTop/BackToTop';
 export { BookingShortcut } from './BookingShortcut/BookingShortcut';
+export { Button, ButtonLink } from './Button';
 export { CenteredHeadingBlock } from './CenteredHeadingBlock/CenteredHeadingBlock';
 export { DatePicker } from './DatePicker/DatePicker';
 export { DirectionalButton } from './DirectionalButton/DirectionalButton';

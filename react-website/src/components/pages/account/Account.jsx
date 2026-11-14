@@ -4,7 +4,8 @@ import {
   cognitoAuth,
   getCognitoFullName,
 } from '../../../auth/cognitoAuth';
-import { Layout, TicketDownloadButton, TicketModal } from '../../shared';
+import { Button, Layout, TicketDownloadButton, TicketModal } from '../../shared';
+import { EyeIcon, DownloadIcon } from '../../shared/Button/icons';
 import { getPosterUrl } from '../../../utils/posterImages';
 import { getAccountBookings, getMovieDetail } from '../shared/bookingApi';
 import styles from './Account.module.css';
@@ -69,7 +70,7 @@ function Profile({ profile }) {
       </div>
       <div className={styles.profileActions}>
         <p>Profile editing is not available yet.</p>
-        <button className={styles.placeholderButton} type="button" disabled>Save changes</button>
+        <Button variant="secondary" shape="pill" disabled>Save changes</Button>
       </div>
     </div>
   );
@@ -80,7 +81,7 @@ function SecuritySettings() {
     <section className={styles.securityCard} aria-labelledby="security-heading">
       <h2 id="security-heading">Account &amp; Security</h2>
       <div className={styles.securityContent}>
-        <button className={styles.placeholderButton} type="button" disabled>Change password</button>
+        <Button variant="secondary" shape="pill" disabled>Change password</Button>
         <div className={styles.alertSettings}>
           {['Email alerts', 'SMS alerts'].map((label) => (
             <label className={styles.alertSetting} key={label}>
@@ -285,9 +286,14 @@ export function Account({
             <div className={styles.titleRow}>
               <h1 id="account-heading">My Account</h1>
               {signedIn && (
-                <button className={styles.logout} type="button" disabled={signingOut} onClick={handleSignOut}>
+                <Button
+                  variant="secondary"
+                  shape="pill"
+                  disabled={signingOut}
+                  onClick={handleSignOut}
+                >
                   {signingOut ? 'Logging out...' : 'Log out'}
-                </button>
+                </Button>
               )}
             </div>
           </div>
@@ -336,16 +342,22 @@ export function Account({
                               </div>
                             </div>
                             <div className={styles.bookingActions}>
-                              <button
-                                className={`${styles.ticketButton} ${view === 'upcoming' ? styles.ticketButtonPrimary : ''}`}
-                                type="button"
+                              <Button
+                                variant={view === 'upcoming' ? 'primary' : 'secondary'}
+                                shape="pill"
                                 disabled={view === 'upcoming' && !booking.bookingRef}
+                                leftIcon={<EyeIcon />}
                                 onClick={() => setSelectedBooking(booking)}
+                                className={styles.ticketActionButton}
                               >
                                 {view === 'upcoming' ? 'View ticket' : 'View details'}
-                              </button>
+                              </Button>
                               {view === 'upcoming' && (
-                                <TicketDownloadButton booking={booking} className={styles.ticketButton} errorClassName={styles.downloadError} />
+                                <TicketDownloadButton
+                                  booking={booking}
+                                  className={styles.ticketActionButton}
+                                  errorClassName={styles.downloadError}
+                                />
                               )}
                             </div>
                             {view === 'upcoming' && !booking.bookingRef && <p className={styles.note}>No booking reference is available for this ticket.</p>}

@@ -1,6 +1,7 @@
 import { useLayoutEffect, useRef, useState } from 'react';
 import { MovieGrid } from '../../movies';
-import { DirectionalButton, SectionHeader } from '../../shared';
+import { ButtonLink, SectionHeader } from '../../shared';
+import { ChevronRightIcon } from '../../shared/Button/icons';
 
 export function MovieSection({
   title,
@@ -37,9 +38,9 @@ export function MovieSection({
   return (
     <section className="movie-poster">
       <SectionHeader title={title} className="movie-section-header">
-        <DirectionalButton className="btn-glass button" href={viewAllHref} direction="next" variant="glass">
+        <ButtonLink href={viewAllHref} variant="glass" shape="rounded" rightIcon={<ChevronRightIcon />}>
           {viewAllLabel}
-        </DirectionalButton>
+        </ButtonLink>
       </SectionHeader>
       <MovieGrid movies={movies.slice(0, visibleCount)} containerRef={gridRef} />
     </section>
