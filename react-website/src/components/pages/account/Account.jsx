@@ -9,7 +9,7 @@ import { getPosterUrl } from '../../../utils/posterImages';
 import { getAccountBookings, getMovieDetail } from '../shared/bookingApi';
 import styles from './Account.module.css';
 
-function theatreNow() {
+function theatreCutoff(now) {
   const parts = new Intl.DateTimeFormat('en-GB', {
     timeZone: 'Europe/London',
     year: 'numeric',
@@ -18,7 +18,7 @@ function theatreNow() {
     hour: '2-digit',
     minute: '2-digit',
     hourCycle: 'h23',
-  }).formatToParts(new Date());
+  }).formatToParts(new Date(now - 30 * 60 * 1000));
   const values = Object.fromEntries(parts.map(({ type, value }) => [type, value]));
   return `${values.year}-${values.month}-${values.day} ${values.hour}:${values.minute}`;
 }
@@ -162,7 +162,27 @@ export function Account({
   const [signingOut, setSigningOut] = useState(false);
   const [signOutError, setSignOutError] = useState('');
   const [posters, setPosters] = useState({});
+  const [now, setNow] = useState(() => Date.now());
   const closeTicket = useCallback(() => setSelectedBooking(null), []);
+
+  useEffect(() => {
+    let timer;
+    function updateClock() {
+      const currentTime = Date.now();
+      setNow(currentTime);
+      window.clearTimeout(timer);
+      timer = window.setTimeout(updateClock, 60_000 - (currentTime % 60_000));
+    }
+
+    timer = window.setTimeout(updateClock, 60_000 - (Date.now() % 60_000));
+    document.addEventListener('visibilitychange', updateClock);
+    window.addEventListener('focus', updateClock);
+    return () => {
+      window.clearTimeout(timer);
+      document.removeEventListener('visibilitychange', updateClock);
+      window.removeEventListener('focus', updateClock);
+    };
+  }, []);
 
   useEffect(() => {
     document.title = 'Blockbuster Theatre - My Account';
@@ -248,11 +268,10 @@ export function Account({
   }
 
   const signedIn = ['ready', 'bookings-loading', 'bookings-error'].includes(account.status);
-  const now = theatreNow();
+  const cutoff = theatreCutoff(now);
+  const isUpcoming = (booking) => `${booking.date} ${booking.time}` > cutoff;
   const bookings = (account.bookings ?? [])
-    .filter((booking) => view === 'upcoming'
-      ? `${booking.date} ${booking.time}` >= now
-      : `${booking.date} ${booking.time}` < now)
+    .filter((booking) => view === 'upcoming' ? isUpcoming(booking) : !isUpcoming(booking))
     .sort((a, b) => {
       const order = `${a.date} ${a.time}`.localeCompare(`${b.date} ${b.time}`);
       return view === 'upcoming' ? order : -order;
@@ -271,7 +290,6 @@ export function Account({
                 </button>
               )}
             </div>
-            {signedIn && <p className={styles.welcome}>Welcome{account.profile.name ? `, ${account.profile.name}` : ''}.</p>}
           </div>
         </div>
         {signOutError && <p role="alert" className={styles.error}>{signOutError}</p>}
@@ -284,57 +302,61 @@ export function Account({
               <Profile profile={account.profile} />
               <SecuritySettings />
             </div>
-            <div>
+            <div className={styles.bookingsColumn}>
               <section className={styles.bookingsCard} aria-labelledby="bookings-heading">
                 <h2 id="bookings-heading">My bookings</h2>
                 <div className={styles.switcher} aria-label="Booking view">
                   <button type="button" aria-pressed={view === 'upcoming'} onClick={() => setView('upcoming')}>Upcoming</button>
                   <button type="button" aria-pressed={view === 'history'} onClick={() => setView('history')}>History</button>
                 </div>
-                {account.status === 'bookings-loading' && (
-                  <div role="status" className={styles.loading}>
-                    <span className="loader" aria-hidden="true" />
-                    <span>Loading bookings...</span>
-                  </div>
-                )}
-                {account.status === 'bookings-error' && <p role="alert" className={styles.error}>Could not load your bookings. Please refresh and try again.</p>}
-                {account.status === 'ready' && (
-                  bookings.length ? (
-                    <ul className={styles.bookings}>
-                      {bookings.map((booking) => (
-                        <li className={styles.booking} key={booking.bookingId}>
-                          <div className={styles.bookingDetails}>
-                            <BookingPoster
-                              movieId={booking.movieId}
-                              movieTitle={booking.movieTitle}
-                              posterUrl={posters[booking.movieId]}
-                            />
-                            <div className={styles.bookingText}>
-                              <h3>{booking.movieTitle}</h3>
-                              <p>{formatDate(booking.date)} at {booking.time}</p>
-                              <p>Screen {booking.screen} · Seats {booking.seats.join(', ')}</p>
-                              {booking.bookingRef && <p className={styles.reference}>Ref: {booking.bookingRef}</p>}
+                <div className={styles.bookingContent}>
+                  {account.status === 'bookings-loading' && (
+                    <div role="status" className={styles.loading}>
+                      <span className="loader" aria-hidden="true" />
+                      <span>Loading bookings...</span>
+                    </div>
+                  )}
+                  {account.status === 'bookings-error' && <p role="alert" className={styles.error}>Could not load your bookings. Please refresh and try again.</p>}
+                  {account.status === 'ready' && (
+                    bookings.length ? (
+                      <ul className={styles.bookings}>
+                        {bookings.map((booking) => (
+                          <li className={styles.booking} key={booking.bookingId}>
+                            <div className={styles.bookingDetails}>
+                              <BookingPoster
+                                movieId={booking.movieId}
+                                movieTitle={booking.movieTitle}
+                                posterUrl={posters[booking.movieId]}
+                              />
+                              <div className={styles.bookingText}>
+                                <h3>{booking.movieTitle}</h3>
+                                <p>{formatDate(booking.date)} at {booking.time}</p>
+                                <p>Screen {booking.screen} · Seats {booking.seats.join(', ')}</p>
+                                {booking.bookingRef && <p className={styles.reference}>Ref: {booking.bookingRef}</p>}
+                              </div>
                             </div>
-                          </div>
-                          <button
-                            className={styles.ticketButton}
-                            type="button"
-                            disabled={!booking.bookingRef}
-                            onClick={() => setSelectedBooking(booking)}
-                          >
-                            View ticket
-                          </button>
-                          {!booking.bookingRef && <p className={styles.note}>No booking reference is available for this ticket.</p>}
-                        </li>
-                      ))}
-                    </ul>
-                  ) : <p className={styles.empty}>No {view === 'upcoming' ? 'upcoming' : 'historical'} bookings yet.</p>
-                )}
+                            <button
+                              className={styles.ticketButton}
+                              type="button"
+                              disabled={view === 'upcoming' && !booking.bookingRef}
+                              onClick={() => setSelectedBooking(booking)}
+                            >
+                              {view === 'upcoming' ? 'View ticket' : 'View details'}
+                            </button>
+                            {view === 'upcoming' && !booking.bookingRef && <p className={styles.note}>No booking reference is available for this ticket.</p>}
+                          </li>
+                        ))}
+                      </ul>
+                    ) : <p className={styles.empty}>No {view === 'upcoming' ? 'upcoming' : 'historical'} bookings yet.</p>
+                  )}
+                </div>
               </section>
             </div>
           </div>
         )}
-        {signedIn && selectedBooking && <TicketModal booking={selectedBooking} onClose={closeTicket} />}
+        {signedIn && selectedBooking && (
+          <TicketModal booking={selectedBooking} onClose={closeTicket} showQRCode={isUpcoming(selectedBooking)} />
+        )}
       </section>
     </Layout>
   );

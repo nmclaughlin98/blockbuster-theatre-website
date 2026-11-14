@@ -31,7 +31,9 @@
     --glass-card: rgba(20, 23, 34, 0.65);
 
     --font-display: 'Oswald', 'Outfit', sans-serif;
-    --font-heading: 'Oswald', sans-serif;
+    --font-heading: 'Oswald', 'Outfit', sans-serif;
+    /* --font-heading: 'Oswald', sans-serif; */
+    --font-heading-2: 'Oswald', sans-serif;
     --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
 
     --radius-sm: 8px;
@@ -1016,7 +1018,7 @@ footer {
     background: #08090d;
     border-top: 1px solid var(--border-subtle);
     margin-top: auto;
-    padding: 20px clamp(16px, 5vw, 60px);
+    padding: 15px clamp(16px, 5vw, 60px);
     display: flex;
     flex-direction: column;
     align-items: flex-start;

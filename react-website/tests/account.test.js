@@ -301,6 +301,40 @@ test('does not open a ticket for a booking without a reference', async () => {
   await page.unmount();
 });
 
+test('opens historical booking details without a QR code, including bookings without a reference', async () => {
+  const past = { ...makeBooking('past', '2020-01-01', '10:00'), guestName: 'Alex Smith', ticketCount: 2, totalAmount: 24, currency: 'GBP' };
+  const legacy = makeBooking('legacy', '2020-01-02', '10:00');
+  delete legacy.bookingRef;
+  const page = await render(Account, {
+    authClient: { fetchAuthSession: async () => session },
+    loadBookings: async () => [past, legacy],
+  });
+  await act(async () => [...page.container.querySelectorAll('button')].find((button) => button.textContent === 'History').click());
+  const buttons = [...page.container.querySelectorAll('button')].filter((button) => button.textContent === 'View details');
+  assert.equal(buttons.length, 2);
+  assert.ok(buttons.every((button) => !button.disabled));
+  assert.doesNotMatch(page.container.textContent, /No booking reference is available/);
+
+  await act(async () => buttons[1].click());
+  let modal = document.body.querySelector('[role="dialog"]');
+  assert.equal(modal.getAttribute('aria-label'), 'Booking details');
+  assert.match(modal.textContent, /Film past/);
+  assert.match(modal.textContent, /Booking referenceREF-past/);
+  assert.match(modal.textContent, /Guest NameAlex Smith/);
+  assert.match(modal.textContent, /Ticket Breakdown2 Tickets/);
+  assert.match(modal.textContent, /Total£24\.00/);
+  assert.equal(modal.querySelector('svg'), null);
+  await act(async () => document.body.querySelector('[aria-label="Close booking details"]').click());
+
+  await act(async () => buttons[0].click());
+  modal = document.body.querySelector('[role="dialog"]');
+  assert.match(modal.textContent, /Film legacy/);
+  assert.doesNotMatch(modal.textContent, /Booking reference/);
+  assert.equal(modal.querySelector('svg'), null);
+  await act(async () => document.body.querySelector('[aria-label="Close booking details"]').click());
+  await page.unmount();
+});
+
 test('closes an open ticket when the authenticated session changes', async () => {
   let signedIn = true;
   const page = await render(Account, {
@@ -348,7 +382,7 @@ test('shows available phone claims and labels missing profile details', async ()
   await page.unmount();
 });
 
-test('categorizes screenings using the theatre time on the same day', async () => {
+test('moves screenings to history at thirty minutes after theatre showtime', async () => {
   const RealDate = globalThis.Date;
   globalThis.Date = class extends RealDate {
     constructor(...args) {
@@ -360,18 +394,95 @@ test('categorizes screenings using the theatre time on the same day', async () =
     const page = await render(Account, {
       authClient: { fetchAuthSession: async () => session },
       loadBookings: async () => [
-        makeBooking('earlier', '2030-07-01', '11:59'),
+        makeBooking('before-cutoff', '2030-07-01', '11:29'),
+        makeBooking('at-cutoff', '2030-07-01', '11:30'),
+        makeBooking('within-grace', '2030-07-01', '11:31'),
         makeBooking('now', '2030-07-01', '12:00'),
       ],
     });
     assert.match(page.container.textContent, /Film now/);
-    assert.doesNotMatch(page.container.textContent, /Film earlier/);
+    assert.match(page.container.textContent, /Film within-grace/);
+    assert.doesNotMatch(page.container.textContent, /Film before-cutoff|Film at-cutoff/);
     await act(async () => [...page.container.querySelectorAll('button')].find((button) => button.textContent === 'History').click());
-    assert.match(page.container.textContent, /Film earlier/);
-    assert.doesNotMatch(page.container.textContent, /Film now/);
+    assert.match(page.container.textContent, /Film before-cutoff/);
+    assert.match(page.container.textContent, /Film at-cutoff/);
+    assert.doesNotMatch(page.container.textContent, /Film now|Film within-grace/);
     await page.unmount();
   } finally {
     globalThis.Date = RealDate;
+  }
+});
+
+test('handles the grace period across midnight in theatre time', async () => {
+  const RealDate = globalThis.Date;
+  globalThis.Date = class extends RealDate {
+    constructor(...args) {
+      super(...(args.length ? args : ['2030-07-01T23:15:00Z']));
+    }
+    static now() { return new RealDate('2030-07-01T23:15:00Z').getTime(); }
+  };
+  try {
+    const page = await render(Account, {
+      authClient: { fetchAuthSession: async () => session },
+      loadBookings: async () => [
+        makeBooking('expired', '2030-07-01', '23:45'),
+        makeBooking('late', '2030-07-01', '23:46'),
+        makeBooking('today', '2030-07-02', '00:15'),
+      ],
+    });
+    assert.match(page.container.textContent, /Film late/);
+    assert.match(page.container.textContent, /Film today/);
+    assert.doesNotMatch(page.container.textContent, /Film expired/);
+    await act(async () => [...page.container.querySelectorAll('button')].find((button) => button.textContent === 'History').click());
+    assert.match(page.container.textContent, /Film expired/);
+    assert.doesNotMatch(page.container.textContent, /Film late|Film today/);
+    await page.unmount();
+  } finally {
+    globalThis.Date = RealDate;
+  }
+});
+
+test('updates an open ticket and booking list when the grace period ends', async () => {
+  const RealDate = globalThis.Date;
+  const realSetTimeout = window.setTimeout;
+  const realClearTimeout = window.clearTimeout;
+  let scheduled;
+  window.setTimeout = (callback, delay) => {
+    scheduled = { callback, delay };
+    return 1;
+  };
+  window.clearTimeout = () => {};
+  let now = new RealDate('2030-07-01T11:59:00Z').getTime();
+  globalThis.Date = class extends RealDate {
+    constructor(...args) {
+      super(...(args.length ? args : [now]));
+    }
+    static now() { return now; }
+  };
+  try {
+    const page = await render(Account, {
+      authClient: { fetchAuthSession: async () => session },
+      loadBookings: async () => [makeBooking('late', '2030-07-01', '12:30')],
+    });
+    assert.equal(scheduled.delay, 60_000);
+    await act(async () => [...page.container.querySelectorAll('button')].find((button) => button.textContent === 'View ticket').click());
+    assert.ok(document.body.querySelector('[role="dialog"] svg'));
+    now = new RealDate('2030-07-01T12:00:00Z').getTime();
+    await act(async () => scheduled.callback());
+    const modal = document.body.querySelector('[role="dialog"]');
+    assert.equal(modal.getAttribute('aria-label'), 'Booking details');
+    assert.equal(modal.querySelector('svg'), null);
+    assert.match(modal.textContent, /Booking referenceREF-late/);
+    assert.match(page.container.textContent, /No upcoming bookings yet/);
+    await act(async () => document.body.querySelector('[aria-label="Close booking details"]').click());
+    await act(async () => [...page.container.querySelectorAll('button')].find((button) => button.textContent === 'History').click());
+    assert.match(page.container.textContent, /Film late/);
+    assert.ok([...page.container.querySelectorAll('button')].some((button) => button.textContent === 'View details'));
+    await page.unmount();
+  } finally {
+    globalThis.Date = RealDate;
+    window.setTimeout = realSetTimeout;
+    window.clearTimeout = realClearTimeout;
   }
 });
 

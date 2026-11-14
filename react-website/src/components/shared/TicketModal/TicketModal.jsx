@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { TicketPass } from '../TicketPass/TicketPass';
 import styles from './TicketModal.module.css';
 
-export function TicketModal({ booking, onClose }) {
+export function TicketModal({ booking, onClose, showQRCode = true }) {
   const closeButtonRef = useRef(null);
 
   useEffect(() => {
@@ -37,7 +37,7 @@ export function TicketModal({ booking, onClose }) {
         if (event.target === event.currentTarget) onClose();
       }}
     >
-      <section className={styles.dialog} role="dialog" aria-modal="true" aria-label="Your ticket">
+      <section className={styles.dialog} role="dialog" aria-modal="true" aria-label={showQRCode ? 'Your ticket' : 'Booking details'}>
         <TicketPass
           movieTitle={booking.movieTitle}
           date={booking.date}
@@ -51,8 +51,9 @@ export function TicketModal({ booking, onClose }) {
             ? new Intl.NumberFormat('en-GB', { style: 'currency', currency: booking.currency }).format(booking.totalAmount)
             : undefined}
           isShowBookingConfirmedIndicator={false}
+          showQRCode={showQRCode}
           headerAction={(
-            <button ref={closeButtonRef} className={styles.close} type="button" onClick={onClose} aria-label="Close ticket">
+            <button ref={closeButtonRef} className={styles.close} type="button" onClick={onClose} aria-label={showQRCode ? 'Close ticket' : 'Close booking details'}>
               &times;
             </button>
           )}
