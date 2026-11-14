@@ -22,6 +22,7 @@ const vite = await createServer({
   logLevel: 'silent',
 });
 const { Account } = await vite.ssrLoadModule('/src/components/pages/account/Account.jsx');
+const { TicketDownloadButton } = await vite.ssrLoadModule('/src/components/shared/TicketDownloadButton/TicketDownloadButton.jsx');
 const { Header } = await vite.ssrLoadModule('/src/components/shared/Header/Header.jsx');
 const { getAccountBookings } = await vite.ssrLoadModule('/src/components/pages/shared/bookingApi.js');
 const { COGNITO_AUTH_STATE_CHANGE_EVENT } = await vite.ssrLoadModule('/src/auth/cognitoAuth.js');
@@ -297,7 +298,51 @@ test('does not open a ticket for a booking without a reference', async () => {
     loadBookings: async () => [booking],
   });
   assert.equal([...page.container.querySelectorAll('button')].find((button) => button.textContent === 'View ticket').disabled, true);
+  assert.equal([...page.container.querySelectorAll('button')].find((button) => button.textContent === 'Download ticket').disabled, true);
   assert.match(page.container.textContent, /No booking reference is available/);
+  await page.unmount();
+});
+
+test('shows download actions only for upcoming bookings', async () => {
+  const page = await render(Account, {
+    authClient: { fetchAuthSession: async () => session },
+    loadBookings: async () => [
+      makeBooking('future', '2099-01-01', '10:00'),
+      makeBooking('past', '2020-01-01', '10:00'),
+    ],
+  });
+  assert.equal([...page.container.querySelectorAll('button')].filter((button) => button.textContent === 'View ticket').length, 1);
+  assert.equal([...page.container.querySelectorAll('button')].filter((button) => button.textContent === 'Download ticket').length, 1);
+  await act(async () => [...page.container.querySelectorAll('button')].find((button) => button.textContent === 'History').click());
+  assert.ok([...page.container.querySelectorAll('button')].some((button) => button.textContent === 'View details'));
+  assert.ok(![...page.container.querySelectorAll('button')].some((button) => button.textContent === 'Download ticket'));
+  await page.unmount();
+});
+
+test('reusable download button passes its booking and reports failures', async () => {
+  const booking = makeBooking('selected', '2099-01-01', '10:00');
+  let rejectDownload;
+  let attempts = 0;
+  const page = await render(TicketDownloadButton, {
+    booking,
+    download: (selected) => {
+      assert.equal(selected, booking);
+      attempts += 1;
+      if (attempts === 2) return Promise.resolve();
+      return new Promise((_resolve, reject) => { rejectDownload = reject; });
+    },
+  });
+  const button = page.container.querySelector('button');
+  await act(async () => button.click());
+  assert.equal(button.disabled, true);
+  assert.match(button.textContent, /Downloading/);
+  await act(async () => rejectDownload(new Error('PDF generation failed')));
+  assert.match(page.container.querySelector('[role="alert"]').textContent, /Could not download/);
+  assert.equal(button.disabled, false);
+  await act(async () => button.click());
+  assert.equal(attempts, 2);
+  assert.equal(page.container.querySelector('[role="alert"]'), null);
+  assert.equal(button.textContent, 'Download ticket');
   await page.unmount();
 });
 
@@ -451,7 +496,7 @@ test('updates an open ticket and booking list when the grace period ends', async
     scheduled = { callback, delay };
     return 1;
   };
-  window.clearTimeout = () => {};
+  window.clearTimeout = () => { };
   let now = new RealDate('2030-07-01T11:59:00Z').getTime();
   globalThis.Date = class extends RealDate {
     constructor(...args) {

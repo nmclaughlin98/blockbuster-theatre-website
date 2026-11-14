@@ -4,7 +4,7 @@ import {
   cognitoAuth,
   getCognitoFullName,
 } from '../../../auth/cognitoAuth';
-import { Layout, TicketModal } from '../../shared';
+import { Layout, TicketDownloadButton, TicketModal } from '../../shared';
 import { getPosterUrl } from '../../../utils/posterImages';
 import { getAccountBookings, getMovieDetail } from '../shared/bookingApi';
 import styles from './Account.module.css';
@@ -335,14 +335,19 @@ export function Account({
                                 {booking.bookingRef && <p className={styles.reference}>Ref: {booking.bookingRef}</p>}
                               </div>
                             </div>
-                            <button
-                              className={styles.ticketButton}
-                              type="button"
-                              disabled={view === 'upcoming' && !booking.bookingRef}
-                              onClick={() => setSelectedBooking(booking)}
-                            >
-                              {view === 'upcoming' ? 'View ticket' : 'View details'}
-                            </button>
+                            <div className={styles.bookingActions}>
+                              <button
+                                className={`${styles.ticketButton} ${view === 'upcoming' ? styles.ticketButtonPrimary : ''}`}
+                                type="button"
+                                disabled={view === 'upcoming' && !booking.bookingRef}
+                                onClick={() => setSelectedBooking(booking)}
+                              >
+                                {view === 'upcoming' ? 'View ticket' : 'View details'}
+                              </button>
+                              {view === 'upcoming' && (
+                                <TicketDownloadButton booking={booking} className={styles.ticketButton} errorClassName={styles.downloadError} />
+                              )}
+                            </div>
                             {view === 'upcoming' && !booking.bookingRef && <p className={styles.note}>No booking reference is available for this ticket.</p>}
                           </li>
                         ))}

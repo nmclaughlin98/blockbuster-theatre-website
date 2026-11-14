@@ -117,7 +117,7 @@
 
 .identityText strong {
     font-family: var(--font-heading);
-    font-size: 1.2rem;
+    font-size: 2rem;
 }
 
 .identityText span,
@@ -348,9 +348,32 @@
     font-size: 0.85rem;
 }
 
-.ticketButton {
-    width: 100%;
+.bookingActions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
     margin-top: 1rem;
+}
+
+.ticketButton {
+    flex: 1 1 9rem;
+    min-width: min(100%, 9rem);
+    font-family: var(--font-display);
+    text-transform: uppercase;
+    font-weight: 700;
+}
+
+.ticketButtonPrimary:not(:disabled) {
+    background: var(--accent-red);
+    border-color: var(--accent-red);
+    color: #fff;
+}
+
+.downloadError {
+    flex-basis: 100%;
+    margin: 0;
+    color: var(--accent-red);
+    font-size: 0.875rem;
 }
 
 .booking>.note {
