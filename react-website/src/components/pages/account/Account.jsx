@@ -56,11 +56,11 @@ function Profile({ profile }) {
       <div className={styles.profileFields}>
         <label className={styles.field}>
           <span>Full name</span>
-          <input value={profile.name} placeholder="Not available" readOnly />
+          <input value={profile.name} placeholder="Not available" readOnly disabled />
         </label>
         <label className={styles.field}>
           <span>Email address</span>
-          <input type="email" value={profile.email} placeholder="Not available" readOnly />
+          <input type="email" value={profile.email} placeholder="Not available" readOnly disabled />
         </label>
         <label className={styles.field}>
           <span>Phone number</span>
