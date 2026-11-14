@@ -24,8 +24,75 @@ function theatreNow() {
 
 function formatDate(date) {
   return new Intl.DateTimeFormat('en-GB', {
-    day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC',
+    weekday: 'short', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC',
   }).format(new Date(`${date}T00:00:00Z`));
+}
+
+function getProfile(session) {
+  const claims = session.tokens?.idToken?.payload ?? {};
+  const readClaim = (value) => typeof value === 'string' ? value.trim() : '';
+  return {
+    name: getCognitoFullName(session),
+    email: readClaim(claims.email),
+    phone: readClaim(claims.phone_number),
+  };
+}
+
+function Profile({ profile }) {
+  const initials = profile.name.split(/\s+/).filter(Boolean).slice(0, 2)
+    .map((part) => Array.from(part)[0].toLocaleUpperCase()).join('');
+
+  return (
+    <div className={styles.profileCard}>
+      <h2>My Profile</h2>
+      <div className={styles.identity}>
+        <div className={styles.avatar} aria-hidden="true">{initials || '?'}</div>
+        <div className={styles.identityText}>
+          <strong>{profile.name || 'Name unavailable'}</strong>
+          <span>{profile.email || 'Email unavailable'}</span>
+        </div>
+      </div>
+      <div className={styles.profileFields}>
+        <label className={styles.field}>
+          <span>Full name</span>
+          <input value={profile.name} placeholder="Not available" readOnly />
+        </label>
+        <label className={styles.field}>
+          <span>Email address</span>
+          <input type="email" value={profile.email} placeholder="Not available" readOnly />
+        </label>
+        <label className={styles.field}>
+          <span>Phone number</span>
+          <input type="tel" value={profile.phone} placeholder="Not available" readOnly />
+        </label>
+      </div>
+      <div className={styles.profileActions}>
+        <p>Profile editing is not available yet.</p>
+        <button className={styles.placeholderButton} type="button" disabled>Save changes</button>
+      </div>
+    </div>
+  );
+}
+
+function SecuritySettings() {
+  return (
+    <section className={styles.securityCard} aria-labelledby="security-heading">
+      <h2 id="security-heading">Account &amp; Security</h2>
+      <div className={styles.securityContent}>
+        <button className={styles.placeholderButton} type="button" disabled>Change password</button>
+        <div className={styles.alertSettings}>
+          {['Email alerts', 'SMS alerts'].map((label) => (
+            <label className={styles.alertSetting} key={label}>
+              <span>{label}</span>
+              <input type="checkbox" role="switch" disabled aria-describedby="security-unavailable" />
+              <span className={styles.switch} aria-hidden="true" />
+            </label>
+          ))}
+        </div>
+      </div>
+      <p className={styles.note} id="security-unavailable">Password changes and alert preferences are not available yet.</p>
+    </section>
+  );
 }
 
 export function Account({ authClient = cognitoAuth, loadBookings = getAccountBookings } = {}) {
@@ -53,16 +120,16 @@ export function Account({ authClient = cognitoAuth, loadBookings = getAccountBoo
           setAccount({ status: 'signed-out' });
           return;
         }
-        const name = getCognitoFullName(session);
-        setAccount({ status: 'bookings-loading', name });
+        const profile = getProfile(session);
+        setAccount({ status: 'bookings-loading', profile });
         const bookings = await loadBookings(token, controller.signal);
-        if (active && currentRequest === requestId) setAccount({ status: 'ready', name, bookings });
+        if (active && currentRequest === requestId) setAccount({ status: 'ready', profile, bookings });
       } catch (error) {
         if (!active || currentRequest !== requestId || error.name === 'AbortError') return;
         console.error('Unable to load account details.', error);
         setAccount((previous) => ({
           status: previous.status === 'bookings-loading' ? 'bookings-error' : 'error',
-          name: previous.name,
+          profile: previous.profile,
         }));
       }
     }
@@ -108,44 +175,66 @@ export function Account({ authClient = cognitoAuth, loadBookings = getAccountBoo
         <div className={styles.heading}>
           <div>
             <p className={styles.eyebrow}>Blockbuster Theatre</p>
-            <h1 id="account-heading">My Account</h1>
-            {signedIn && <p className={styles.welcome}>Welcome{account.name ? `, ${account.name}` : ''}.</p>}
+            <div className={styles.titleRow}>
+              <h1 id="account-heading">My Account</h1>
+              {signedIn && (
+                <button className={styles.logout} type="button" disabled={signingOut} onClick={handleSignOut}>
+                  {signingOut ? 'Logging out...' : 'Log out'}
+                </button>
+              )}
+            </div>
+            {signedIn && <p className={styles.welcome}>Welcome{account.profile.name ? `, ${account.profile.name}` : ''}.</p>}
           </div>
-          {signedIn && (
-            <button className={styles.logout} type="button" disabled={signingOut} onClick={handleSignOut}>
-              {signingOut ? 'Logging out...' : 'Log out'}
-            </button>
-          )}
         </div>
         {signOutError && <p role="alert" className={styles.error}>{signOutError}</p>}
         {account.status === 'loading' && <p role="status">Checking sign-in status...</p>}
         {account.status === 'signed-out' && <p>Please <a href="/login">log in</a> to view your account.</p>}
         {account.status === 'error' && <p role="alert" className={styles.error}>Could not check your account. Please refresh and try again.</p>}
         {signedIn && (
-          <div className={styles.panel}>
-            <h2>My bookings</h2>
-            <div className={styles.switcher} aria-label="Booking view">
-              <button type="button" aria-pressed={view === 'upcoming'} onClick={() => setView('upcoming')}>Upcoming</button>
-              <button type="button" aria-pressed={view === 'history'} onClick={() => setView('history')}>History</button>
+          <div className={styles.columns}>
+            <div className={styles.profileColumn}>
+              <p className={styles.sectionLabel}>Profile</p>
+              <Profile profile={account.profile} />
+              <SecuritySettings />
             </div>
-            {account.status === 'bookings-loading' && <p role="status">Loading bookings...</p>}
-            {account.status === 'bookings-error' && <p role="alert" className={styles.error}>Could not load your bookings. Please refresh and try again.</p>}
-            {account.status === 'ready' && (
-              bookings.length ? (
-                <ul className={styles.bookings}>
-                  {bookings.map((booking) => (
-                    <li className={styles.booking} key={booking.bookingId}>
-                      <div>
-                        <h3>{booking.movieTitle}</h3>
-                        <p>{formatDate(booking.date)} at {booking.time} · Screen {booking.screen}</p>
-                        <p>Seats: {booking.seats.join(', ')}</p>
-                      </div>
-                      {booking.bookingRef && <p className={styles.reference}>Booking ref: {booking.bookingRef}</p>}
-                    </li>
-                  ))}
-                </ul>
-              ) : <p className={styles.empty}>No {view === 'upcoming' ? 'upcoming' : 'historical'} bookings yet.</p>
-            )}
+            <div>
+              <p className={styles.sectionLabel}>Bookings</p>
+              <section className={styles.bookingsCard} aria-labelledby="bookings-heading">
+                <h2 id="bookings-heading">My bookings</h2>
+                <div className={styles.switcher} aria-label="Booking view">
+                  <button type="button" aria-pressed={view === 'upcoming'} onClick={() => setView('upcoming')}>Upcoming</button>
+                  <button type="button" aria-pressed={view === 'history'} onClick={() => setView('history')}>History</button>
+                </div>
+                {account.status === 'bookings-loading' && <p role="status" className={styles.empty}>Loading bookings...</p>}
+                {account.status === 'bookings-error' && <p role="alert" className={styles.error}>Could not load your bookings. Please refresh and try again.</p>}
+                {account.status === 'ready' && (
+                  bookings.length ? (
+                    <ul className={styles.bookings}>
+                      {bookings.map((booking) => (
+                        <li className={styles.booking} key={booking.bookingId}>
+                          <div className={styles.bookingDetails}>
+                            <div className={styles.posterPlaceholder} role="img" aria-label="Poster unavailable">
+                              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                <rect x="3" y="4" width="18" height="16" rx="2" />
+                                <path d="M7 4v16M17 4v16M3 9h4M3 15h4M17 9h4M17 15h4" />
+                              </svg>
+                            </div>
+                            <div className={styles.bookingText}>
+                              <h3>{booking.movieTitle}</h3>
+                              <p>{formatDate(booking.date)} at {booking.time}</p>
+                              <p>Screen {booking.screen} · Seats {booking.seats.join(', ')}</p>
+                              {booking.bookingRef && <p className={styles.reference}>Ref: {booking.bookingRef}</p>}
+                            </div>
+                          </div>
+                          <button className={styles.ticketButton} type="button" disabled>View ticket</button>
+                          <p className={styles.note}>Ticket view is not available yet.</p>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : <p className={styles.empty}>No {view === 'upcoming' ? 'upcoming' : 'historical'} bookings yet.</p>
+                )}
+              </section>
+            </div>
           </div>
         )}
       </section>

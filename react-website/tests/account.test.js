@@ -28,7 +28,7 @@ after(() => vite.close());
 const session = {
   tokens: {
     accessToken: { toString: () => 'access-token' },
-    idToken: { payload: { given_name: 'Jane', family_name: 'Doe' } },
+    idToken: { payload: { given_name: 'Jane', family_name: 'Doe', email: 'jane@example.com' } },
   },
 };
 const makeBooking = (bookingId, date, time) => ({
@@ -66,6 +66,12 @@ test('shows account bookings, switches to history, and logs out', async () => {
     },
   });
   assert.match(page.container.textContent, /Welcome, Jane Doe/);
+  assert.equal(page.container.querySelector('input[type="email"]').value, 'jane@example.com');
+  assert.equal(page.container.querySelector('input[type="tel"]').placeholder, 'Not available');
+  assert.ok(page.container.querySelector('input[type="email"]').readOnly);
+  assert.ok([...page.container.querySelectorAll('button')].find((button) => button.textContent === 'Save changes').disabled);
+  assert.ok([...page.container.querySelectorAll('button')].find((button) => button.textContent === 'View ticket').disabled);
+  assert.ok([...page.container.querySelectorAll('[role="switch"]')].every((toggle) => toggle.disabled));
   assert.match(page.container.textContent, /Film future/);
   assert.doesNotMatch(page.container.textContent, /Film past/);
   const history = [...page.container.querySelectorAll('button')].find((button) => button.textContent === 'History');
@@ -77,6 +83,7 @@ test('shows account bookings, switches to history, and logs out', async () => {
   await act(async () => { logout.click(); await new Promise((resolve) => setTimeout(resolve, 0)); });
   assert.match(page.container.textContent, /log in to view your account/i);
   assert.doesNotMatch(page.container.textContent, /Film past/);
+  assert.doesNotMatch(page.container.textContent, /jane@example.com/);
   await page.unmount();
 });
 
@@ -86,7 +93,26 @@ test('shows booking failures instead of an empty history', async () => {
     loadBookings: async () => { throw new Error('service failed'); },
   });
   assert.match(page.container.querySelector('[role="alert"]').textContent, /Could not load your bookings/);
+  assert.equal(page.container.querySelector('input[type="email"]').value, 'jane@example.com');
   assert.doesNotMatch(page.container.textContent, /No upcoming bookings/);
+  await page.unmount();
+});
+
+test('shows available phone claims and labels missing profile details', async () => {
+  const page = await render(Account, {
+    authClient: {
+      fetchAuthSession: async () => ({
+        tokens: {
+          accessToken: { toString: () => 'access-token' },
+          idToken: { payload: { phone_number: '+441234567890' } },
+        },
+      }),
+    },
+    loadBookings: async () => [],
+  });
+  assert.equal(page.container.querySelector('input[type="tel"]').value, '+441234567890');
+  assert.match(page.container.textContent, /Name unavailable/);
+  assert.match(page.container.textContent, /Email unavailable/);
   await page.unmount();
 });
 

@@ -10,6 +10,8 @@ The Login page signs in with Cognito using Amplify's SRP flow. The Sign Up page 
 
 Signed-in users can open My Account from the header to see their name, upcoming bookings and booking history, or log out. Booking history requires the backend's authenticated `GET /api/v1/bookings/account/history` endpoint; deploy that backend change before using the page. Only bookings linked to the account, including converted guest bookings, are shown. Newly linked bookings may take a short time to appear.
 
+The account profile displays name, email and phone claims when present in the Cognito ID token. Profile editing, password changes and email/SMS alert preferences are placeholders, not saved settings. The booking-history response does not supply poster artwork or a reusable ticket view, so those are placeholders as well.
+
 ## Wallet passes
 
 Apple and Google Wallet buttons are shown on the demo ticket preview. Pass generation is disabled by default; clicking either button displays a toast. To enable generation, set `VITE_ENABLE_WALLET_PASSES=true` for the build. The existing wallet worker is used by default; set `VITE_WALLET_PASS_API_URL` to override its URL. For GitHub Pages, configure these as repository Actions variables.
