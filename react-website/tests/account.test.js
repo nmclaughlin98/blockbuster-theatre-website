@@ -3,7 +3,9 @@ import { fileURLToPath } from 'node:url';
 import test, { after } from 'node:test';
 import { act, createElement } from 'react';
 import { createRoot } from 'react-dom/client';
+import { renderToStaticMarkup } from 'react-dom/server';
 import { JSDOM } from 'jsdom';
+import { QRCodeSVG } from 'qrcode.react';
 import { createServer } from 'vite';
 
 const dom = new JSDOM('<!doctype html><html><body></body></html>', { url: 'http://localhost/account' });
@@ -70,7 +72,7 @@ test('shows account bookings, switches to history, and logs out', async () => {
   assert.equal(page.container.querySelector('input[type="tel"]').placeholder, 'Not available');
   assert.ok(page.container.querySelector('input[type="email"]').readOnly);
   assert.ok([...page.container.querySelectorAll('button')].find((button) => button.textContent === 'Save changes').disabled);
-  assert.ok([...page.container.querySelectorAll('button')].find((button) => button.textContent === 'View ticket').disabled);
+  assert.equal([...page.container.querySelectorAll('button')].find((button) => button.textContent === 'View ticket').disabled, false);
   assert.ok([...page.container.querySelectorAll('[role="switch"]')].every((toggle) => toggle.disabled));
   assert.match(page.container.textContent, /Film future/);
   assert.doesNotMatch(page.container.textContent, /Film past/);
@@ -84,6 +86,86 @@ test('shows account bookings, switches to history, and logs out', async () => {
   assert.match(page.container.textContent, /log in to view your account/i);
   assert.doesNotMatch(page.container.textContent, /Film past/);
   assert.doesNotMatch(page.container.textContent, /jane@example.com/);
+  await page.unmount();
+});
+
+test('opens the selected booking ticket and closes with Escape, backdrop or close button', async () => {
+  const first = { ...makeBooking('first', '2099-01-01', '10:00'), bookingRef: 'BBT-111111', seats: ['A1', 'A2'] };
+  const second = { ...makeBooking('second', '2099-01-02', '19:30'), bookingRef: 'BBT-222222', screen: '5', seats: ['F10', 'F11'] };
+  const page = await render(Account, {
+    authClient: { fetchAuthSession: async () => session },
+    loadBookings: async () => [first, second],
+  });
+  const ticketButtons = [...page.container.querySelectorAll('button')].filter((button) => button.textContent === 'View ticket');
+
+  ticketButtons[0].focus();
+  await act(async () => ticketButtons[0].click());
+  let modal = document.body.querySelector('[role="dialog"]');
+  assert.match(modal.textContent, /Film first/);
+  assert.match(modal.textContent, /A1, A2/);
+  assert.match(modal.textContent, /BBT-111111/);
+  const svgContainer = document.createElement('div');
+  svgContainer.innerHTML = renderToStaticMarkup(createElement(QRCodeSVG, {
+    value: 'BBT-111111', size: 160, level: 'M', boostLevel: false, marginSize: 4,
+    bgColor: '#ffffff', fgColor: '#0c0d12', role: 'img',
+    'aria-label': 'QR code for booking reference BBT-111111',
+  }));
+  assert.equal(modal.querySelector('svg').outerHTML, svgContainer.querySelector('svg').outerHTML);
+  assert.equal(document.activeElement.getAttribute('aria-label'), 'Close ticket');
+  assert.equal(document.body.classList.contains('noScroll'), true);
+  const tab = new window.KeyboardEvent('keydown', { key: 'Tab', bubbles: true, cancelable: true });
+  await act(async () => document.dispatchEvent(tab));
+  assert.equal(tab.defaultPrevented, true);
+  assert.equal(document.activeElement.getAttribute('aria-label'), 'Close ticket');
+
+  await act(async () => document.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'Escape', bubbles: true })));
+  assert.equal(document.body.querySelector('[role="dialog"]'), null);
+  assert.equal(document.body.classList.contains('noScroll'), false);
+  assert.equal(document.activeElement, ticketButtons[0]);
+
+  await act(async () => ticketButtons[1].click());
+  modal = document.body.querySelector('[role="dialog"]');
+  assert.match(modal.textContent, /Film second/);
+  assert.match(modal.textContent, /F10, F11/);
+  assert.match(modal.textContent, /BBT-222222/);
+  assert.match(modal.textContent, /19:30/);
+  assert.equal(modal.querySelector('svg').getAttribute('aria-label'), 'QR code for booking reference BBT-222222');
+  await act(async () => modal.parentElement.dispatchEvent(new window.MouseEvent('click', { bubbles: true })));
+  assert.equal(document.body.querySelector('[role="dialog"]'), null);
+
+  await act(async () => ticketButtons[1].click());
+  await act(async () => document.body.querySelector('[aria-label="Close ticket"]').click());
+  assert.equal(document.body.querySelector('[role="dialog"]'), null);
+  await page.unmount();
+});
+
+test('does not open a ticket for a booking without a reference', async () => {
+  const booking = makeBooking('legacy', '2099-01-01', '10:00');
+  delete booking.bookingRef;
+  const page = await render(Account, {
+    authClient: { fetchAuthSession: async () => session },
+    loadBookings: async () => [booking],
+  });
+  assert.equal([...page.container.querySelectorAll('button')].find((button) => button.textContent === 'View ticket').disabled, true);
+  assert.match(page.container.textContent, /No booking reference is available/);
+  await page.unmount();
+});
+
+test('closes an open ticket when the authenticated session changes', async () => {
+  let signedIn = true;
+  const page = await render(Account, {
+    authClient: { fetchAuthSession: async () => signedIn ? session : {} },
+    loadBookings: async () => [makeBooking('private', '2099-01-01', '10:00')],
+  });
+  await act(async () => [...page.container.querySelectorAll('button')].find((button) => button.textContent === 'View ticket').click());
+  assert.ok(document.body.querySelector('[role="dialog"]'));
+  signedIn = false;
+  await act(async () => {
+    window.dispatchEvent(new window.Event(COGNITO_AUTH_STATE_CHANGE_EVENT));
+    await Promise.resolve();
+  });
+  assert.equal(document.body.querySelector('[role="dialog"]'), null);
+  assert.equal(document.body.classList.contains('noScroll'), false);
   await page.unmount();
 });
 

@@ -187,17 +187,20 @@
 }
 
 .logout,
-.switcher button {
+.switcher button,
+.ticketButton:not(:disabled) {
     cursor: pointer;
 }
 
 .logout:hover,
-.switcher button:hover {
+.switcher button:hover,
+.ticketButton:not(:disabled):hover {
     border-color: var(--accent-red);
 }
 
 .logout:focus-visible,
 .switcher button:focus-visible,
+.ticketButton:focus-visible,
 .field input:focus-visible {
     outline: 2px solid var(--accent-red);
     outline-offset: 3px;
@@ -209,7 +212,7 @@
 }
 
 .placeholderButton,
-.ticketButton {
+.ticketButton:disabled {
     color: var(--text-secondary);
     cursor: not-allowed;
 }

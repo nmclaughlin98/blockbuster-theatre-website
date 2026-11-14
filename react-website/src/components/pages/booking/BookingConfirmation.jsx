@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { asset, DirectionalButton } from '../../shared';
+import { asset, DirectionalButton, TicketQRCode } from '../../shared';
 import {
   convertGuestAccount,
   getApiErrorMessage,
@@ -198,7 +198,7 @@ export function BookingConfirmation({
             <div className="ticket-detail-item"><span>Total</span><strong>{totalAmount}</strong></div>
           </div>
           <div className="ticket-perforation"><div className="ticket-perforation-line" /></div>
-          <div className="ticket-barcode-area"><div className="ticket-booking-ref">REF: {bookingRef}</div></div>
+          <div className="ticket-barcode-area"><TicketQRCode bookingRef={bookingRef} /></div>
         </div>
       </div>
       <div className="wallet-pass-actions">

@@ -752,13 +752,6 @@
     gap: 10px;
 }
 
-.root :global(.ticket-booking-ref) {
-    font-family: 'Courier New', Courier, monospace;
-    font-size: 0.85rem;
-    color: var(--text-secondary);
-    letter-spacing: 0.1em;
-}
-
 .root :global(.guest-conversion-card) {
     margin: 28px 0;
     padding: clamp(18px, 4vw, 28px);

@@ -10,4 +10,6 @@ export { Layout } from './Layout/Layout';
 export { SectionHeader } from './SectionHeader/SectionHeader';
 export { SkeletonBlock } from './SkeletonBlock/SkeletonBlock';
 export { ShowtimeChip } from './ShowtimeChip/ShowtimeChip';
+export { TicketModal } from './TicketModal/TicketModal';
+export { TicketQRCode } from './TicketQRCode/TicketQRCode';
 export { TrailerModal } from './TrailerModal/TrailerModal';

@@ -1,10 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import {
   COGNITO_AUTH_STATE_CHANGE_EVENT,
   cognitoAuth,
   getCognitoFullName,
 } from '../../../auth/cognitoAuth';
-import { Layout } from '../../shared';
+import { Layout, TicketModal } from '../../shared';
 import { getAccountBookings } from '../shared/bookingApi';
 import styles from './Account.module.css';
 
@@ -98,8 +98,10 @@ function SecuritySettings() {
 export function Account({ authClient = cognitoAuth, loadBookings = getAccountBookings } = {}) {
   const [account, setAccount] = useState({ status: 'loading' });
   const [view, setView] = useState('upcoming');
+  const [selectedBooking, setSelectedBooking] = useState(null);
   const [signingOut, setSigningOut] = useState(false);
   const [signOutError, setSignOutError] = useState('');
+  const closeTicket = useCallback(() => setSelectedBooking(null), []);
 
   useEffect(() => {
     document.title = 'Blockbuster Theatre - My Account';
@@ -111,6 +113,7 @@ export function Account({ authClient = cognitoAuth, loadBookings = getAccountBoo
       const currentRequest = ++requestId;
       controller?.abort();
       controller = new AbortController();
+      setSelectedBooking(null);
       setAccount({ status: 'loading' });
       try {
         const session = await authClient.fetchAuthSession();
@@ -174,7 +177,6 @@ export function Account({ authClient = cognitoAuth, loadBookings = getAccountBoo
       <section className={styles.page} aria-labelledby="account-heading">
         <div className={styles.heading}>
           <div>
-            <p className={styles.eyebrow}>Blockbuster Theatre</p>
             <div className={styles.titleRow}>
               <h1 id="account-heading">My Account</h1>
               {signedIn && (
@@ -193,12 +195,10 @@ export function Account({ authClient = cognitoAuth, loadBookings = getAccountBoo
         {signedIn && (
           <div className={styles.columns}>
             <div className={styles.profileColumn}>
-              <p className={styles.sectionLabel}>Profile</p>
               <Profile profile={account.profile} />
               <SecuritySettings />
             </div>
             <div>
-              <p className={styles.sectionLabel}>Bookings</p>
               <section className={styles.bookingsCard} aria-labelledby="bookings-heading">
                 <h2 id="bookings-heading">My bookings</h2>
                 <div className={styles.switcher} aria-label="Booking view">
@@ -226,8 +226,15 @@ export function Account({ authClient = cognitoAuth, loadBookings = getAccountBoo
                               {booking.bookingRef && <p className={styles.reference}>Ref: {booking.bookingRef}</p>}
                             </div>
                           </div>
-                          <button className={styles.ticketButton} type="button" disabled>View ticket</button>
-                          <p className={styles.note}>Ticket view is not available yet.</p>
+                          <button
+                            className={styles.ticketButton}
+                            type="button"
+                            disabled={!booking.bookingRef}
+                            onClick={() => setSelectedBooking(booking)}
+                          >
+                            View ticket
+                          </button>
+                          {!booking.bookingRef && <p className={styles.note}>No booking reference is available for this ticket.</p>}
                         </li>
                       ))}
                     </ul>
@@ -237,6 +244,7 @@ export function Account({ authClient = cognitoAuth, loadBookings = getAccountBoo
             </div>
           </div>
         )}
+        {signedIn && selectedBooking && <TicketModal booking={selectedBooking} onClose={closeTicket} />}
       </section>
     </Layout>
   );
