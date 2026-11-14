@@ -137,6 +137,76 @@
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
+    .pdfLayout {
+        max-width: 270px;
+        background: #181b29;
+        border: none;
+        border-radius: 0;
+        box-shadow: none;
+        overflow: hidden;
+    }
+
+    .pdfLayout .header {
+        padding: 12px 12px;
+        gap: 0.5rem;
+    }
+
+    .pdfLayout .brand {
+        font-size: 0.9rem;
+        letter-spacing: 0.1em;
+        line-height: 1;
+    }
+
+    .pdfLayout .body {
+        padding: 12px;
+    }
+
+    .pdfLayout .movieTitle {
+        margin-bottom: 10px;
+        font-size: 1.1rem;
+    }
+
+    .pdfLayout .details {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+        margin: 12px 0 10px;
+    }
+
+    .pdfLayout .detail span {
+        font-size: 0.65rem;
+    }
+
+    .pdfLayout .detail strong {
+        font-size: 0.85rem;
+    }
+
+    .pdfLayout .perforation {
+        height: 16px;
+        margin: 0 -12px;
+    }
+
+    .pdfLayout .perforation::before,
+    .pdfLayout .perforation::after {
+        width: 16px;
+        height: 16px;
+    }
+
+    .pdfLayout .perforation::before {
+        left: -8px;
+    }
+
+    .pdfLayout .perforation::after {
+        right: -8px;
+    }
+
+    .pdfLayout .perforationLine {
+        border-top: 1.5px dashed rgba(255, 255, 255, 0.15);
+    }
+
+    .pdfLayout .barcode {
+        padding-top: 10px;
+    }
+
     .brand {
         font-size: 1rem;
     }
