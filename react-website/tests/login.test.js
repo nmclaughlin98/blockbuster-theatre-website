@@ -113,7 +113,7 @@ test('links to the signup page', async () => {
   await page.unmount();
 });
 
-test('signs in with SRP, waits for the session, and navigates after success', async () => {
+test('signs in with SRP and navigates immediately after the session is confirmed', async () => {
   let resolveSignIn;
   const signInPromise = new Promise((resolve) => {
     resolveSignIn = resolve;
@@ -152,15 +152,9 @@ test('signs in with SRP, waits for the session, and navigates after success', as
     resolveSignIn({ isSignedIn: true });
     await new Promise((resolve) => setTimeout(resolve, 0));
   });
-  assert.equal(submitButton.disabled, true);
-  assert.match(page.container.textContent, /Login successful\./);
-  const successToast = page.container.querySelector('[data-type="success"]');
-  assert.ok(successToast);
-  assert.equal(successToast.querySelector('svg path').getAttribute('d'), 'm5 12.5 4.5 4.5L19 7.5');
-  assert.equal(page.container.querySelector('h1').textContent.trim(), 'Welcome back');
-  assert.equal(authenticated, false);
-  await act(async () => new Promise((resolve) => window.setTimeout(resolve, 1250)));
   assert.equal(authenticated, true);
+  assert.doesNotMatch(page.container.textContent, /Welcome back|Signed in as|Log out/);
+  assert.equal(page.container.querySelector('form'), null);
   await page.unmount();
 });
 
@@ -183,6 +177,22 @@ test('shows a safe invalid-credentials message for Cognito sign-in errors', asyn
   assert.ok(page.container.querySelector('[data-type="warning"]'));
   assert.doesNotMatch(page.container.textContent, /Do not expose provider details/);
   assert.equal(page.container.querySelector('button[type="submit"]').disabled, false);
+  await page.unmount();
+});
+
+test('does not redirect if sign-in does not produce an access token', async () => {
+  let redirected = false;
+  const page = await renderLogin({
+    signIn: async () => ({ isSignedIn: true }),
+    fetchAuthSession: async () => ({}),
+  }, () => { redirected = true; });
+  page.container.querySelector('[name="email"]').value = 'guest@example.com';
+  page.container.querySelector('[name="password"]').value = 'secret-password';
+
+  await page.submit();
+  assert.equal(redirected, false);
+  assert.match(page.container.textContent, /Login error/);
+  assert.ok(page.container.querySelector('form'));
   await page.unmount();
 });
 
@@ -221,8 +231,6 @@ test('completes an MFA code challenge with Cognito', async () => {
   await page.submit();
 
   assert.equal(confirmedCode, '123456');
-  assert.match(page.container.textContent, /Login successful\./);
-  await act(async () => new Promise((resolve) => window.setTimeout(resolve, 1250)));
   assert.equal(authenticated, true);
   await page.unmount();
 });
@@ -305,48 +313,28 @@ test('accepts Cognito required-new-password challenges', async () => {
   await page.unmount();
 });
 
-test('shows a logout button for an existing Cognito session', async () => {
-  let hasSession = true;
-  let signOutCalled = false;
+test('immediately redirects an existing Cognito session without showing account details', async () => {
+  let redirects = 0;
   const authClient = {
     signIn: async () => assert.fail('Sign-in should not be available while logged in'),
     confirmSignIn: async () => assert.fail('No challenge should be confirmed'),
     fetchAuthSession: async () => ({
-      tokens: hasSession ? {
+      tokens: {
         accessToken: { toString: () => 'access-token' },
         idToken: {
           payload: {
             given_name: 'Jane',
             family_name: 'Doe',
-            auth_time: Math.floor(Date.now() / 1000),
           },
         },
-      } : undefined,
+      },
     }),
-    signOut: async () => {
-      signOutCalled = true;
-      hasSession = false;
-    },
   };
-  const page = await renderLogin(authClient);
+  const page = await renderLogin(authClient, () => { redirects += 1; });
 
-  assert.match(page.container.textContent, /Already logged in\./);
-  assert.match(page.container.textContent, /Signed in as Jane Doe\./);
-  assert.equal(page.container.querySelector('h1').textContent.trim(), 'Welcome back');
-  assert.match(page.container.textContent, /Refresh session expires in (29|30) days/);
-  assert.match(page.container.textContent, /Access and ID tokens refresh automatically every 60 minutes/);
+  assert.equal(redirects, 1);
+  assert.doesNotMatch(page.container.textContent, /Welcome back|Signed in as|Log out|Refresh session/);
   assert.equal(page.container.querySelector('form'), null);
-  const logoutButton = page.container.querySelector('button[type="button"]');
-  assert.equal(logoutButton.textContent.trim(), 'Log out');
-  await act(async () => {
-    logoutButton.dispatchEvent(new window.MouseEvent('click', { bubbles: true }));
-    await Promise.resolve();
-  });
-
-  assert.equal(signOutCalled, true);
-  assert.match(page.container.textContent, /Logged out successfully\./);
-  assert.doesNotMatch(page.container.textContent, /Signed in as Jane Doe/);
-  assert.ok(page.container.querySelector('form'));
   await page.unmount();
 });
 

@@ -72,7 +72,7 @@ function Navigation({ current, open, onNavigate, isAuthenticated, displayName })
                                 <path d="M5 20c0-3.9 3.1-7 7-7s7 3.1 7 7" />
                             </svg>
                         )}
-                        <span>{isAuthenticated ? displayName || 'Account' : 'Sign Up / Login'}</span>
+                        <span>{isAuthenticated ? 'Account' : 'Sign Up / Login'}</span>
                     </a>
                 </li>
             </ul>

@@ -5,12 +5,8 @@ import { useToast } from '../../shared/Toast/useToast';
 import {
   COGNITO_AUTH_STATE_CHANGE_EVENT,
   cognitoAuth,
-  getCognitoFirstName,
-  getCognitoFullName,
 } from '../../../auth/cognitoAuth';
 import styles from './Login.module.css';
-
-const REFRESH_SESSION_DURATION_MS = 1 * 24 * 60 * 60 * 1000;
 
 const codeChallenges = {
   CONFIRM_SIGN_IN_WITH_SMS_CODE: 'Enter the verification code sent to your phone.',
@@ -84,37 +80,8 @@ function getSignInErrorMessage(error) {
   return 'Login error. Please try again later.';
 }
 
-function navigateToHome() {
-  window.location.assign('/');
-}
-
-function getSessionExpiry(session) {
-  const authTime = Number(session.tokens?.idToken?.payload?.auth_time);
-  return Number.isFinite(authTime) && authTime > 0
-    ? authTime * 1000 + REFRESH_SESSION_DURATION_MS
-    : null;
-}
-
-function getSessionDurationMessage(expiresAt, now) {
-  if (!expiresAt) {
-    return 'Your refresh session lasts up to 1 day from sign-in. Access and ID tokens refresh automatically.';
-  }
-
-  const totalMinutes = Math.ceil((expiresAt - now) / 60000);
-  if (totalMinutes <= 0) {
-    return 'Your refresh session has expired. Please log in again.';
-  }
-
-  const days = Math.floor(totalMinutes / (24 * 60));
-  const hours = Math.floor((totalMinutes % (24 * 60)) / 60);
-  const minutes = totalMinutes % 60;
-  const duration = [
-    days && `${days} day${days === 1 ? '' : 's'}`,
-    hours && `${hours} hour${hours === 1 ? '' : 's'}`,
-    !days && !hours && `${minutes} minute${minutes === 1 ? '' : 's'}`,
-  ].filter(Boolean).join(', ');
-
-  return `Refresh session expires in ${duration}. Access and ID tokens refresh automatically every 60 minutes.`;
+function navigateToAccount() {
+  window.location.assign('/account');
 }
 
 function EmailInput({ disabled }) {
@@ -167,7 +134,7 @@ function PasswordInput({ disabled }) {
 
 export function Login({
   authClient = cognitoAuth,
-  onAuthenticated = navigateToHome,
+  onAuthenticated = navigateToAccount,
 } = {}) {
   const { toast, setToastMessage } = useToast();
   const [statusMessage, setStatusMessage] = useState('Sign in with your existing account.');
@@ -175,10 +142,6 @@ export function Login({
   const [isLoading, setIsLoading] = useState(false);
   const [isRedirecting, setIsRedirecting] = useState(false);
   const [isSessionChecking, setIsSessionChecking] = useState(true);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [displayName, setDisplayName] = useState('');
-  const [sessionExpiresAt, setSessionExpiresAt] = useState(null);
-  const [currentTime, setCurrentTime] = useState(0);
   const isBusy = isLoading || isRedirecting;
 
   useEffect(() => {
@@ -192,11 +155,7 @@ export function Login({
       try {
         const session = await authClient.fetchAuthSession();
         if (active && session.tokens?.accessToken) {
-          setSessionExpiresAt(getSessionExpiry(session));
-          setCurrentTime(Date.now());
-          setDisplayName(getCognitoFullName(session));
-          setIsAuthenticated(true);
-          setStatusMessage('You are already logged in.');
+          setIsRedirecting(true);
         }
       } catch (error) {
         if (active) setToastMessage(getSignInErrorMessage(error), 'warning');
@@ -212,18 +171,8 @@ export function Login({
   }, [authClient, setToastMessage]);
 
   useEffect(() => {
-    if (!isRedirecting) return undefined;
-
-    const timeout = window.setTimeout(onAuthenticated, 1200);
-    return () => window.clearTimeout(timeout);
+    if (isRedirecting) onAuthenticated();
   }, [isRedirecting, onAuthenticated]);
-
-  useEffect(() => {
-    if (!isAuthenticated || !sessionExpiresAt) return undefined;
-
-    const interval = window.setInterval(() => setCurrentTime(Date.now()), 60_000);
-    return () => window.clearInterval(interval);
-  }, [isAuthenticated, sessionExpiresAt]);
 
   async function handleSubmit(event) {
     event.preventDefault();
@@ -252,17 +201,7 @@ export function Login({
         if (!session.tokens?.accessToken) {
           throw new Error('Cognito returned a session without an access token.');
         }
-        const name = getCognitoFirstName(session);
-        const now = Date.now();
-        setDisplayName(name);
-        setSessionExpiresAt(getSessionExpiry(session));
-        setCurrentTime(now);
-        setIsAuthenticated(true);
         window.dispatchEvent(new window.Event(COGNITO_AUTH_STATE_CHANGE_EVENT));
-        setToastMessage('Login successful.', 'success');
-        setStatusMessage(name
-          ? `Welcome back, ${name}. Redirecting to the home page...`
-          : 'Login successful. Redirecting to the home page...');
         setIsRedirecting(true);
         return;
       }
@@ -286,52 +225,16 @@ export function Login({
     }
   }
 
-  async function handleSignOut() {
-    if (isLoading || isRedirecting) return;
-
-    setIsLoading(true);
-    setToastMessage('');
-    try {
-      await authClient.signOut();
-      window.dispatchEvent(new window.Event(COGNITO_AUTH_STATE_CHANGE_EVENT));
-      setDisplayName('');
-      setSessionExpiresAt(null);
-      setIsAuthenticated(false);
-      setStatusMessage('You are signed out.');
-      setToastMessage('Logged out successfully.', 'success');
-    } catch {
-      setToastMessage('Logout error. Please try again.', 'warning');
-    } finally {
-      setIsLoading(false);
-    }
-  }
-
   return (
     <Layout className={styles.root} current="login">
       <section className={styles.page} aria-labelledby="login-heading">
         <div className={styles.card}>
-          <h1 className={styles.title} id="login-heading">
-            {isAuthenticated ? 'Welcome back' : 'Log In'}
-          </h1>
-          <p className={styles.description}>
-            {isAuthenticated
-              ? displayName ? `Signed in as ${displayName}.` : 'You are already logged in.'
-              : 'Sign in to your Blockbuster Theatre account.'}
-          </p>
-          {isSessionChecking ? (
+          <h1 className={styles.title} id="login-heading">Log In</h1>
+          <p className={styles.description}>Sign in to your Blockbuster Theatre account.</p>
+          {isRedirecting ? (
+            <p className={styles.notice} role="status">Redirecting to your account...</p>
+          ) : isSessionChecking ? (
             <p className={styles.notice} role="status">Checking sign-in status...</p>
-          ) : isAuthenticated ? (
-            <div className={styles.form} aria-busy={isLoading}>
-              <a className={styles.signupLink} href="/account">View account</a>
-              <button
-                className={styles.submit}
-                type="button"
-                onClick={handleSignOut}
-                disabled={isLoading || isRedirecting}
-              >
-                {isLoading ? 'Logging out...' : 'Log out'}
-              </button>
-            </div>
           ) : (
             <form className={styles.form} autoComplete="on" onSubmit={handleSubmit} aria-busy={isBusy}>
               <div className={styles.field}>
@@ -358,8 +261,7 @@ export function Login({
                 </div>
               )}
               <button className={styles.submit} type="submit" disabled={isBusy}>
-                {isLoading ? 'Signing in...' : isRedirecting ? 'Success!'
-                  : challenge?.kind === 'code' ? 'Verify code'
+                {isLoading ? 'Signing in...' : challenge?.kind === 'code' ? 'Verify code'
                     : challenge?.kind === 'new-password' ? 'Set password' : 'Login'}
               </button>
               {!challenge && (
@@ -369,12 +271,7 @@ export function Login({
               )}
             </form>
           )}
-          {!isSessionChecking && <p className={styles.notice} role="status">{statusMessage}</p>}
-          {isAuthenticated && (
-            <p className={styles.notice} aria-live="off">
-              {getSessionDurationMessage(sessionExpiresAt, currentTime)}
-            </p>
-          )}
+          {!isSessionChecking && !isRedirecting && <p className={styles.notice} role="status">{statusMessage}</p>}
         </div>
         <Toast
           message={toast.message}

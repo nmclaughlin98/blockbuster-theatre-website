@@ -56,12 +56,14 @@ async function render(component, props) {
 
 test('shows account bookings, switches to history, and logs out', async () => {
   let signedIn = true;
+  let redirected = false;
   const authClient = {
     fetchAuthSession: async () => signedIn ? session : {},
     signOut: async () => { signedIn = false; },
   };
   const page = await render(Account, {
     authClient,
+    onSignedOut: () => { redirected = true; },
     loadBookings: async (token) => {
       assert.equal(token, 'access-token');
       return [makeBooking('past', '2020-01-01', '10:00'), makeBooking('future', '2099-01-01', '10:00')];
@@ -83,6 +85,7 @@ test('shows account bookings, switches to history, and logs out', async () => {
   assert.doesNotMatch(page.container.textContent, /Film future/);
   const logout = [...page.container.querySelectorAll('button')].find((button) => button.textContent === 'Log out');
   await act(async () => { logout.click(); await new Promise((resolve) => setTimeout(resolve, 0)); });
+  assert.equal(redirected, true);
   assert.match(page.container.textContent, /log in to view your account/i);
   assert.doesNotMatch(page.container.textContent, /Film past/);
   assert.doesNotMatch(page.container.textContent, /jane@example.com/);
@@ -251,11 +254,13 @@ test('does not show previous bookings after the session changes', async () => {
 });
 
 test('keeps the account visible when logout fails', async () => {
+  let redirected = false;
   const page = await render(Account, {
     authClient: {
       fetchAuthSession: async () => session,
       signOut: async () => { throw new Error('sign-out failed'); },
     },
+    onSignedOut: () => { redirected = true; },
     loadBookings: async () => [],
   });
   await act(async () => {
@@ -263,6 +268,7 @@ test('keeps the account visible when logout fails', async () => {
     await Promise.resolve();
   });
   assert.match(page.container.querySelector('[role="alert"]').textContent, /Could not log out/);
+  assert.equal(redirected, false);
   assert.match(page.container.textContent, /Welcome, Jane Doe/);
   await page.unmount();
 });

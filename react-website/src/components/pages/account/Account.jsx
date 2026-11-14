@@ -95,7 +95,15 @@ function SecuritySettings() {
   );
 }
 
-export function Account({ authClient = cognitoAuth, loadBookings = getAccountBookings } = {}) {
+function navigateToLogin() {
+  window.location.assign('/login');
+}
+
+export function Account({
+  authClient = cognitoAuth,
+  loadBookings = getAccountBookings,
+  onSignedOut = navigateToLogin,
+} = {}) {
   const [account, setAccount] = useState({ status: 'loading' });
   const [view, setView] = useState('upcoming');
   const [selectedBooking, setSelectedBooking] = useState(null);
@@ -152,13 +160,15 @@ export function Account({ authClient = cognitoAuth, loadBookings = getAccountBoo
     setSignOutError('');
     try {
       await authClient.signOut();
-      window.dispatchEvent(new window.Event(COGNITO_AUTH_STATE_CHANGE_EVENT));
     } catch (error) {
       console.error('Unable to sign out.', error);
       setSignOutError('Could not log out. Please try again.');
+      return;
     } finally {
       setSigningOut(false);
     }
+    window.dispatchEvent(new window.Event(COGNITO_AUTH_STATE_CHANGE_EVENT));
+    onSignedOut();
   }
 
   const signedIn = ['ready', 'bookings-loading', 'bookings-error'].includes(account.status);
