@@ -54,6 +54,20 @@ async function render(component, props) {
   };
 }
 
+function mockPosterImages(t, autoLoad = false) {
+  const originalImage = window.Image;
+  const images = [];
+  window.Image = class {
+    constructor() { images.push(this); }
+    set src(value) {
+      this.url = value;
+      if (autoLoad) queueMicrotask(() => this.onload?.());
+    }
+  };
+  t.after(() => { window.Image = originalImage; });
+  return images;
+}
+
 test('shows account bookings, switches to history, and logs out', async () => {
   let signedIn = true;
   let redirected = false;
@@ -92,7 +106,8 @@ test('shows account bookings, switches to history, and logs out', async () => {
   await page.unmount();
 });
 
-test('loads appropriately sized posters once per movie and falls back when unavailable', async () => {
+test('loads appropriately sized posters once per movie and falls back when unavailable', async (t) => {
+  mockPosterImages(t, true);
   const calls = [];
   const page = await render(Account, {
     authClient: { fetchAuthSession: async () => session },
@@ -125,7 +140,40 @@ test('loads appropriately sized posters once per movie and falls back when unava
   await page.unmount();
 });
 
-test('shows bookings while posters load and discards results after the session changes', async () => {
+test('waits for poster details and image loads before showing bookings', async (t) => {
+  const images = mockPosterImages(t);
+  let resolvePoster;
+  const page = await render(Account, {
+    authClient: { fetchAuthSession: async () => session },
+    loadBookings: async () => [
+      { ...makeBooking('first', '2099-01-01', '10:00'), movieId: '1' },
+      { ...makeBooking('second', '2099-01-02', '10:00'), movieId: '2' },
+    ],
+    loadMovieDetail: (movieId) => movieId === '1'
+      ? new Promise((resolve) => { resolvePoster = resolve; })
+      : Promise.resolve({ poster: 'https://image.tmdb.org/t/p/original/broken.jpg' }),
+  });
+  assert.match(page.container.querySelector('[role="status"]').textContent, /Loading bookings/);
+  assert.ok(page.container.querySelector('[role="status"] .loader'));
+  assert.doesNotMatch(page.container.textContent, /Film first|Film second/);
+  await act(async () => {
+    resolvePoster({ poster: 'https://image.tmdb.org/t/p/original/first.jpg' });
+    await Promise.resolve();
+  });
+  assert.equal(images.length, 2);
+  assert.equal(images[1].url, 'https://image.tmdb.org/t/p/w185/first.jpg');
+  await act(async () => images[1].onload());
+  assert.doesNotMatch(page.container.textContent, /Film first|Film second/);
+  await act(async () => images[0].onerror());
+  assert.match(page.container.textContent, /Film first/);
+  assert.match(page.container.textContent, /Film second/);
+  assert.equal(page.container.querySelector('img[alt="Film first poster"]').getAttribute('src'), images[1].url);
+  assert.ok(page.container.querySelector('[aria-label="Poster unavailable"]'));
+  assert.equal(page.container.querySelector('[role="status"]'), null);
+  await page.unmount();
+});
+
+test('discards poster results after the session changes', async () => {
   let signedIn = true;
   let resolvePoster;
   let posterSignal;
@@ -137,8 +185,8 @@ test('shows bookings while posters load and discards results after the session c
       return new Promise((resolve) => { resolvePoster = resolve; });
     },
   });
-  assert.match(page.container.textContent, /Film private/);
-  assert.ok(page.container.querySelector('[aria-label="Poster unavailable"]'));
+  assert.match(page.container.textContent, /Loading bookings/);
+  assert.doesNotMatch(page.container.textContent, /Film private/);
 
   signedIn = false;
   await act(async () => {
@@ -149,6 +197,28 @@ test('shows bookings while posters load and discards results after the session c
   assert.equal(posterSignal.aborted, true);
   assert.doesNotMatch(page.container.textContent, /Film private/);
   assert.equal(page.container.querySelector('img[alt$=" poster"]'), null);
+  await page.unmount();
+});
+
+test('cancels pending poster image loads when the session changes', async (t) => {
+  const images = mockPosterImages(t);
+  let signedIn = true;
+  const page = await render(Account, {
+    authClient: { fetchAuthSession: async () => signedIn ? session : {} },
+    loadBookings: async () => [{ ...makeBooking('private', '2099-01-01', '10:00'), movieId: '1' }],
+    loadMovieDetail: async () => ({ poster: 'https://image.tmdb.org/t/p/original/poster.jpg' }),
+  });
+  assert.equal(images.length, 1);
+  assert.match(page.container.textContent, /Loading bookings/);
+  signedIn = false;
+  await act(async () => {
+    window.dispatchEvent(new window.Event(COGNITO_AUTH_STATE_CHANGE_EVENT));
+    await Promise.resolve();
+  });
+  assert.equal(images[0].onload, null);
+  assert.equal(images[0].onerror, null);
+  assert.doesNotMatch(page.container.textContent, /Film private/);
+  assert.match(page.container.textContent, /log in to view your account/i);
   await page.unmount();
 });
 

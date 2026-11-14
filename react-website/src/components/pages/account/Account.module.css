@@ -362,6 +362,19 @@
     color: var(--text-secondary);
 }
 
+.loading {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+    color: var(--text-secondary);
+}
+
+.loading :global(.loader) {
+    --size: 0.5px;
+    flex-shrink: 0;
+}
+
 .error {
     margin-top: 1rem;
     color: var(--accent-red);

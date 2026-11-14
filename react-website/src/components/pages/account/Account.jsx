@@ -100,6 +100,29 @@ function navigateToLogin() {
   window.location.assign('/login');
 }
 
+function loadPosterImage(src, signal) {
+  return new Promise((resolve, reject) => {
+    if (signal.aborted) {
+      resolve();
+      return;
+    }
+
+    const image = new window.Image();
+    const finish = (error) => {
+      image.onload = null;
+      image.onerror = null;
+      signal.removeEventListener('abort', abort);
+      if (error) reject(error);
+      else resolve();
+    };
+    const abort = () => finish();
+    image.onload = () => finish();
+    image.onerror = () => finish(new Error('The poster image could not be loaded.'));
+    signal.addEventListener('abort', abort, { once: true });
+    image.src = src;
+  });
+}
+
 function BookingPoster({ movieId, movieTitle, posterUrl }) {
   const [failedSrc, setFailedSrc] = useState(null);
   const src = getPosterUrl(posterUrl, 'w185') || posterUrl;
@@ -112,7 +135,6 @@ function BookingPoster({ movieId, movieTitle, posterUrl }) {
           alt={`${movieTitle} poster`}
           width="56"
           height="80"
-          loading="lazy"
           onError={() => {
             console.warn('Unable to load booking poster image.', { movieId });
             setFailedSrc(src);
@@ -168,23 +190,27 @@ export function Account({
         setAccount({ status: 'bookings-loading', profile });
         const bookings = await loadBookings(token, requestController.signal);
         if (!active || currentRequest !== requestId) return;
-        setAccount({ status: 'ready', profile, bookings });
         const movieIds = [...new Set(bookings.map((booking) => booking.movieId).filter(Boolean))];
-        await Promise.all(movieIds.map(async (movieId) => {
+        const posterEntries = await Promise.all(movieIds.map(async (movieId) => {
           try {
             const movie = await loadMovieDetail(movieId, requestController.signal);
             if (typeof movie.poster !== 'string') {
               throw new Error('The movie service returned an invalid poster URL.');
             }
-            if (movie.poster && active && currentRequest === requestId) {
-              setPosters((previous) => ({ ...previous, [movieId]: movie.poster }));
+            if (movie.poster) {
+              await loadPosterImage(getPosterUrl(movie.poster, 'w185') || movie.poster, requestController.signal);
+              return [movieId, movie.poster];
             }
           } catch (error) {
             if (!requestController.signal.aborted) {
               console.warn('Unable to load booking poster.', { movieId, error });
             }
           }
+          return null;
         }));
+        if (!active || currentRequest !== requestId) return;
+        setPosters(Object.fromEntries(posterEntries.filter(Boolean)));
+        setAccount({ status: 'ready', profile, bookings });
       } catch (error) {
         if (!active || currentRequest !== requestId || error.name === 'AbortError') return;
         console.error('Unable to load account details.', error);
@@ -265,7 +291,12 @@ export function Account({
                   <button type="button" aria-pressed={view === 'upcoming'} onClick={() => setView('upcoming')}>Upcoming</button>
                   <button type="button" aria-pressed={view === 'history'} onClick={() => setView('history')}>History</button>
                 </div>
-                {account.status === 'bookings-loading' && <p role="status" className={styles.empty}>Loading bookings...</p>}
+                {account.status === 'bookings-loading' && (
+                  <div role="status" className={styles.loading}>
+                    <span className="loader" aria-hidden="true" />
+                    <span>Loading bookings...</span>
+                  </div>
+                )}
                 {account.status === 'bookings-error' && <p role="alert" className={styles.error}>Could not load your bookings. Please refresh and try again.</p>}
                 {account.status === 'ready' && (
                   bookings.length ? (
