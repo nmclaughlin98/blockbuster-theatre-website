@@ -107,7 +107,7 @@ function TimetableMovie({ movie, day }) {
             <div className="movie-info">
                 <a
                     className="movie-title"
-                    href={`./movie-detail.html?movie=${encodeURIComponent(movieSlug(movie))}`}
+                    href={`./movie=${encodeURIComponent(movieSlug(movie))}`}
                 >
                     {getMovieTitle(movie)}
                 </a>
@@ -120,7 +120,7 @@ function TimetableMovie({ movie, day }) {
                     <ShowtimeChip
                         className="timetable-showtime-chip"
                         href={createBookingHref(
-                            './bookNow.html',
+                            '/bookNow',
                             movieSlug(movie) || getMovieTitle(movie),
                             slot.date,
                             slot,
@@ -230,7 +230,7 @@ export function Timetable() {
                             ? filteredMovies.map((movie) => <TimetableMovie movie={movie} day={day}
                                 key={movieId(movie)} />)
                             : <p>No movies available for this search and day.</p>}
-            </div>
+                </div>
             </section>
         </Layout>
     );

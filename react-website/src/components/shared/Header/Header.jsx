@@ -8,9 +8,9 @@ import { asset } from '../asset/asset';
 
 const links = [
     ['Home', '/', 'home'],
-    ['Now Showing', './nowShowing.html', 'now'],
-    ['Coming Soon', './comingSoon.html', 'coming'],
-    ['About', './about.html', 'about'],
+    ['Now Showing', './nowShowing', 'now'],
+    ['Coming Soon', './comingSoon', 'coming'],
+    ['About', './about', 'about'],
 ];
 
 // Helper to blur element on tap/click to strip sticky hover states on mobile
@@ -55,8 +55,8 @@ function Navigation({ current, open, onNavigate, isAuthenticated, displayName })
                 ))}
                 <li>
                     <a
-                        className={`nav-cta-btn ${current === 'login' ? 'current' : ''}`}
-                        href="./login.html"
+                        className={`nav-account-cta-btn ${current === 'login' ? 'current' : ''}`}
+                        href="./login"
                         onClick={(e) => handleBlurClick(e, onNavigate)}
                         aria-label={isAuthenticated ? `Account for ${displayName || 'signed-in user'}` : 'Log in'}
                     >

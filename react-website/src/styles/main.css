@@ -310,7 +310,7 @@ header {
     background: var(--accent-red-hover);
 }
 
-.primary-nav .menu li .nav-cta-btn {
+.primary-nav .menu li .nav-account-cta-btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -335,13 +335,13 @@ header {
     stroke-linejoin: round;
 }
 
-.primary-nav .menu li .nav-cta-btn:hover {
+.primary-nav .menu li .nav-account-cta-btn:hover {
     background: var(--accent-red-hover-transparent);
     color: #fff;
     transform: translateY(-2px);
 }
 
-.primary-nav .menu li .nav-cta-btn.current {
+.primary-nav .menu li .nav-account-cta-btn.current {
     background: var(--accent-red-dark);
     border-color: var(--accent-red-dark);
 }

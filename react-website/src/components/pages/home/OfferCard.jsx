@@ -11,7 +11,7 @@ export function OfferCard({ offer, featuredMovie, isSlowConnection }) {
   return (
     <a
       className={styles.card}
-      href={`./bookNow.html?offerId=${encodeURIComponent(offer.offerId)}`}
+      href={`./bookNow?offerId=${encodeURIComponent(offer.offerId)}`}
     >
       {featuredMovie?.poster && (
         <img

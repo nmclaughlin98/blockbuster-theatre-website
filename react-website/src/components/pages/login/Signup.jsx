@@ -141,7 +141,7 @@ export function Signup({ authClient = cognitoAuth } = {}) {
           </p>
 
           {isComplete ? (
-            <a className={styles.submit} href="./login.html">Go to Log In</a>
+            <a className={styles.submit} href="./login">Go to Log In</a>
           ) : isConfirmationRequired ? (
             <form className={styles.form} onSubmit={handleConfirmation} aria-busy={isLoading}>
               <label className={styles.field} htmlFor="signup-confirmation-code">
@@ -221,7 +221,7 @@ export function Signup({ authClient = cognitoAuth } = {}) {
 
           <p className={styles.status} role="status">{statusMessage}</p>
           {!isComplete && (
-            <a className={styles.loginLink} href="./login.html">Already have an account? Log in</a>
+            <a className={styles.loginLink} href="./login">Already have an account? Log in</a>
           )}
         </div>
         <Toast

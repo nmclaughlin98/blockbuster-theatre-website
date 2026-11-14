@@ -137,7 +137,7 @@ function MovieContent({ movie, comingSoon }) {
         ))?.[0] || '';
     });
     const movieIdentifier = movieSlug(movie);
-    const movieBookingUrl = `../bookNow.html?movie=${encodeURIComponent(movieIdentifier)}`;
+    const movieBookingUrl = `../bookNow?movie=${encodeURIComponent(movieIdentifier)}`;
     const selectedShowtime = Object.entries(movie.showtimes || {}).flatMap(([day, slots]) => (
         (Array.isArray(slots) ? slots : []).map((slot) => ({ ...slot, day }))
     )).find((slot) => (
@@ -149,7 +149,7 @@ function MovieContent({ movie, comingSoon }) {
     ));
     const bookingHref = selectedShowtime
         ? createBookingHref(
-            '../bookNow.html',
+            '../bookNow',
             movieIdentifier,
             selectedShowtime.date,
             selectedShowtime,

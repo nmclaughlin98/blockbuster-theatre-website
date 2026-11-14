@@ -103,7 +103,7 @@ export function HeroCarousel({ movies }) {
                                 <div className="hero-actions">
                                     <a
                                         className="button"
-                                        href={`./bookNow.html?movie=${encodeURIComponent(movieSlug(movie))}`}
+                                        href={`/bookNow?movie=${encodeURIComponent(movieSlug(movie))}`}
                                         onClick={(e) => e.currentTarget.blur()}
                                     >
                                         Book Tickets
@@ -119,7 +119,7 @@ export function HeroCarousel({ movies }) {
                                     )}
                                     <a
                                         className="button btn-glass"
-                                        href={`./movie-detail.html?movie=${encodeURIComponent(movieSlug(movie))}`}
+                                        href={`/movie=${encodeURIComponent(movieSlug(movie))}`}
                                         onClick={(e) => e.currentTarget.blur()}
                                     >
                                         More Info

@@ -98,7 +98,7 @@ test('signs up with Cognito name attributes and confirms the email address', asy
       username: 'ada@example.com',
       confirmationCode: '123456',
     });
-    const loginLink = Array.from(page.container.querySelectorAll('a[href="./login.html"]')).find(
+    const loginLink = Array.from(page.container.querySelectorAll('a[href="./login"]')).find(
       (link) => link.textContent.trim() === 'Go to Log In',
     );
     assert.ok(loginLink);

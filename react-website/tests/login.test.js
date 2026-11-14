@@ -30,7 +30,7 @@ const { Header } = await vite.ssrLoadModule('/src/components/shared/Header/Heade
 const { COGNITO_AUTH_STATE_CHANGE_EVENT } = await vite.ssrLoadModule('/src/auth/cognitoAuth.js');
 after(() => vite.close());
 
-async function renderLogin(authClient, onAuthenticated = () => {}) {
+async function renderLogin(authClient, onAuthenticated = () => { }) {
   const container = document.createElement('div');
   document.body.append(container);
   const root = createRoot(container);
@@ -361,7 +361,7 @@ test('shows the signed-in name and account icon in the header', async () => {
     fetchAuthSession: async () => session,
   });
 
-  const accountLink = page.container.querySelector('.nav-cta-btn');
+  const accountLink = page.container.querySelector('.nav-account-cta-btn');
   assert.equal(accountLink.textContent.trim(), 'Jane Doe');
   assert.equal(accountLink.getAttribute('aria-label'), 'Account for Jane Doe');
   assert.ok(accountLink.querySelector('.nav-account-icon'));

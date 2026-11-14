@@ -100,7 +100,7 @@
         box-shadow: 0 10px 22px var(--accent-glow);
     }
 
-    .primary-nav .menu li .nav-cta-btn {
+    .primary-nav .menu li .nav-account-cta-btn {
         width: 100%;
         padding: 12px 23px;
         font-size: 1.05rem;
@@ -304,7 +304,7 @@ header {
         font-size: 0.75rem;
     }
 
-    .primary-nav .menu li .nav-cta-btn {
+    .primary-nav .menu li .nav-account-cta-btn {
         padding: 7px 12px;
         font-size: 0.75rem;
     }
@@ -327,11 +327,7 @@ header {
 
 }
 
-@media only screen
-    and (min-width: 900px)
-    and (max-width: 980px)
-    and (orientation: landscape)
-    and (-webkit-min-device-pixel-ratio: 3) {
+@media only screen and (min-width: 900px) and (max-width: 980px) and (orientation: landscape) and (-webkit-min-device-pixel-ratio: 3) {
 
     .primary-nav,
     .primary-nav.open {
@@ -373,7 +369,7 @@ header {
         font-size: 0.8rem;
     }
 
-    .primary-nav .menu li .nav-cta-btn {
+    .primary-nav .menu li .nav-account-cta-btn {
         width: auto;
         padding: 8px 12px;
         font-size: 0.8rem;
