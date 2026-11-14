@@ -1,0 +1,130 @@
+.root {
+    min-height: 100%;
+}
+
+.page {
+    width: min(100% - 2 * var(--page-gutter), 60rem);
+    margin: 0 auto;
+    padding: clamp(2.5rem, 6vw, 5rem) 0;
+}
+
+.heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    margin-bottom: 2rem;
+}
+
+.heading h1 {
+    margin: 0;
+    font-family: var(--font-heading);
+    font-size: clamp(2.5rem, 6vw, 4rem);
+}
+
+.eyebrow {
+    margin: 0;
+    color: var(--accent-red);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-weight: 700;
+}
+
+.welcome {
+    margin: 0.5rem 0 0;
+    color: var(--text-secondary);
+}
+
+.panel {
+    padding: clamp(1.25rem, 4vw, 2rem);
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+}
+
+.panel h2 {
+    margin: 0 0 1.25rem;
+    font-family: var(--font-heading);
+    font-size: 1.75rem;
+}
+
+.logout,
+.switcher button {
+    padding: 0.7rem 1.25rem;
+    border: 1px solid var(--border-highlight);
+    border-radius: var(--radius-full);
+    background: transparent;
+    color: var(--text-primary);
+    font: inherit;
+    cursor: pointer;
+}
+
+.logout:hover,
+.switcher button:hover {
+    border-color: var(--accent-red);
+}
+
+.logout:focus-visible,
+.switcher button:focus-visible {
+    outline: 2px solid var(--accent-red);
+    outline-offset: 3px;
+}
+
+.logout:disabled {
+    opacity: 0.6;
+    cursor: wait;
+}
+
+.switcher {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.switcher button[aria-pressed='true'] {
+    background: var(--accent-red);
+    border-color: var(--accent-red);
+    color: #fff;
+}
+
+.bookings {
+    display: grid;
+    gap: 1rem;
+    list-style: none;
+    margin: 1.5rem 0 0;
+    padding: 0;
+}
+
+.booking {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+    padding: 1.25rem;
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    background: var(--bg-surface-elevated);
+}
+
+.booking h3 {
+    margin: 0 0 0.5rem;
+}
+
+.booking p {
+    margin: 0.25rem 0;
+    color: var(--text-secondary);
+}
+
+.reference {
+    font-size: 0.875rem;
+}
+
+.empty {
+    margin: 1.5rem 0 0;
+    color: var(--text-secondary);
+}
+
+.error {
+    color: var(--accent-red);
+}

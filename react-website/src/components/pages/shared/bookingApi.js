@@ -138,6 +138,27 @@ export async function getBookedSeatDetails(showtimeId, date, signal, accessToken
   };
 }
 
+export async function getAccountBookings(accessToken, signal) {
+  if (!accessToken) throw new Error('Sign in to view your bookings.');
+  const data = await requestJson('/api/v1/bookings/account/history', { signal }, undefined, accessToken);
+  if (!Array.isArray(data?.bookings) || data.bookings.some((booking) => {
+    const date = typeof booking?.date === 'string' ? new Date(`${booking.date}T00:00:00Z`) : new Date(NaN);
+    return !booking
+      || typeof booking.bookingId !== 'string' || !booking.bookingId
+      || (booking.bookingRef !== undefined
+        && (typeof booking.bookingRef !== 'string' || !booking.bookingRef))
+      || typeof booking.movieTitle !== 'string' || !booking.movieTitle
+      || !/^\d{4}-\d{2}-\d{2}$/.test(booking.date)
+      || Number.isNaN(date.getTime()) || date.toISOString().slice(0, 10) !== booking.date
+      || typeof booking.time !== 'string' || !/^(?:[01]\d|2[0-3]):[0-5]\d$/.test(booking.time)
+      || typeof booking.screen !== 'string' || !booking.screen
+      || !Array.isArray(booking.seats) || booking.seats.some((seat) => typeof seat !== 'string');
+  })) {
+    throw new Error('The booking service returned invalid account booking details.');
+  }
+  return data.bookings;
+}
+
 export function createGuestBookingPayload({
   showtimeId, date, seats, email, customerName, tickets, offerId,
 }) {

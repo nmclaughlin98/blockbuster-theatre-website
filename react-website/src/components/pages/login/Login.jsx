@@ -322,6 +322,7 @@ export function Login({
             <p className={styles.notice} role="status">Checking sign-in status...</p>
           ) : isAuthenticated ? (
             <div className={styles.form} aria-busy={isLoading}>
+              <a className={styles.signupLink} href="/account">View account</a>
               <button
                 className={styles.submit}
                 type="button"

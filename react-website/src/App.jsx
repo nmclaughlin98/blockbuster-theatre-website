@@ -1,4 +1,5 @@
 import {
+  Account,
   About,
   Booking,
   CollectionDetail,
@@ -25,6 +26,7 @@ export default function App() {
   else if (path.includes('nowshowing')) page = <NowShowing />;
   else if (path.includes('comingsoon')) page = <ComingSoon />;
   else if (path.includes('signup')) page = <Signup />;
+  else if (path.includes('account')) page = <Account />;
   else if (path.includes('login')) page = <Login />;
   else if (path.includes('timetable')) page = <Timetable />;
   else if (path.includes('about')) page = <About />;

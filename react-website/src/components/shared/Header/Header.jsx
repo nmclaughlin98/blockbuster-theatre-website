@@ -55,8 +55,8 @@ function Navigation({ current, open, onNavigate, isAuthenticated, displayName })
                 ))}
                 <li>
                     <a
-                        className={`nav-account-cta-btn ${current === 'login' ? 'current' : ''}`}
-                        href="./login"
+                        className={`nav-account-cta-btn ${current === 'login' || current === 'account' ? 'current' : ''}`}
+                        href={isAuthenticated ? '/account' : '/login'}
                         onClick={(e) => handleBlurClick(e, onNavigate)}
                         aria-label={isAuthenticated ? `Account for ${displayName || 'signed-in user'}` : 'Log in'}
                     >

@@ -9,3 +9,4 @@ export { NowShowing } from './now-showing/NowShowing';
 export { Signup } from './login/Signup';
 export { Timetable } from './timetable/Timetable';
 export { useMovies } from './shared/useMovies';
+export { Account } from './account/Account';
