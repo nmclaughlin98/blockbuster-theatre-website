@@ -72,6 +72,8 @@ export function BookingConfirmation({
         window.location.href,
       ).href;
       const ticketPayload = {
+        bookingRef,
+        movieName: movieTitle,
         barcodeValue: bookingRef,
         barcodeFormat: 'QR',
         logoText: 'Blockbuster Theatre',
