@@ -1,10 +1,11 @@
 import styles from './Collections.module.css';
 import { CollectionCard } from './CollectionCard';
+import { CollectionsSkeleton } from './CollectionsSkeleton';
 
 export function CollectionsView({ collections, loading, error, onRetry }) {
   const activeCollections = collections.filter((collection) => collection.isActive !== false);
 
-  if (loading) return <div className={styles.root}><p className="collection-message" role="status">Loading collections…</p></div>;
+  if (loading) return <div className={styles.root}><CollectionsSkeleton /></div>;
   if (error) {
     return (
       <div className={styles.root}>

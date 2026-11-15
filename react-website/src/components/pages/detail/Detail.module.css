@@ -155,10 +155,23 @@
 }
 
 .root :global(.col-no-border):global(.col-2-3) h2{
+    display: flex;
+    align-items: center;
+    gap: 12px;
     font-family: var(--font-heading);
     font-size: clamp(1.7rem, 2vw, 3rem);
     color: #fff;
     margin-bottom: clamp(12px, 1vw, 20px);
+}
+
+.root :global(.col-no-border):global(.col-2-3) h2::before{
+    content: '';
+    display: inline-block;
+    width: 6px;
+    height: 0.85em;
+    flex: 0 0 6px;
+    background: var(--accent-red);
+    border-radius: var(--radius-full);
 }
 
 .root :global(.col-no-border):global(.col-2-3) p{
@@ -176,6 +189,49 @@
     border: 1px solid var(--border-subtle);
     box-shadow: var(--shadow-md);
     margin-top: 16px;
+}
+
+.trailerLauncher {
+    position: relative;
+    width: 100%;
+    max-width: 1000px;
+}
+
+.trailerLauncher :global(.trailer-media) {
+    pointer-events: none;
+}
+
+.trailerLaunchButton {
+    position: absolute;
+    inset: 16px 0 0;
+    display: grid;
+    place-items: center;
+    width: 100%;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+}
+
+.trailerLaunchButton svg {
+    width: clamp(3.5rem, 8vw, 5rem);
+    height: clamp(3.5rem, 8vw, 5rem);
+    padding: 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    border-radius: 50%;
+    background: rgba(12, 13, 18, 0.75);
+    fill: #fff;
+    transition: background-color var(--transition), transform var(--transition);
+}
+
+.trailerLaunchButton:hover svg {
+    background: var(--accent-red);
+    transform: scale(1.08);
+}
+
+.trailerLaunchButton:focus-visible {
+    outline: 2px solid var(--text-primary);
+    outline-offset: 3px;
 }
 
 .root :global(.trailer-still){
@@ -368,4 +424,17 @@
 .root :global(.movie-page) :global(.showtimes-schedule) :global(.book-now-button){
     padding: 16px 32px;
     font-size: clamp(1.05rem, 1.35vw, 1.2rem);
+}
+
+@media only screen
+    and (min-width: 900px)
+    and (max-width: 980px)
+    and (orientation: landscape)
+    and (-webkit-min-device-pixel-ratio: 3) {
+
+    .root :global(.movie-page) {
+        grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+        gap: var(--layout-gap);
+    }
+
 }

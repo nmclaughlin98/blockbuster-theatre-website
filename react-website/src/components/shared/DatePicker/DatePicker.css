@@ -83,6 +83,12 @@
     z-index: 1001;
 }
 
+.booking-date-popper .react-datepicker__triangle {
+    fill: #171923;
+    color: #171923;
+    stroke: rgba(255, 255, 255, 0.14);
+}
+
 .booking-date-calendar .react-datepicker__header {
     padding-top: 1rem;
     padding-bottom: 0.6rem;

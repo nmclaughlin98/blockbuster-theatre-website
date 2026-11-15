@@ -1,7 +1,8 @@
 import styles from './BookingPage.module.css';
 import { useEffect, useState } from 'react';
-import { Layout } from '../../shared';
-import { Toast } from '../../shared/Toast';
+import { CenteredHeadingBlock, Layout } from '../../shared';
+import { Toast } from '../../shared/Toast/Toast';
+import { useToast } from '../../shared/Toast/useToast';
 import { BookingConfirmation } from './BookingConfirmation';
 import { GuestDetails } from './GuestDetails';
 import { PaymentStep } from './PaymentStep';
@@ -23,7 +24,7 @@ const initialBooking = {
 export function Booking() {
   const [step, setStep] = useState(0);
   const [booking, setBooking] = useState(initialBooking);
-  const [toastMessage, setToastMessage] = useState('');
+  const { toast, setToastMessage } = useToast();
 
   useEffect(() => {
     document.title = 'Blockbuster Theatre - Book Now';
@@ -57,10 +58,10 @@ export function Booking() {
   return (
     <Layout className={styles.root} current="booking">
       <section className="booking-section">
-        <div className="booking-title-block">
-          <h1>Book Your Tickets</h1>
-          <p>Reserve the best seats in the house with our interactive seat picker.</p>
-        </div>
+        <CenteredHeadingBlock
+          title="Book Your Tickets"
+          description="Reserve the best seats in the house with our interactive seat picker."
+        />
         <ProgressBar currentStep={step} />
         <form className="booking-form" onSubmit={(event) => event.preventDefault()}>
           {step === 0 && (
@@ -107,7 +108,11 @@ export function Booking() {
             />
           )}
         </form>
-        <Toast message={toastMessage} onDismiss={() => setToastMessage('')} />
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onDismiss={() => setToastMessage('')}
+        />
       </section>
     </Layout>
   );

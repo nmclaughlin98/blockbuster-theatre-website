@@ -1,0 +1,439 @@
+.root {
+    min-height: 100%;
+}
+
+.page {
+    width: min(100% - 2 * var(--page-gutter), 75rem);
+    margin: 0 auto;
+    padding: clamp(2.5rem, 6vw, 4.5rem) 0;
+}
+
+.heading {
+    margin-bottom: 2rem;
+}
+
+.titleRow {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    flex-wrap: wrap;
+}
+
+.heading h1 {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: clamp(1.5rem, 3vw, 2rem);
+    line-height: 1.15;
+    text-transform: uppercase;
+}
+
+.eyebrow {
+    margin: 0 0 0.4rem;
+    color: var(--accent-red);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-weight: 700;
+    font-size: 0.8rem;
+}
+
+.welcome {
+    margin: 0.5rem 0 0;
+    color: var(--text-secondary);
+}
+
+.columns {
+    display: grid;
+    grid-template-columns: minmax(0, 1.7fr) minmax(19rem, 1fr);
+    gap: 2rem;
+    align-items: start;
+}
+
+.profileColumn {
+    display: grid;
+    gap: 1.25rem;
+}
+
+.sectionLabel {
+    margin: 0 0 0.6rem;
+    color: var(--text-secondary);
+    font-family: var(--font-heading);
+    font-size: 0.9rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.profileColumn>.sectionLabel {
+    margin-bottom: -0.65rem;
+}
+
+.profileCard,
+.securityCard,
+.bookingsCard {
+    min-width: 0;
+    padding: clamp(1.25rem, 3vw, 1.75rem);
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+}
+
+.profileCard h2,
+.securityCard h2,
+.bookingsCard h2 {
+    margin: 0 0 1.25rem;
+    font-family: var(--font-heading);
+    font-size: 1.5rem;
+}
+
+.identity {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border-subtle);
+}
+
+.avatar {
+    display: grid;
+    place-items: center;
+    flex: 0 0 3.75rem;
+    height: 3.75rem;
+    border: 1px solid var(--border-accent);
+    border-radius: 50%;
+    background: var(--accent-red-transparent);
+    color: var(--text-primary);
+    font-family: var(--font-heading);
+    font-size: 1.4rem;
+    font-weight: 600;
+}
+
+.identityText {
+    display: grid;
+    min-width: 0;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+}
+
+.identityText strong {
+    font-family: var(--font-heading);
+    font-size: 2rem;
+}
+
+.identityText span,
+.note,
+.profileActions p {
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+}
+
+.profileFields {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem 1.25rem;
+    margin-top: 1.5rem;
+}
+
+.field {
+    display: block;
+    font-weight: 600;
+    font-size: clamp(0.85rem, 2vw, 1rem);
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.field input {
+    width: 100%;
+    min-width: 0;
+    padding: 0.7rem 0.85rem;
+    border: 1px solid var(--border-highlight);
+    border-radius: var(--radius-sm);
+    background: var(--bg-surface-elevated);
+    color: var(--text-primary);
+    font: inherit;
+    font-weight: 400;
+}
+
+.field input::placeholder {
+    color: var(--text-secondary);
+    opacity: 1;
+}
+
+.profileActions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-top: 1.5rem;
+}
+
+.profileActions p,
+.note {
+    margin: 0;
+}
+
+.securityContent {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1.25rem;
+    flex-wrap: wrap;
+}
+
+.alertSettings {
+    display: grid;
+    gap: 0.75rem;
+    min-width: min(100%, 14rem);
+}
+
+.alertSetting {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.alertSetting input {
+    position: absolute;
+    opacity: 0;
+}
+
+.switch {
+    position: relative;
+    flex: 0 0 2.5rem;
+    height: 1.4rem;
+    border-radius: var(--radius-full);
+    background: #454b59;
+}
+
+.switch::after {
+    position: absolute;
+    top: 0.2rem;
+    left: 0.2rem;
+    width: 1rem;
+    height: 1rem;
+    border-radius: 50%;
+    background: var(--text-secondary);
+    content: '';
+}
+
+.securityCard>.note {
+    margin-top: 1.25rem;
+}
+
+.switcher {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-bottom: 1rem;
+    font-family: var(--font-display);
+    font-size: clamp(2rem, 3.5vw, 2.7rem);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.switcher button {
+    flex: 0 0 auto;
+    white-space: nowrap;
+    padding: 8px 20px;
+    font-family: var(--font-heading);
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    background: var(--bg-surface-elevated);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-full);
+    cursor: pointer;
+    transition: all var(--transition);
+    touch-action: manipulation;
+}
+
+.switcher button:hover,
+.switcher button[aria-pressed='true'] {
+    color: #fff;
+    background: var(--accent-red);
+    border-color: var(--accent-red);
+    box-shadow: 0 4px 15px var(--accent-glow);
+}
+
+.bookings {
+    display: grid;
+    gap: 1rem;
+    list-style: none;
+    padding: 0;
+}
+
+.booking {
+    min-width: 0;
+    padding: 1rem;
+    border: 1px solid var(--border-highlight);
+    border-radius: var(--radius-md);
+    background: var(--bg-surface-elevated);
+}
+
+.bookingDetails {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.85rem;
+    min-width: 0;
+    padding-bottom: 1rem;
+    border-bottom: 1px dashed var(--border-highlight);
+}
+
+.posterPlaceholder {
+    display: grid;
+    place-items: center;
+    flex: 0 0 3.5rem;
+    height: 5rem;
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-sm);
+    background: var(--bg-main);
+    color: var(--text-secondary);
+    overflow: hidden;
+}
+
+.posterPlaceholder img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.posterPlaceholder svg {
+    width: 1.5rem;
+    stroke: currentColor;
+    stroke-width: 1.5;
+}
+
+.bookingText {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.booking h3 {
+    margin: 0 0 0.4rem;
+    font-family: var(--font-heading);
+    font-size: 1.15rem;
+    line-height: 1.3;
+}
+
+.bookingText p {
+    margin: 0.2rem 0;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+}
+
+.bookingActions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin-top: 1rem;
+}
+
+.ticketActionButton {
+    flex: 1 1 9rem;
+    min-width: min(100%, 9rem);
+    font-family: var(--font-display);
+    text-transform: uppercase;
+    font-weight: 700;
+    font-size: 0.75rem;
+    padding: 0.5rem 0.9rem;
+}
+
+.ticketButtonPrimary:not(:disabled) {
+    background: var(--accent-red);
+    border-color: var(--accent-red);
+    color: #fff;
+}
+
+.downloadError {
+    flex-basis: 100%;
+    margin: 0;
+    color: var(--accent-red);
+    font-size: 0.875rem;
+}
+
+.booking>.note {
+    margin-top: 0.5rem;
+    text-align: center;
+}
+
+.empty {
+    margin: 1.5rem 0 0;
+    color: var(--text-secondary);
+}
+
+.loading {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+    color: var(--text-secondary);
+}
+
+.loading :global(.loader) {
+    --size: 0.5px;
+    flex-shrink: 0;
+}
+
+.error {
+    margin-top: 1rem;
+    color: var(--accent-red);
+}
+
+@media (min-width: 851px) {
+    .bookingsColumn {
+        position: relative;
+        align-self: stretch;
+    }
+
+    .bookingsCard {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .bookingContent {
+        min-height: 0;
+        padding-top: 0.5rem;
+        padding-bottom: 1rem;
+        overflow-y: auto;
+        scroll-padding-block: 1rem;
+        scrollbar-width: none;
+        -webkit-mask-image: linear-gradient(to bottom, transparent, #000 0.75rem, #000 calc(100% - 0.75rem), transparent);
+        mask-image: linear-gradient(to bottom, transparent, #000 0.75rem, #000 calc(100% - 0.75rem), transparent);
+    }
+
+    .bookingContent::-webkit-scrollbar {
+        display: none;
+    }
+}
+
+@media (max-width: 850px) {
+    .columns {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .profileColumn {
+        display: contents;
+    }
+
+    .securityCard {
+        order: 1;
+    }
+}
+
+@media (max-width: 480px) {
+    .profileFields {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}

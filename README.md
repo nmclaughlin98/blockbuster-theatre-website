@@ -36,7 +36,7 @@ cd react-website
 npm install
 ```
 
-The API base URL is set with `VITE_MOVIES_API_URL`. Copy `react-website/.env.example` to `react-website/.env.local` and set the value to the API invoke base URL, for example `https://your-api-id.execute-api.your-region.amazonaws.com`. Do not append a route such as `/movies`. Restart the Vite server after changing the setting. Development and production builds fail with a clear error if the variable is missing or is not an absolute HTTP(S) URL.
+Copy `react-website/.env.example` to `react-website/.env.local`. Set `VITE_MOVIES_API_URL` to the API invoke base URL, and set `VITE_COGNITO_REGION`, `VITE_COGNITO_USER_POOL_ID`, and `VITE_COGNITO_USER_POOL_CLIENT_ID` from the backend stack outputs (`UserPoolId` and `UserPoolClientId`; region is currently `eu-west-2`). Do not append a route such as `/movies` to the API URL. Restart the Vite server after changing these values. The deployment workflow requires these variables as GitHub Actions repository variables. Cognito IDs are public identifiers, not secrets; do not add an app-client secret to the frontend.
 
 Start the development server:
 

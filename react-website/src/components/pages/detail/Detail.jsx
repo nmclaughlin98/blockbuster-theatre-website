@@ -1,11 +1,11 @@
 import styles from './Detail.module.css';
 import { useEffect, useState } from 'react';
 import { Countdown, movieSlug } from '../../movies/index.js';
-import { asset, Layout, ShowtimeChip } from '../../shared';
-import { PageLoader } from '../../shared/PageLoader';
+import { asset, Layout, ShowtimeChip, TrailerModal } from '../../shared';
 import { createBookingHref } from '../shared/showtimeNavigation';
 import { getUpcomingScreeningDates } from '../shared/bookingApi';
 import { useMovieDetail } from './useMovieDetail';
+import { DetailSkeleton } from './DetailSkeleton';
 
 function formatPeople(people) {
     if (Array.isArray(people))
@@ -122,6 +122,7 @@ function MovieContent({ movie, comingSoon }) {
     const query = new URLSearchParams(window.location.search);
     const [selectedDate, setSelectedDate] = useState(() => query.get('date') || '');
     const [selectedShowtimeId, setSelectedShowtimeId] = useState(() => query.get('showtimeId') || '');
+    const [trailerUrl, setTrailerUrl] = useState('');
     const [selectedTime, setSelectedTime] = useState(
         () => query.get('time') || '',
     );
@@ -136,7 +137,7 @@ function MovieContent({ movie, comingSoon }) {
         ))?.[0] || '';
     });
     const movieIdentifier = movieSlug(movie);
-    const movieBookingUrl = `../bookNow.html?movie=${encodeURIComponent(movieIdentifier)}`;
+    const movieBookingUrl = `../bookNow?movie=${encodeURIComponent(movieIdentifier)}`;
     const selectedShowtime = Object.entries(movie.showtimes || {}).flatMap(([day, slots]) => (
         (Array.isArray(slots) ? slots : []).map((slot) => ({ ...slot, day }))
     )).find((slot) => (
@@ -148,7 +149,7 @@ function MovieContent({ movie, comingSoon }) {
     ));
     const bookingHref = selectedShowtime
         ? createBookingHref(
-            '../bookNow.html',
+            '../bookNow',
             movieIdentifier,
             selectedShowtime.date,
             selectedShowtime,
@@ -182,14 +183,25 @@ function MovieContent({ movie, comingSoon }) {
                     <div className="move-trailer"
                         aria-label={`${movie.title} ${movie.trailer ? 'trailer' : 'still'}`}>
                         {movie.trailer ? (
-                            <iframe
-                                className="trailer-media"
-                                src={movie.trailer}
-                                title={`${movie.title} trailer`}
-                                referrerPolicy="strict-origin-when-cross-origin"
-                                allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
-                                allowFullScreen
-                            />
+                            <div className={styles.trailerLauncher}>
+                                <iframe
+                                    className="trailer-media"
+                                    src={movie.trailer}
+                                    title={`${movie.title} trailer preview`}
+                                    aria-hidden="true"
+                                    tabIndex="-1"
+                                    referrerPolicy="strict-origin-when-cross-origin"
+                                    allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
+                                    allowFullScreen
+                                />
+                                <button
+                                    className={styles.trailerLaunchButton}
+                                    type="button"
+                                    aria-label={`Watch ${movie.title} trailer`}
+                                    onClick={() => setTrailerUrl(movie.trailer)}
+                                >
+                                </button>
+                            </div>
                         ) : (
                             <img
                                 className="trailer-media trailer-still"
@@ -214,6 +226,11 @@ function MovieContent({ movie, comingSoon }) {
                     />
                 )}
             </section>
+            <TrailerModal
+                url={trailerUrl}
+                onClose={() => setTrailerUrl('')}
+                title={`${movie.title} trailer`}
+            />
         </>
     );
 }
@@ -226,7 +243,7 @@ export function Detail({ comingSoon = false }) {
     if (loading) {
         return (
             <Layout className={styles.root} loading>
-                <PageLoader label="Loading movie details" />
+                <DetailSkeleton comingSoon={comingSoon} />
             </Layout>
         );
     }

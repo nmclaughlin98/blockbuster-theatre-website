@@ -1,9 +1,9 @@
 import styles from './NowShowing.module.css';
 import { useEffect, useMemo, useState } from 'react';
 import { MovieGrid } from '../../movies';
-import { DirectionalButton, Layout } from '../../shared';
-import { PageLoader } from '../../shared/PageLoader';
+import { DirectionalButton, Layout, SectionHeader } from '../../shared';
 import { CollectionsView } from '../collections/Collections';
+import { NowShowingSkeleton } from './NowShowingSkeleton';
 import { NowShowingSwitch } from './NowShowingSwitch';
 import { useCollections } from '../collections/useCollections';
 import { useMovies } from '../shared/useMovies';
@@ -71,7 +71,7 @@ export function NowShowing({ initialView }) {
     }, [view]);
 
     const { movies, loading, error } = useMovies();
-    const collectionState = useCollections(view === 'collections');
+    const collectionState = useCollections(true);
     const [search, setSearch] = useState('');
     const [sort, setSort] = useState('title-asc');
     const [genre, setGenre] = useState('all');
@@ -85,7 +85,7 @@ export function NowShowing({ initialView }) {
         )].sort((a, b) => a.localeCompare(b)),
     ], [movies]);
 
-    const pageLoading = view === 'movies' ? loading : collectionState.loading;
+    const pageLoading = loading || !collectionState.initialLoadComplete;
 
     function changeView(nextView) {
         setView(nextView);
@@ -120,7 +120,7 @@ export function NowShowing({ initialView }) {
     if (pageLoading) {
         return (
             <Layout className={styles.root} current="now" loading>
-                <PageLoader label={view === 'movies' ? 'Loading now showing movies' : 'Loading collections'} />
+                <NowShowingSkeleton view={view} />
             </Layout>
         );
     }
@@ -128,21 +128,18 @@ export function NowShowing({ initialView }) {
     return (
         <Layout className={styles.root} current="now">
             <section className="movie-poster">
-                <div className="section-header">
-                    <div>
-                        <h1>{view === 'movies' ? 'Now Showing' : 'Collections'}</h1>
-                        <p className="muted">
-                            {view === 'movies'
-                                ? 'Select a movie to view synopsis, showtimes, and book reserved luxury seats.'
-                                : 'Discover connected stories and films gathered together.'}
-                        </p>
-                    </div>
+                <SectionHeader
+                    title={view === 'movies' ? 'Now Showing' : 'Collections'}
+                    description={view === 'movies'
+                        ? 'Select a movie to view synopsis, showtimes, and book reserved luxury seats.'
+                        : 'Discover connected stories and films gathered together.'}
+                >
                     {view === 'movies' && (
                         <DirectionalButton className="button btn-glass" href="./timetable.html" direction="next" variant="glass">
                             View Timetable
                         </DirectionalButton>
                     )}
-                </div>
+                </SectionHeader>
                 <NowShowingSwitch current={view} onChange={changeView} />
                 <div
                     className="now-showing-view"

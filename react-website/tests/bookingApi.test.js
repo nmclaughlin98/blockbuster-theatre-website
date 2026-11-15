@@ -3,9 +3,11 @@ import test from 'node:test';
 import { MOVIES_API_URL } from '../src/config.js';
 import {
   createCheckoutPayload,
+  createBooking,
   createGuestBooking,
   createGuestBookingPayload,
   convertGuestAccount,
+  getBookedSeatDetails,
   getBookedSeats,
   getBookingSelections,
   getFilmSelections,
@@ -323,6 +325,61 @@ test('rejects booked-seat data returned for another screening', async () => {
   }
 });
 
+test('loads signed-in booked seats and identifies the current user seats', async () => {
+  let request;
+  const restoreFetch = mockFetch(async (url, options) => {
+    request = { url: new URL(url), options };
+    return new Response(JSON.stringify({
+      showtimeId: '559924_2026-11-01_1215',
+      date: '2026-11-01',
+      bookedSeats: ['A2', 'B4', 'C2'],
+      myBookedSeats: ['C2', 'A2'],
+    }));
+  });
+
+  try {
+    assert.deepEqual(
+      await getBookedSeatDetails(
+        '559924_2026-11-01_1215',
+        '2026-11-01',
+        undefined,
+        'signed-in-access-token',
+      ),
+      { bookedSeats: ['A2', 'B4', 'C2'], myBookedSeats: ['A2', 'C2'] },
+    );
+    assert.equal(request.url.pathname, '/api/v1/bookings/account');
+    assert.deepEqual(Object.fromEntries(request.url.searchParams), {
+      showtimeId: '559924_2026-11-01_1215',
+      date: '2026-11-01',
+    });
+    assert.ok(request.options.headers.get('Authorization'));
+  } finally {
+    restoreFetch();
+  }
+});
+
+test('does not request personal seat details for guest bookings', async () => {
+  let requestedUrl;
+  const restoreFetch = mockFetch(async (url) => {
+    requestedUrl = new URL(url);
+    return new Response(JSON.stringify({
+      showtimeId: '559924_2026-11-01_1215',
+      date: '2026-11-01',
+      bookedSeats: ['B4'],
+    }));
+  });
+
+  try {
+    assert.deepEqual(
+      await getBookedSeatDetails('559924_2026-11-01_1215', '2026-11-01', undefined, null),
+      { bookedSeats: ['B4'], myBookedSeats: [] },
+    );
+    assert.equal(requestedUrl.pathname, '/api/v1/bookings/guest');
+  } finally {
+    restoreFetch();
+  }
+});
+
 test('accepts only the exact backend showtime ID format for its date', () => {
   assert.equal(isShowtimeIdForDate('559924_2026-11-01_1215', '2026-11-01'), true);
   assert.equal(isShowtimeIdForDate('559924_2026-11-01_1215', '2026-11-02'), false);
@@ -406,6 +463,47 @@ test('posts the exact guest booking payload to the versioned endpoint', async ()
     assert.equal(JSON.parse(request.options.body).userId, undefined);
     assert.equal(JSON.parse(request.options.body).paymentToken, undefined);
     assert.deepEqual(booking, { ...bookingDetails, seats: ['F10', 'F11'] });
+  } finally {
+    restoreFetch();
+  }
+});
+
+test('posts signed-in bookings to the account endpoint with the access token', async () => {
+  const bookingDetails = {
+    bookingId: 'bk_990123',
+    bookingRef: 'BBT-883214',
+    showtimeId: '559924_2026-11-01_1215',
+    date: '2026-11-01',
+    movieTitle: 'Inception',
+    seats: ['F10'],
+    tickets: [{ tierId: 'adult', quantity: 1 }],
+    totalAmount: 12,
+    currency: 'GBP',
+    customerEmail: 'customer@example.com',
+    confirmationEmailSent: true,
+  };
+  let request;
+  const restoreFetch = mockFetch(async (url, options) => {
+    request = { url: new URL(url), options };
+    return new Response(JSON.stringify(bookingDetails), { status: 201 });
+  });
+
+  try {
+    const payload = createGuestBookingPayload({
+      showtimeId: '559924_2026-11-01_1215',
+      date: '2026-11-01',
+      seats: ['F10'],
+      email: 'customer@example.com',
+      customerName: 'Niall McLaughlin',
+      tickets: [{ tierId: 'adult', quantity: 1 }],
+    });
+    const booking = await createBooking(payload, 'signed-in-access-token');
+
+    assert.equal(request.url.pathname, '/api/v1/bookings/account');
+    assert.equal(request.options.headers.get('Authorization'), 'Bearer signed-in-access-token');
+    assert.deepEqual(JSON.parse(request.options.body), payload);
+    assert.equal(JSON.parse(request.options.body).userId, undefined);
+    assert.deepEqual(booking, bookingDetails);
   } finally {
     restoreFetch();
   }

@@ -276,3 +276,15 @@
     }
 
 }
+
+@media only screen
+    and (min-width: 900px)
+    and (max-width: 980px)
+    and (orientation: landscape)
+    and (-webkit-min-device-pixel-ratio: 3) {
+
+    .root :global(.about-grid-layout) {
+        grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+    }
+
+}

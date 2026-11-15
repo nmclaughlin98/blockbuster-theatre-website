@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
 import {
-  createGuestBooking,
+  createBooking,
   createGuestBookingPayload,
   getBookedSeats,
   sortSeatIds,
@@ -82,7 +82,7 @@ export function PaymentStep({
           ? { offerId: initialData.selection.offerId }
           : {}),
       });
-      const details = await createGuestBooking(payload);
+      const details = await createBooking(payload);
       if (details.showtimeId !== showtime.showtimeId || details.date !== showtime.date) {
         throw new Error('The booking service returned a confirmation for a different screening. Please contact support.');
       }

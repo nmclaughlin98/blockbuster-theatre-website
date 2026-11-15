@@ -1,8 +1,8 @@
 import { useEffect } from 'react';
 import { MovieGrid } from '../../movies';
-import { Layout } from '../../shared';
-import { PageLoader } from '../../shared/PageLoader';
+import { Layout, SectionHeader } from '../../shared';
 import { useMovies } from '../shared/useMovies';
+import { ComingSoonSkeleton } from './ComingSoonSkeleton';
 
 export function ComingSoon() {
   const { movies, loading, error } = useMovies();
@@ -17,7 +17,7 @@ export function ComingSoon() {
   if (loading) {
     return (
       <Layout current="coming" loading>
-        <PageLoader label="Loading coming soon movies" />
+        <ComingSoonSkeleton />
       </Layout>
     );
   }
@@ -25,14 +25,10 @@ export function ComingSoon() {
   return (
     <Layout current="coming">
       <section className="movie-poster">
-        <div className="section-header">
-          <div>
-            <h1>Coming Soon</h1>
-            <p className="muted">
-              Get a sneak peek at the most anticipated big-screen blockbusters arriving soon.
-            </p>
-          </div>
-        </div>
+        <SectionHeader
+          title="Coming Soon"
+          description="Get a sneak peek at the most anticipated big-screen blockbusters arriving soon."
+        />
         {error
           ? <p>Coming soon movies are temporarily unavailable.</p>
           : <MovieGrid movies={upcoming} comingSoon />}

@@ -1,13 +1,15 @@
+import styles from './NowShowingSwitch.module.css';
+
 export function NowShowingSwitch({ current, onChange }) {
   return (
     <div
-      className="now-showing-switch"
+      className={styles.switch}
       data-current={current}
       role="group"
       aria-label="Now Showing content"
     >
       <button
-        className={current === 'movies' ? 'active' : ''}
+        className={`${styles.button} ${current === 'movies' ? styles.active : ''}`}
         type="button"
         aria-pressed={current === 'movies'}
         onClick={() => onChange('movies')}
@@ -15,7 +17,7 @@ export function NowShowingSwitch({ current, onChange }) {
         Now Showing
       </button>
       <button
-        className={current === 'collections' ? 'active' : ''}
+        className={`${styles.button} ${current === 'collections' ? styles.active : ''}`}
         type="button"
         aria-pressed={current === 'collections'}
         onClick={() => onChange('collections')}
