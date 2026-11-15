@@ -1,4 +1,4 @@
-import { BookingShortcut } from '../BookingShortcut/BookingShortcut';
+import { BookNowFab } from '../BookNowFab';
 import { excludedPages } from '../BookingShortcut/ExcludedPages';
 import { BackToTop } from '../BackToTop/BackToTop';
 import { Footer } from '../Footer/Footer';
@@ -9,7 +9,7 @@ export function Layout({ current, children, loading = false, className }) {
     <>
       <Header current={current} />
       <main className={className}>{children}</main>
-      {!excludedPages.includes(current) && <BookingShortcut />}
+      {!excludedPages.includes(current) && <BookNowFab />}
       <BackToTop />
       {!loading && <Footer />}
     </>
