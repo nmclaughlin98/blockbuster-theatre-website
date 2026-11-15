@@ -1117,6 +1117,61 @@ html.seat-selection-dragging {
         opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+.book-now-fab {
+    position: fixed;
+    bottom: 88px;
+    right: 28px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 18px 30px;
+    font-family: var(--font-heading);
+    font-weight: 800;
+    font-size: 1.1rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    border-radius: var(--radius-full);
+    background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+    color: #0c0d12;
+    border: 1px solid rgba(251, 191, 36, 0.6);
+    cursor: pointer;
+    z-index: 900;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(16px);
+    transition: opacity var(--transition), visibility var(--transition), transform var(--transition);
+    box-shadow: 0 6px 24px rgba(245, 158, 11, 0.55);
+    touch-action: manipulation;
+    animation: book-now-fab-pulse 2.4s ease-in-out infinite;
+}
+
+.book-now-fab.visible {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.book-now-fab:hover {
+    background: linear-gradient(135deg, #fde68a 0%, #fbbf24 100%);
+    color: #000;
+    transform: translateY(-3px);
+    box-shadow: 0 10px 32px rgba(245, 158, 11, 0.75);
+}
+
+.book-now-fab .material-symbols-outlined {
+    font-size: 1.3rem;
+}
+
+@keyframes book-now-fab-pulse {
+    0%, 100% {
+        box-shadow: 0 6px 24px rgba(245, 158, 11, 0.55);
+    }
+    50% {
+        box-shadow: 0 6px 32px rgba(245, 158, 11, 0.9), 0 0 0 8px rgba(245, 158, 11, 0.15);
+    }
+}
+
 .back-to-top {
     position: fixed;
     bottom: 28px;

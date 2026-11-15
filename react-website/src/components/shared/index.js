@@ -1,5 +1,6 @@
 export { asset } from './asset';
 export { BackToTop } from './BackToTop';
+export { BookNowFab } from './BookNowFab';
 export { DatePicker } from './DatePicker/DatePicker';
 export { DirectionalButton } from './DirectionalButton';
 export { Footer } from './Footer';
