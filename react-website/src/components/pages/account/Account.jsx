@@ -149,81 +149,116 @@ function BookingPoster({ movieId, movieTitle, posterUrl }) {
   );
 }
 
-function BookingsPanel({
+function BookingViewControls({ view, setView }) {
+  return (
+    <div className={styles.switcher} aria-label="Booking view">
+      <button type="button" aria-pressed={view === 'upcoming'} onClick={() => setView('upcoming')}>Upcoming</button>
+      <button type="button" aria-pressed={view === 'history'} onClick={() => setView('history')}>History</button>
+    </div>
+  );
+}
+
+function BookingListContent({
   account,
   bookings,
   posters,
   view,
-  setView,
   setSelectedBooking,
-  preview = false,
+  maxItems,
 }) {
-  const displayedBookings = preview ? bookings.slice(0, 3) : bookings;
+  const displayedBookings = maxItems === undefined ? bookings : bookings.slice(0, maxItems);
+  return (
+    <div className={styles.bookingContent}>
+      {account.status === 'bookings-loading' && (
+        <div role="status" className={styles.loading}>
+          <span className="loader" aria-hidden="true" />
+          <span>Loading bookings...</span>
+        </div>
+      )}
+      {account.status === 'bookings-error' && <p role="alert" className={styles.error}>Could not load your bookings. Please refresh and try again.</p>}
+      {account.status === 'ready' && (
+        displayedBookings.length ? (
+          <ul className={styles.bookings}>
+            {displayedBookings.map((booking) => (
+              <li className={styles.booking} key={booking.bookingId}>
+                <div className={styles.bookingDetails}>
+                  <BookingPoster
+                    movieId={booking.movieId}
+                    movieTitle={booking.movieTitle}
+                    posterUrl={posters[booking.movieId]}
+                  />
+                  <div className={styles.bookingText}>
+                    <h3>{booking.movieTitle}</h3>
+                    <p>{formatDate(booking.date)} at {booking.time}</p>
+                    <p>Screen {booking.screen} · Seats {booking.seats.join(', ')}</p>
+                    {booking.bookingRef && <p className={styles.reference}>Ref: {booking.bookingRef}</p>}
+                  </div>
+                </div>
+                <div className={styles.bookingActions}>
+                  <Button
+                    variant={view === 'upcoming' ? 'primary' : 'secondary'}
+                    shape="pill"
+                    disabled={view === 'upcoming' && !booking.bookingRef}
+                    leftIcon={<EyeIcon />}
+                    onClick={() => setSelectedBooking(booking)}
+                    className={styles.ticketActionButton}
+                  >
+                    {view === 'upcoming' ? 'View ticket' : 'View details'}
+                  </Button>
+                  {view === 'upcoming' && (
+                    <TicketDownloadButton
+                      booking={booking}
+                      className={styles.ticketActionButton}
+                      errorClassName={styles.downloadError}
+                    />
+                  )}
+                </div>
+                {view === 'upcoming' && !booking.bookingRef && <p className={styles.note}>No booking reference is available for this ticket.</p>}
+              </li>
+            ))}
+          </ul>
+        ) : <p className={styles.empty}>No {view === 'upcoming' ? 'upcoming' : 'historical'} bookings yet.</p>
+      )}
+    </div>
+  );
+}
+
+function OverviewBookingsCard({ account, bookings, posters, view, setView, setSelectedBooking }) {
   return (
     <section className={styles.bookingsCard} aria-labelledby="bookings-heading">
       <div className={styles.cardHeader}>
         <h2 id="bookings-heading">My Bookings</h2>
-        {/* {preview && <Link className={styles.panelAction} to="/account?tab=bookings">View all bookings <span aria-hidden="true">→</span></Link>} */}
-        <Link className={styles.panelAction} to="/account?tab=settings">
+        <Link className={styles.panelAction} to="/account?tab=bookings">
           <span className={styles.panelActionIcon} aria-hidden="true">confirmation_number</span> View all bookings
         </Link>
       </div>
-      <div className={styles.switcher} aria-label="Booking view">
-        <button type="button" aria-pressed={view === 'upcoming'} onClick={() => setView('upcoming')}>Upcoming</button>
-        <button type="button" aria-pressed={view === 'history'} onClick={() => setView('history')}>History</button>
+      <BookingViewControls view={view} setView={setView} />
+      <BookingListContent
+        account={account}
+        bookings={bookings}
+        posters={posters}
+        view={view}
+        setSelectedBooking={setSelectedBooking}
+        maxItems={3}
+      />
+    </section>
+  );
+}
+
+function AllBookingsCard({ account, bookings, posters, view, setView, setSelectedBooking }) {
+  return (
+    <section className={styles.bookingsCard} aria-labelledby="bookings-heading">
+      <div className={styles.cardHeader}>
+        <h2 id="bookings-heading">My Bookings</h2>
       </div>
-      <div className={styles.bookingContent}>
-        {account.status === 'bookings-loading' && (
-          <div role="status" className={styles.loading}>
-            <span className="loader" aria-hidden="true" />
-            <span>Loading bookings...</span>
-          </div>
-        )}
-        {account.status === 'bookings-error' && <p role="alert" className={styles.error}>Could not load your bookings. Please refresh and try again.</p>}
-        {account.status === 'ready' && (
-          displayedBookings.length ? (
-            <ul className={styles.bookings}>
-              {displayedBookings.map((booking) => (
-                <li className={styles.booking} key={booking.bookingId}>
-                  <div className={styles.bookingDetails}>
-                    <BookingPoster
-                      movieId={booking.movieId}
-                      movieTitle={booking.movieTitle}
-                      posterUrl={posters[booking.movieId]}
-                    />
-                    <div className={styles.bookingText}>
-                      <h3>{booking.movieTitle}</h3>
-                      <p>{formatDate(booking.date)} at {booking.time}</p>
-                      <p>Screen {booking.screen} · Seats {booking.seats.join(', ')}</p>
-                      {booking.bookingRef && <p className={styles.reference}>Ref: {booking.bookingRef}</p>}
-                    </div>
-                  </div>
-                  <div className={styles.bookingActions}>
-                    <Button
-                      variant={view === 'upcoming' ? 'primary' : 'secondary'}
-                      shape="pill"
-                      disabled={view === 'upcoming' && !booking.bookingRef}
-                      leftIcon={<EyeIcon />}
-                      onClick={() => setSelectedBooking(booking)}
-                      className={styles.ticketActionButton}
-                    >
-                      {view === 'upcoming' ? 'View ticket' : 'View details'}
-                    </Button>
-                    {view === 'upcoming' && (
-                      <TicketDownloadButton
-                        booking={booking}
-                        className={styles.ticketActionButton}
-                        errorClassName={styles.downloadError}
-                      />
-                    )}
-                  </div>
-                  {view === 'upcoming' && !booking.bookingRef && <p className={styles.note}>No booking reference is available for this ticket.</p>}
-                </li>
-              ))}
-            </ul>
-          ) : <p className={styles.empty}>No {view === 'upcoming' ? 'upcoming' : 'historical'} bookings yet.</p>
-        )}
-      </div>
+      <BookingViewControls view={view} setView={setView} />
+      <BookingListContent
+        account={account}
+        bookings={bookings}
+        posters={posters}
+        view={view}
+        setSelectedBooking={setSelectedBooking}
+      />
     </section>
   );
 }
@@ -410,19 +445,18 @@ export function Account({
           activeTab === 'overview' ? (
             <div className={styles.columns}>
               <Profile profile={account.profile} />
-              <BookingsPanel
+              <OverviewBookingsCard
                 account={account}
                 bookings={bookings}
                 posters={posters}
                 view={view}
                 setView={setView}
                 setSelectedBooking={setSelectedBooking}
-                preview
               />
             </div>
           ) : activeTab === 'bookings' ? (
             <div className={styles.fullWidth}>
-              <BookingsPanel
+              <AllBookingsCard
                 account={account}
                 bookings={bookings}
                 posters={posters}

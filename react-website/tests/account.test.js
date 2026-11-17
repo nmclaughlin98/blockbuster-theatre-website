@@ -160,12 +160,15 @@ test('drives account tabs from the URL and shows the full bookings list outside 
       makeBooking(id, `2099-01-0${index + 1}`, '10:00')),
   });
 
-  const bookingCard = page.container.querySelector('#bookings-heading').closest('section');
-  assert.equal(bookingCard.querySelectorAll('ul > li').length, 3);
-  const allBookings = page.container.querySelector('a[href="/account?tab=bookings"]');
+  const overviewBookingsCard = page.container.querySelector('#bookings-heading').closest('section');
+  assert.equal(overviewBookingsCard.querySelectorAll('ul > li').length, 3);
+  const allBookings = overviewBookingsCard.querySelector('a[href="/account?tab=bookings"]');
+  assert.ok(allBookings);
   await act(async () => allBookings.dispatchEvent(new window.MouseEvent('click', { bubbles: true, cancelable: true })));
   assert.equal(page.container.querySelector('nav[aria-label="Account sections"] a[aria-current="page"]').textContent, 'My Bookings');
-  assert.equal(page.container.querySelector('#bookings-heading').closest('section').querySelectorAll('ul > li').length, 4);
+  const allBookingsCard = page.container.querySelector('#bookings-heading').closest('section');
+  assert.equal(allBookingsCard.querySelectorAll('ul > li').length, 4);
+  assert.equal(allBookingsCard.querySelector('a[href="/account?tab=bookings"]'), null);
 
   const settingsTab = [...page.container.querySelectorAll('nav[aria-label="Account sections"] a')].find((tab) => tab.textContent === 'Account Settings');
   await act(async () => settingsTab.dispatchEvent(new window.MouseEvent('click', { bubbles: true, cancelable: true })));

@@ -33,6 +33,43 @@
     background: var(--glass-bg);
     box-shadow: 0 8px 26px rgba(0, 0, 0, 0.45), 0 0 18px var(--accent-red-hover-transparent);
     box-sizing: border-box;
+    animation: slideOpen 180ms ease-out both;
+}
+
+.closing {
+    animation: slideClose 180ms ease-in both;
+    pointer-events: none;
+}
+
+@keyframes slideOpen {
+    from {
+        opacity: 0;
+        transform: translateY(-0.4rem);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideClose {
+    from {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    to {
+        opacity: 0;
+        transform: translateY(-0.4rem);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .dropdown,
+    .closing {
+        animation: none;
+    }
 }
 
 .header {

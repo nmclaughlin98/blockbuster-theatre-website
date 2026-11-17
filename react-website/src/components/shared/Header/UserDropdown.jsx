@@ -1,24 +1,61 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { COGNITO_AUTH_STATE_CHANGE_EVENT } from '../../../auth/cognitoAuth';
 import { UserAvatar } from '../UserAvatar/UserAvatar';
 import styles from './UserDropdown.module.css';
 
+const CLOSE_ANIMATION_DURATION_MS = 180;
+
 export function UserDropdown({ account, authClient }) {
     const [menuOpen, setMenuOpen] = useState(false);
+    const [menuMounted, setMenuMounted] = useState(false);
+    const [menuClosing, setMenuClosing] = useState(false);
     const [signOutError, setSignOutError] = useState('');
     const [signingOut, setSigningOut] = useState(false);
     const menuRef = useRef(null);
-    const closeMenu = () => setMenuOpen(false);
+    const triggerRef = useRef(null);
+    const closeTimerRef = useRef(null);
+
+    const closeMenu = useCallback(() => {
+        setMenuOpen(false);
+        if (!menuMounted) return;
+
+        setMenuClosing(true);
+        window.clearTimeout(closeTimerRef.current);
+        const prefersReducedMotion = window.matchMedia
+            && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (prefersReducedMotion) {
+            setMenuMounted(false);
+            setMenuClosing(false);
+            return;
+        }
+
+        closeTimerRef.current = window.setTimeout(() => {
+            setMenuMounted(false);
+            setMenuClosing(false);
+            closeTimerRef.current = null;
+        }, CLOSE_ANIMATION_DURATION_MS);
+    }, [menuMounted]);
+
+    const openMenu = useCallback(() => {
+        window.clearTimeout(closeTimerRef.current);
+        closeTimerRef.current = null;
+        setMenuClosing(false);
+        setMenuMounted(true);
+        setMenuOpen(true);
+    }, []);
 
     useEffect(() => {
         if (!menuOpen) return undefined;
 
         function handlePointerDown(event) {
-            if (!menuRef.current?.contains(event.target)) setMenuOpen(false);
+            if (!menuRef.current?.contains(event.target)) closeMenu();
         }
         function handleKeyDown(event) {
-            if (event.key === 'Escape') setMenuOpen(false);
+            if (event.key === 'Escape') {
+                closeMenu();
+                triggerRef.current?.focus();
+            }
         }
 
         document.addEventListener('pointerdown', handlePointerDown);
@@ -27,7 +64,11 @@ export function UserDropdown({ account, authClient }) {
             document.removeEventListener('pointerdown', handlePointerDown);
             document.removeEventListener('keydown', handleKeyDown);
         };
-    }, [menuOpen]);
+    }, [menuOpen, closeMenu]);
+
+    useEffect(() => () => {
+        window.clearTimeout(closeTimerRef.current);
+    }, []);
 
     async function handleSignOut() {
         if (signingOut) return;
@@ -50,15 +91,21 @@ export function UserDropdown({ account, authClient }) {
             <button
                 type="button"
                 className={styles.avatarTrigger}
+                ref={triggerRef}
                 aria-label={`Open account menu for ${account.displayName || 'signed-in user'}`}
                 aria-haspopup="menu"
                 aria-expanded={menuOpen}
-                onClick={() => setMenuOpen((isOpen) => !isOpen)}
+                onClick={() => (menuOpen ? closeMenu() : openMenu())}
             >
                 <UserAvatar name={account.displayName} imageUrl={account.imageUrl} size="nav" />
             </button>
-            {menuOpen && (
-                <div className={styles.dropdown} role="menu">
+            {menuMounted && (
+                <div
+                    className={`${styles.dropdown} ${menuClosing ? styles.closing : ''}`}
+                    role="menu"
+                    aria-hidden={menuClosing}
+                    inert={menuClosing}
+                >
                     <div className={styles.header}>
                         <strong>{account.displayName || 'Name unavailable'}</strong>
                         <span>{account.email ? account.email.toLowerCase() : 'Email unavailable'}</span>

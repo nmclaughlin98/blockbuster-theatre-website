@@ -415,6 +415,8 @@ test('shows the Cognito profile dropdown and supports dismiss and sign-out', asy
   await act(async () => {
     document.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
   });
+  assert.equal(avatarTrigger.getAttribute('aria-expanded'), 'false');
+  await act(async () => new Promise((resolve) => window.setTimeout(resolve, 200)));
   assert.equal(page.container.querySelector('[role="menu"]'), null);
 
   await act(async () => {
@@ -427,6 +429,7 @@ test('shows the Cognito profile dropdown and supports dismiss and sign-out', asy
     await Promise.resolve();
   });
   assert.equal(signOutCalls, 1);
+  await act(async () => new Promise((resolve) => window.setTimeout(resolve, 200)));
   assert.equal(page.container.querySelector('[role="menu"]'), null);
 
   session = { tokens: undefined };
