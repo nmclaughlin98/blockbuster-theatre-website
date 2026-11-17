@@ -25,7 +25,7 @@ function formatScreeningDate(date, time) {
 }
 
 export function PaymentStep({
-  initialData, onBack, onNext, onSeatConflict, onTicketIssue, onToast,
+  initialData, onBack, onNext, onSeatConflict, onTicketIssue, onToast, skipGuestInfo = false,
 }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submissionStatus, setSubmissionStatus] = useState('');
@@ -109,7 +109,7 @@ export function PaymentStep({
   return (
     <fieldset className="active" data-step="3">
       <StepHeader
-        title="Step 4: Review Your Booking"
+        title={`Step ${skipGuestInfo ? 3 : 4}: Review Your Booking`}
         description="Review the details below to reserve your seats. No card details are collected or submitted."
       />
       <div className="review-details-grid">

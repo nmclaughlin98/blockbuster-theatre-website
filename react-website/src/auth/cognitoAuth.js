@@ -105,6 +105,17 @@ export function getCognitoFirstName(session) {
     .join(' ');
 }
 
+export function getCognitoCustomer(session) {
+  const claims = session.tokens?.idToken?.payload ?? {};
+  const getClaim = (value) => (typeof value === 'string' ? value.trim() : '');
+
+  return {
+    firstName: getClaim(claims.given_name),
+    surname: getClaim(claims.family_name),
+    email: getClaim(claims.email),
+  };
+}
+
 export function getCognitoFullName(session) {
   const claims = session.tokens?.idToken?.payload ?? {};
   if (typeof claims.name === 'string' && claims.name.trim()) return claims.name.trim();
