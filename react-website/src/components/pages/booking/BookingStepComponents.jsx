@@ -1,8 +1,10 @@
 import { DirectionalButton } from '../../shared';
 
-const steps = ['Tickets', 'Select Seats', 'Guest Info', 'Review', 'Confirmed'];
+const allSteps = ['Tickets', 'Select Seats', 'Guest Info', 'Review', 'Confirmed'];
 
-export function ProgressBar({ currentStep }) {
+export function ProgressBar({ currentStep: rawStep, skipGuestInfo = false }) {
+  const steps = skipGuestInfo ? allSteps.filter((label) => label !== 'Guest Info') : allSteps;
+  const currentStep = skipGuestInfo && rawStep > 2 ? rawStep - 1 : rawStep;
   return (
     <ol id="progressbar" aria-label="Booking progress">
       {steps.map((label, index) => (

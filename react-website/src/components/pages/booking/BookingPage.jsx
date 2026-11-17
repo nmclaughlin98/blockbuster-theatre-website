@@ -1,5 +1,6 @@
 import styles from './BookingPage.module.css';
 import { useEffect, useState } from 'react';
+import { cognitoAuth, getCognitoCustomer } from '../../../auth/cognitoAuth';
 import { CenteredHeadingBlock, Layout } from '../../shared';
 import { Toast } from '../../shared/Toast/Toast';
 import { useToast } from '../../shared/Toast/useToast';
@@ -25,6 +26,30 @@ export function Booking() {
   const [step, setStep] = useState(0);
   const [booking, setBooking] = useState(initialBooking);
   const { toast, setToastMessage } = useToast();
+
+  const [signedInCustomer, setSignedInCustomer] = useState(null);
+
+  useEffect(() => {
+    let active = true;
+    async function loadSignedInCustomer() {
+      try {
+        const session = await cognitoAuth.fetchAuthSession();
+        const customer = getCognitoCustomer(session);
+        const complete = session.tokens?.accessToken
+          && customer.firstName && customer.surname && customer.email;
+        if (active && complete) {
+          setSignedInCustomer(customer);
+          setBooking((current) => ({ ...current, customer }));
+        }
+      } catch {
+        // Not signed in or Cognito unconfigured: fall back to guest details.
+      }
+    }
+    loadSignedInCustomer();
+    return () => { active = false; };
+  }, []);
+
+  const skipGuestInfo = Boolean(signedInCustomer);
 
   useEffect(() => {
     document.title = 'Blockbuster Theatre - Book Now';
@@ -52,7 +77,7 @@ export function Booking() {
 
   function goBack() {
     setToastMessage('');
-    setStep((current) => Math.max(0, current - 1));
+    setStep((current) => (skipGuestInfo && current === 3 ? 1 : Math.max(0, current - 1)));
   }
 
   return (
@@ -62,7 +87,7 @@ export function Booking() {
           title="Book Your Tickets"
           description="Reserve the best seats in the house with our interactive seat picker."
         />
-        <ProgressBar currentStep={step} />
+        <ProgressBar currentStep={step} skipGuestInfo={skipGuestInfo} />
         <form className="booking-form" onSubmit={(event) => event.preventDefault()}>
           {step === 0 && (
             <TicketSelection
@@ -75,11 +100,11 @@ export function Booking() {
             <SeatSelection
               initialData={booking}
               onBack={goBack}
-              onNext={(seats) => navigateToStep(2, { seats })}
+              onNext={(seats) => navigateToStep(skipGuestInfo ? 3 : 2, { seats })}
               onToast={setToastMessage}
             />
           )}
-          {step === 2 && (
+          {step === 2 && !skipGuestInfo && (
             <GuestDetails
               initialData={booking.customer}
               onBack={goBack}
@@ -89,6 +114,7 @@ export function Booking() {
           )}
           {step === 3 && (
             <PaymentStep
+              skipGuestInfo={skipGuestInfo}
               initialData={booking}
               onBack={goBack}
               onNext={(confirmation) => navigateToStep(4, { confirmation })}

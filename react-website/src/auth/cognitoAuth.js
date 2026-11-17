@@ -113,6 +113,16 @@ export function getCognitoFullName(session) {
     .join(' ');
 }
 
+export function getCognitoCustomer(session) {
+  const claims = session.tokens?.idToken?.payload ?? {};
+  const text = (value) => (typeof value === 'string' ? value.trim() : '');
+  return {
+    firstName: text(claims.given_name),
+    surname: text(claims.family_name),
+    email: text(claims.email),
+  };
+}
+
 export const cognitoAuth = {
   signIn: signInWithCognito,
   signUp: signUpWithCognito,
