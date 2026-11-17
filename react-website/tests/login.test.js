@@ -354,6 +354,27 @@ test('shows sign-in controls in the desktop navbar and mobile drawer when signed
   await page.unmount();
 });
 
+test('hides navbar auth controls until Cognito resolves', async () => {
+  let resolveSession;
+  const page = await renderHeader({
+    fetchAuthSession: () => new Promise((resolve) => { resolveSession = resolve; }),
+  });
+
+  assert.equal(page.container.querySelector('.nav-desktop-auth'), null);
+  assert.equal(page.container.querySelector('.nav-mobile-auth'), null);
+  assert.equal(page.container.querySelector('.nav-account-cta-btn'), null);
+  assert.equal(page.container.querySelector('.nav-avatar-trigger'), null);
+
+  await act(async () => {
+    resolveSession({ tokens: undefined });
+    await Promise.resolve();
+  });
+  assert.equal(page.container.querySelectorAll('.nav-account-cta-btn').length, 2);
+  assert.ok(page.container.querySelector('.nav-desktop-auth'));
+  assert.ok(page.container.querySelector('.nav-mobile-auth'));
+  await page.unmount();
+});
+
 test('shows the Cognito profile dropdown and supports dismiss and sign-out', async () => {
   let session = {
     tokens: {
@@ -376,8 +397,10 @@ test('shows the Cognito profile dropdown and supports dismiss and sign-out', asy
   });
   assert.match(page.container.querySelector('.nav-dropdown').textContent, /Jane Doe/);
   assert.match(page.container.querySelector('.nav-dropdown').textContent, /jane@example.com/);
-  assert.ok(page.container.querySelector('[role="menuitem"][href="/account"]'));
-  assert.equal(page.container.querySelectorAll('.nav-dropdown a').length, 2);
+  assert.ok(page.container.querySelector('.nav-dropdown-header[href="/account"]'));
+  assert.ok(page.container.querySelector('[role="menuitem"][href="/account?tab=bookings"]'));
+  assert.ok(page.container.querySelector('[role="menuitem"][href="/account?tab=settings"]'));
+  assert.equal(page.container.querySelectorAll('.nav-dropdown a').length, 3);
 
   await act(async () => {
     document.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));

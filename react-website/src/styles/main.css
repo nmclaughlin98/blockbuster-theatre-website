@@ -400,6 +400,19 @@ header {
     min-width: 0;
     padding: 0.55rem 0.65rem 0.75rem;
     border-bottom: 1px solid var(--border-subtle);
+    color: inherit;
+    text-decoration: none;
+}
+
+.nav-dropdown > a.nav-dropdown-header {
+    display: grid;
+    border: 0;
+    border-bottom: 1px solid var(--border-subtle);
+    border-radius: 0;
+}
+
+.nav-dropdown > a.nav-dropdown-header:hover {
+    background: var(--bg-surface-elevated);
 }
 
 .nav-dropdown-header strong,

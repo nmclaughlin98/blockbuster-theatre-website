@@ -1,12 +1,10 @@
 import { useEffect, useState } from 'react';
 import { useNetworkSpeed } from '../../../utils/useNetworkSpeed';
 import { getFilmSelections } from '../shared/bookingApi';
-import { useMovies } from '../shared/useMovies';
 import { SectionHeader } from '../../shared';
 import { OfferCard } from './OfferCard';
 
-export function Offers() {
-  const { movies } = useMovies();
+export function Offers({ movies = [] }) {
   const isSlowConnection = useNetworkSpeed();
   const [state, setState] = useState({ offers: [], loading: true, error: null });
 

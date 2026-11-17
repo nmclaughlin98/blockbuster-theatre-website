@@ -1,12 +1,12 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import {
   COGNITO_AUTH_STATE_CHANGE_EVENT,
   cognitoAuth,
   getCognitoFullName,
 } from '../../../auth/cognitoAuth';
 import { Button, Layout, TicketDownloadButton, TicketModal, UserAvatar } from '../../shared';
-import { EyeIcon, DownloadIcon } from '../../shared/Button/icons';
+import { EyeIcon } from '../../shared/Button/icons';
 import { getPosterUrl } from '../../../utils/posterImages';
 import { getAccountBookings, getMovieDetail } from '../shared/bookingApi';
 import styles from './Account.module.css';
@@ -43,8 +43,11 @@ function getProfile(session) {
 
 function Profile({ profile }) {
   return (
-    <div className={styles.profileCard}>
-      <h2>My Profile</h2>
+    <section className={styles.profileCard} aria-labelledby="profile-heading">
+      <div className={styles.cardHeader}>
+        <h2 id="profile-heading">My Profile</h2>
+        <Link className={styles.panelAction} to="/account?tab=settings">Edit Profile &amp; Security <span aria-hidden="true">→</span></Link>
+      </div>
       <div className={styles.identity}>
         <UserAvatar name={profile.name} size="profile" />
         <div className={styles.identityText}>
@@ -53,31 +56,29 @@ function Profile({ profile }) {
         </div>
       </div>
       <div className={styles.profileFields}>
-        <label className={styles.field}>
+        <div className={styles.field}>
           <span>Full name</span>
-          <input value={profile.name} placeholder="Not available" readOnly disabled />
-        </label>
-        <label className={styles.field}>
+          <strong>{profile.name || 'Not available'}</strong>
+        </div>
+        <div className={styles.field}>
           <span>Email address</span>
-          <input type="email" value={profile.email} placeholder="Not available" readOnly disabled />
-        </label>
-        <label className={styles.field}>
+          <strong>{profile.email || 'Not available'}</strong>
+        </div>
+        <div className={styles.field}>
           <span>Phone number</span>
-          <input type="tel" value={profile.phone} placeholder="Not available" readOnly />
-        </label>
+          <strong>{profile.phone || 'Not available'}</strong>
+        </div>
       </div>
-      <div className={styles.profileActions}>
-        <p>Profile editing is not available yet.</p>
-        <Button variant="secondary" shape="pill" disabled>Save changes</Button>
-      </div>
-    </div>
+    </section>
   );
 }
 
 function SecuritySettings() {
   return (
     <section className={styles.securityCard} aria-labelledby="security-heading">
-      <h2 id="security-heading">Account &amp; Security</h2>
+      <div className={styles.cardHeader}>
+        <h2 id="security-heading">Account &amp; Security</h2>
+      </div>
       <div className={styles.securityContent}>
         <Button variant="secondary" shape="pill" disabled>Change password</Button>
         <div className={styles.alertSettings}>
@@ -145,6 +146,82 @@ function BookingPoster({ movieId, movieTitle, posterUrl }) {
   );
 }
 
+function BookingsPanel({
+  account,
+  bookings,
+  posters,
+  view,
+  setView,
+  setSelectedBooking,
+  preview = false,
+}) {
+  const displayedBookings = preview ? bookings.slice(0, 3) : bookings;
+  return (
+    <section className={styles.bookingsCard} aria-labelledby="bookings-heading">
+      <div className={styles.cardHeader}>
+        <h2 id="bookings-heading">My Bookings</h2>
+        {preview && <Link className={styles.panelAction} to="/account?tab=bookings">View all bookings <span aria-hidden="true">→</span></Link>}
+      </div>
+      <div className={styles.switcher} aria-label="Booking view">
+        <button type="button" aria-pressed={view === 'upcoming'} onClick={() => setView('upcoming')}>Upcoming</button>
+        <button type="button" aria-pressed={view === 'history'} onClick={() => setView('history')}>History</button>
+      </div>
+      <div className={styles.bookingContent}>
+        {account.status === 'bookings-loading' && (
+          <div role="status" className={styles.loading}>
+            <span className="loader" aria-hidden="true" />
+            <span>Loading bookings...</span>
+          </div>
+        )}
+        {account.status === 'bookings-error' && <p role="alert" className={styles.error}>Could not load your bookings. Please refresh and try again.</p>}
+        {account.status === 'ready' && (
+          displayedBookings.length ? (
+            <ul className={styles.bookings}>
+              {displayedBookings.map((booking) => (
+                <li className={styles.booking} key={booking.bookingId}>
+                  <div className={styles.bookingDetails}>
+                    <BookingPoster
+                      movieId={booking.movieId}
+                      movieTitle={booking.movieTitle}
+                      posterUrl={posters[booking.movieId]}
+                    />
+                    <div className={styles.bookingText}>
+                      <h3>{booking.movieTitle}</h3>
+                      <p>{formatDate(booking.date)} at {booking.time}</p>
+                      <p>Screen {booking.screen} · Seats {booking.seats.join(', ')}</p>
+                      {booking.bookingRef && <p className={styles.reference}>Ref: {booking.bookingRef}</p>}
+                    </div>
+                  </div>
+                  <div className={styles.bookingActions}>
+                    <Button
+                      variant={view === 'upcoming' ? 'primary' : 'secondary'}
+                      shape="pill"
+                      disabled={view === 'upcoming' && !booking.bookingRef}
+                      leftIcon={<EyeIcon />}
+                      onClick={() => setSelectedBooking(booking)}
+                      className={styles.ticketActionButton}
+                    >
+                      {view === 'upcoming' ? 'View ticket' : 'View details'}
+                    </Button>
+                    {view === 'upcoming' && (
+                      <TicketDownloadButton
+                        booking={booking}
+                        className={styles.ticketActionButton}
+                        errorClassName={styles.downloadError}
+                      />
+                    )}
+                  </div>
+                  {view === 'upcoming' && !booking.bookingRef && <p className={styles.note}>No booking reference is available for this ticket.</p>}
+                </li>
+              ))}
+            </ul>
+          ) : <p className={styles.empty}>No {view === 'upcoming' ? 'upcoming' : 'historical'} bookings yet.</p>
+        )}
+      </div>
+    </section>
+  );
+}
+
 export function Account({
   authClient = cognitoAuth,
   loadBookings = getAccountBookings,
@@ -152,6 +229,9 @@ export function Account({
   onSignedOut,
 } = {}) {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const requestedTab = searchParams.get('tab');
+  const activeTab = ['overview', 'bookings', 'settings'].includes(requestedTab) ? requestedTab : 'overview';
   const [account, setAccount] = useState({ status: 'loading' });
   const [view, setView] = useState('upcoming');
   const [selectedBooking, setSelectedBooking] = useState(null);
@@ -278,94 +358,76 @@ export function Account({
     <Layout className={styles.root} current="account">
       <section className={styles.page} aria-labelledby="account-heading">
         <div className={styles.heading}>
-          <div>
-            <div className={styles.titleRow}>
-              <h1 id="account-heading">My Account</h1>
-              {signedIn && (
-                <Button
-                  variant="secondary"
-                  shape="pill"
-                  disabled={signingOut}
-                  onClick={handleSignOut}
-                >
-                  {signingOut ? 'Logging out...' : 'Log out'}
-                </Button>
-              )}
-            </div>
+          <div className={styles.titleRow}>
+            <h1 id="account-heading">My Account</h1>
+            {signedIn && (
+              <Button
+                variant="secondary"
+                shape="pill"
+                disabled={signingOut}
+                onClick={handleSignOut}
+              >
+                {signingOut ? 'Logging out...' : 'Log out'}
+              </Button>
+            )}
           </div>
         </div>
+        {signedIn && (
+          <nav className={styles.tabs} aria-label="Account sections">
+            {[
+              ['overview', 'Overview'],
+              ['bookings', 'My Bookings'],
+              ['settings', 'Account Settings'],
+            ].map(([tab, label]) => (
+              <Link
+                key={tab}
+                to={`/account?tab=${tab}`}
+                className={styles.tab}
+                aria-current={activeTab === tab ? 'page' : undefined}
+                onClick={(event) => {
+                  event.preventDefault();
+                  setSearchParams({ tab });
+                }}
+              >
+                {label}
+              </Link>
+            ))}
+          </nav>
+        )}
         {signOutError && <p role="alert" className={styles.error}>{signOutError}</p>}
         {account.status === 'loading' && <p role="status">Checking sign-in status...</p>}
         {account.status === 'signed-out' && <p>Please <Link to="/login">log in</Link> to view your account.</p>}
         {account.status === 'error' && <p role="alert" className={styles.error}>Could not check your account. Please refresh and try again.</p>}
         {signedIn && (
-          <div className={styles.columns}>
-            <div className={styles.profileColumn}>
+          activeTab === 'overview' ? (
+            <div className={styles.columns}>
               <Profile profile={account.profile} />
+              <BookingsPanel
+                account={account}
+                bookings={bookings}
+                posters={posters}
+                view={view}
+                setView={setView}
+                setSelectedBooking={setSelectedBooking}
+                preview
+              />
+            </div>
+          ) : activeTab === 'bookings' ? (
+            <div className={styles.fullWidth}>
+              <BookingsPanel
+                account={account}
+                bookings={bookings}
+                posters={posters}
+                view={view}
+                setView={setView}
+                setSelectedBooking={setSelectedBooking}
+              />
+            </div>
+          ) : (
+            <div className={styles.settings}>
               <SecuritySettings />
             </div>
-            <div className={styles.bookingsColumn}>
-              <section className={styles.bookingsCard} aria-labelledby="bookings-heading">
-                <h2 id="bookings-heading">My bookings</h2>
-                <div className={styles.switcher} aria-label="Booking view">
-                  <button type="button" aria-pressed={view === 'upcoming'} onClick={() => setView('upcoming')}>Upcoming</button>
-                  <button type="button" aria-pressed={view === 'history'} onClick={() => setView('history')}>History</button>
-                </div>
-                <div className={styles.bookingContent}>
-                  {account.status === 'bookings-loading' && (
-                    <div role="status" className={styles.loading}>
-                      <span className="loader" aria-hidden="true" />
-                      <span>Loading bookings...</span>
-                    </div>
-                  )}
-                  {account.status === 'bookings-error' && <p role="alert" className={styles.error}>Could not load your bookings. Please refresh and try again.</p>}
-                  {account.status === 'ready' && (
-                    bookings.length ? (
-                      <ul className={styles.bookings}>
-                        {bookings.map((booking) => (
-                          <li className={styles.booking} key={booking.bookingId}>
-                            <div className={styles.bookingDetails}>
-                              <BookingPoster
-                                movieId={booking.movieId}
-                                movieTitle={booking.movieTitle}
-                                posterUrl={posters[booking.movieId]}
-                              />
-                              <div className={styles.bookingText}>
-                                <h3>{booking.movieTitle}</h3>
-                                <p>{formatDate(booking.date)} at {booking.time}</p>
-                                <p>Screen {booking.screen} · Seats {booking.seats.join(', ')}</p>
-                                {booking.bookingRef && <p className={styles.reference}>Ref: {booking.bookingRef}</p>}
-                              </div>
-                            </div>
-                            <div className={styles.bookingActions}>
-                              <Button
-                                variant={view === 'upcoming' ? 'primary' : 'secondary'}
-                                shape="pill"
-                                disabled={view === 'upcoming' && !booking.bookingRef}
-                                leftIcon={<EyeIcon />}
-                                onClick={() => setSelectedBooking(booking)}
-                                className={styles.ticketActionButton}
-                              >
-                                {view === 'upcoming' ? 'View ticket' : 'View details'}
-                              </Button>
-                              {view === 'upcoming' && (
-                                <TicketDownloadButton
-                                  booking={booking}
-                                  className={styles.ticketActionButton}
-                                  errorClassName={styles.downloadError}
-                                />
-                              )}
-                            </div>
-                            {view === 'upcoming' && !booking.bookingRef && <p className={styles.note}>No booking reference is available for this ticket.</p>}
-                          </li>
-                        ))}
-                      </ul>
-                    ) : <p className={styles.empty}>No {view === 'upcoming' ? 'upcoming' : 'historical'} bookings yet.</p>
-                  )}
-                </div>
-              </section>
-            </div>
-          </div>
+          )
         )}
         {signedIn && selectedBooking && (
           <TicketModal booking={selectedBooking} onClose={closeTicket} showQRCode={isUpcoming(selectedBooking)} />

@@ -44,8 +44,35 @@ test('loads at most three active additional collections in configured order', as
     );
 
     assert.deepEqual(result.collections.map(({ collectionId }) => collectionId), ['2', '4', '5']);
-    assert.deepEqual(requestedIds, ['1', '2', '3', '4', '5']);
+    assert.deepEqual(requestedIds, ['1', '2', '3', '4', '5', '6']);
     assert.equal(result.error, null);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test('starts all additional collection requests before any response resolves', async () => {
+  const originalFetch = globalThis.fetch;
+  const requestedIds = [];
+  const resolveRequests = new Map();
+  globalThis.fetch = (url) => new Promise((resolve) => {
+    const collectionId = new URL(url).pathname.split('/').at(-1);
+    requestedIds.push(collectionId);
+    resolveRequests.set(collectionId, resolve);
+  });
+
+  try {
+    const pending = loadAdditionalCollections(
+      ['8706566', '8706524'],
+      new AbortController().signal,
+    );
+    assert.deepEqual(requestedIds, ['8706566', '8706524']);
+
+    resolveRequests.get('8706524')(new Response(JSON.stringify(collectionResponse('8706524'))));
+    resolveRequests.get('8706566')(new Response(JSON.stringify(collectionResponse('8706566'))));
+    const result = await pending;
+
+    assert.deepEqual(result.collections.map(({ collectionId }) => collectionId), ['8706566', '8706524']);
   } finally {
     globalThis.fetch = originalFetch;
   }

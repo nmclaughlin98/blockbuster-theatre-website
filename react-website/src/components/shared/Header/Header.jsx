@@ -121,12 +121,12 @@ function UserMenu({ account, authClient }) {
             </button>
             {menuOpen && (
                 <div className="nav-dropdown" role="menu">
-                    <div className="nav-dropdown-header">
+                    <Link to="/account" className="nav-dropdown-header" role="menuitem" onClick={closeMenu}>
                         <strong>{account.displayName || 'Name unavailable'}</strong>
                         <span>{account.email || 'Email unavailable'}</span>
-                    </div>
-                    <Link to="/account" role="menuitem" onClick={closeMenu}>My Bookings</Link>
-                    <Link to="/account" role="menuitem" onClick={closeMenu}>Account Settings</Link>
+                    </Link>
+                    <Link to="/account?tab=bookings" role="menuitem" onClick={closeMenu}>My Bookings</Link>
+                    <Link to="/account?tab=settings" role="menuitem" onClick={closeMenu}>Account Settings</Link>
                     {signOutError && <p className="nav-signout-error" role="alert">{signOutError}</p>}
                     <button type="button" role="menuitem" onClick={handleSignOut} disabled={signingOut}>
                         <SignOutIcon />
@@ -140,6 +140,7 @@ function UserMenu({ account, authClient }) {
 
 function Navigation({ current, open, onNavigate, account, authClient }) {
     const isAuthenticated = account.isAuthenticated;
+    const isLoading = account.status === 'loading';
     return (
         <nav className={`nav primary-nav ${open ? 'open' : ''}`}>
             <ul className="menu">
@@ -154,6 +155,7 @@ function Navigation({ current, open, onNavigate, account, authClient }) {
                         </Link>
                     </li>
                 ))}
+                {!isLoading && (
                 <li className="nav-desktop-auth">
                     {isAuthenticated ? (
                 <UserMenu account={account} authClient={authClient} />
@@ -163,7 +165,9 @@ function Navigation({ current, open, onNavigate, account, authClient }) {
                 />
                     )}
                 </li>
+                )}
             </ul>
+            {!isLoading && (
             <div className="nav-mobile-auth">
                 <div className="nav-auth-divider" />
                 {isAuthenticated ? (
@@ -182,6 +186,7 @@ function Navigation({ current, open, onNavigate, account, authClient }) {
                     <SignInLink onClick={(e) => handleBlurClick(e, onNavigate)} />
                 )}
             </div>
+            )}
         </nav>
     );
 }
@@ -205,6 +210,7 @@ function MenuButton({ open, onClick }) {
 export function Header({ current, authClient = cognitoAuth }) {
     const [open, setOpen] = useState(false);
     const [account, setAccount] = useState({
+        status: 'loading',
         isAuthenticated: false,
         displayName: '',
         email: '',
@@ -225,6 +231,7 @@ export function Header({ current, authClient = cognitoAuth }) {
                 const isAuthenticated = Boolean(session.tokens?.accessToken);
                 const claims = session.tokens?.idToken?.payload ?? {};
                 setAccount({
+                    status: isAuthenticated ? 'authenticated' : 'signed-out',
                     isAuthenticated,
                     displayName: isAuthenticated ? getCognitoFullName(session) : '',
                     email: isAuthenticated && typeof claims.email === 'string' ? claims.email.trim() : '',
@@ -232,7 +239,7 @@ export function Header({ current, authClient = cognitoAuth }) {
                 });
             } catch (error) {
                 if (active && currentRequestId === requestId) {
-                    setAccount({ isAuthenticated: false, displayName: '', email: '', imageUrl: undefined });
+                    setAccount({ status: 'signed-out', isAuthenticated: false, displayName: '', email: '', imageUrl: undefined });
                     console.error('Unable to check the Cognito session for the header.', error);
                 }
             }

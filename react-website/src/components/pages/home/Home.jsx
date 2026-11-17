@@ -27,8 +27,9 @@ export function Home() {
     collections: additionalCollections,
     error: additionalCollectionsError,
   } = useAdditionalCollections(ADDITIONAL_COLLECTION_IDS);
-  const current = movies.filter((movie) => movie.visible !== false && movie.isComingSoon !== true);
-  const carousel = movies.filter((movie) => movie.visible !== false && movie.isCarousel === true);
+  const visibleMovies = movies.filter((movie) => movie.visible !== false);
+  const current = visibleMovies.filter((movie) => movie.isComingSoon !== true);
+  const carousel = visibleMovies.filter((movie) => movie.isCarousel === true);
 
   if (loading) {
     return (
@@ -60,7 +61,7 @@ export function Home() {
           )
         ))}
       </>}
-      <Offers />
+      <Offers movies={visibleMovies} />
     </Layout>
   );
 }

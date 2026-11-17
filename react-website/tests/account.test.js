@@ -39,12 +39,12 @@ const makeBooking = (bookingId, date, time) => ({
   bookingId, bookingRef: `REF-${bookingId}`, movieTitle: `Film ${bookingId}`, date, time, screen: '2', seats: ['A1', 'A2'],
 });
 
-async function render(component, props) {
+async function render(component, props, initialEntries = ['/account']) {
   const container = document.createElement('div');
   document.body.append(container);
   const root = createRoot(container);
   await act(async () => {
-    root.render(createElement(MemoryRouter, null, createElement(component, props)));
+    root.render(createElement(MemoryRouter, { initialEntries }, createElement(component, props)));
     await new Promise((resolve) => setTimeout(resolve, 0));
   });
   return {
@@ -86,10 +86,13 @@ test('shows account bookings, switches to history, and logs out', async () => {
     },
   });
   assert.match(page.container.textContent, /Jane Doe/);
-  assert.equal(page.container.querySelector('input[type="email"]').value, 'jane@example.com');
-  assert.equal(page.container.querySelector('input[type="tel"]').placeholder, 'Not available');
-  assert.ok(page.container.querySelector('input[type="email"]').readOnly);
-  assert.ok([...page.container.querySelectorAll('button')].find((button) => button.textContent === 'Save changes').disabled);
+  assert.match(page.container.textContent, /jane@example.com/);
+  assert.match(page.container.textContent, /Full name/);
+  assert.match(page.container.textContent, /Phone number/);
+  assert.equal(page.container.querySelector('input[type="email"]'), null);
+  assert.equal(page.container.querySelector('input[type="tel"]'), null);
+  assert.equal(page.container.querySelector('#security-heading'), null);
+  assert.equal([...page.container.querySelectorAll('button')].find((button) => /Log out/.test(button.textContent)).textContent.trim(), 'Log out');
   assert.equal([...page.container.querySelectorAll('button')].find((button) => button.textContent === 'View ticket').disabled, false);
   assert.ok([...page.container.querySelectorAll('[role="switch"]')].every((toggle) => toggle.disabled));
   assert.match(page.container.textContent, /Film future/);
@@ -105,6 +108,28 @@ test('shows account bookings, switches to history, and logs out', async () => {
   assert.match(page.container.textContent, /log in to view your account/i);
   assert.doesNotMatch(page.container.textContent, /Film past/);
   assert.doesNotMatch(page.container.textContent, /jane@example.com/);
+  await page.unmount();
+});
+
+test('drives account tabs from the URL and shows the full bookings list outside the overview preview', async () => {
+  const page = await render(Account, {
+    authClient: { fetchAuthSession: async () => session },
+    loadBookings: async () => ['one', 'two', 'three', 'four'].map((id, index) =>
+      makeBooking(id, `2099-01-0${index + 1}`, '10:00')),
+  });
+
+  const bookingCard = page.container.querySelector('#bookings-heading').closest('section');
+  assert.equal(bookingCard.querySelectorAll('ul > li').length, 3);
+  const allBookings = page.container.querySelector('a[href="/account?tab=bookings"]');
+  await act(async () => allBookings.dispatchEvent(new window.MouseEvent('click', { bubbles: true, cancelable: true })));
+  assert.equal(page.container.querySelector('nav[aria-label="Account sections"] a[aria-current="page"]').textContent, 'My Bookings');
+  assert.equal(page.container.querySelector('#bookings-heading').closest('section').querySelectorAll('ul > li').length, 4);
+
+  const settingsTab = [...page.container.querySelectorAll('nav[aria-label="Account sections"] a')].find((tab) => tab.textContent === 'Account Settings');
+  await act(async () => settingsTab.dispatchEvent(new window.MouseEvent('click', { bubbles: true, cancelable: true })));
+  assert.equal(page.container.querySelector('nav[aria-label="Account sections"] a[aria-current="page"]').textContent, 'Account Settings');
+  assert.ok(page.container.querySelector('#security-heading'));
+  assert.equal(page.container.querySelector('#bookings-heading'), null);
   await page.unmount();
 });
 
@@ -126,7 +151,7 @@ test('loads appropriately sized posters once per movie and falls back when unava
       if (movieId === '43') return { poster: 'https://image.tmdb.org/t/p/original/history.jpg' };
       return { poster: 'https://image.tmdb.org/t/p/original/jzPwsojjFStf5lR5Nm07w2hH56G.jpg' };
     },
-  });
+  }, ['/account?tab=bookings']);
   assert.deepEqual(calls, ['1003596', '42', '43']);
   const posters = [...page.container.querySelectorAll('img[alt$=" poster"]')];
   assert.equal(posters.length, 2);
@@ -405,7 +430,7 @@ test('shows booking failures instead of an empty history', async () => {
     loadBookings: async () => { throw new Error('service failed'); },
   });
   assert.match(page.container.querySelector('[role="alert"]').textContent, /Could not load your bookings/);
-  assert.equal(page.container.querySelector('input[type="email"]').value, 'jane@example.com');
+  assert.match(page.container.textContent, /jane@example.com/);
   assert.doesNotMatch(page.container.textContent, /No upcoming bookings/);
   await page.unmount();
 });
@@ -422,7 +447,7 @@ test('shows available phone claims and labels missing profile details', async ()
     },
     loadBookings: async () => [],
   });
-  assert.equal(page.container.querySelector('input[type="tel"]').value, '+441234567890');
+  assert.match(page.container.textContent, /\+441234567890/);
   assert.match(page.container.textContent, /Name unavailable/);
   assert.match(page.container.textContent, /Email unavailable/);
   await page.unmount();
