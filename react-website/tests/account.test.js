@@ -8,6 +8,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { JSDOM } from 'jsdom';
 import { QRCodeSVG } from 'qrcode.react';
 import { createServer } from 'vite';
+import { getInitialsHex } from '../src/utils/getInitialsHex.js';
 
 const dom = new JSDOM('<!doctype html><html><body></body></html>', { url: 'http://localhost/account' });
 globalThis.window = dom.window;
@@ -25,6 +26,7 @@ const vite = await createServer({
 const { Account } = await vite.ssrLoadModule('/src/components/pages/account/Account.jsx');
 const { TicketDownloadButton } = await vite.ssrLoadModule('/src/components/shared/TicketDownloadButton/TicketDownloadButton.jsx');
 const { Header } = await vite.ssrLoadModule('/src/components/shared/Header/Header.jsx');
+const { UserAvatar } = await vite.ssrLoadModule('/src/components/shared/UserAvatar/UserAvatar.jsx');
 const { getAccountBookings } = await vite.ssrLoadModule('/src/components/pages/shared/bookingApi.js');
 const { COGNITO_AUTH_STATE_CHANGE_EVENT } = await vite.ssrLoadModule('/src/auth/cognitoAuth.js');
 after(() => vite.close());
@@ -32,7 +34,14 @@ after(() => vite.close());
 const session = {
   tokens: {
     accessToken: { toString: () => 'access-token' },
-    idToken: { payload: { given_name: 'Jane', family_name: 'Doe', email: 'jane@example.com' } },
+    idToken: {
+      payload: {
+        given_name: 'Jane',
+        family_name: 'Doe',
+        email: 'jane@example.com',
+        member_since: '2024-04-03T12:34:56.789Z',
+      },
+    },
   },
 };
 const makeBooking = (bookingId, date, time) => ({
@@ -139,6 +148,38 @@ test('shows account bookings, switches to history, and logs out', async (t) => {
   assert.ok(page.container.querySelector('[data-login-route]'));
   assert.doesNotMatch(page.container.textContent, /Film past/);
   assert.doesNotMatch(page.container.textContent, /jane@example.com/);
+});
+
+test('formats the member-since date from the Cognito ID token', async () => {
+  const page = await render(Account, {
+    authClient: { fetchAuthSession: async () => session },
+    loadBookings: async () => [],
+  });
+  assert.match(page.container.textContent, /Member since3 April 2024/);
+  await page.unmount();
+});
+
+test('shows an unavailable member date when the Cognito claim is missing', async () => {
+  const sessionWithoutMemberSince = {
+    ...session,
+    tokens: {
+      ...session.tokens,
+      idToken: {
+        payload: { ...session.tokens.idToken.payload, member_since: undefined },
+      },
+    },
+  };
+  const page = await render(Account, {
+    authClient: { fetchAuthSession: async () => sessionWithoutMemberSince },
+    loadBookings: async () => [],
+  });
+  assert.match(page.container.textContent, /Member sinceNot available/);
+  await page.unmount();
+});
+
+test('colors the profile avatar from the displayed initials', async () => {
+  const markup = renderToStaticMarkup(createElement(UserAvatar, { name: 'Jane Doe' }));
+  assert.match(markup, new RegExp(`background-color:${getInitialsHex('JD')}`, 'i'));
 });
 
 test('redirects signed-out users from every account tab to login', async () => {

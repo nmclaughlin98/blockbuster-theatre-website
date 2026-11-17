@@ -6,7 +6,7 @@
   border: 1px solid var(--border-accent);
   border-radius: 50%;
   background: var(--accent-red-dark);
-  color: var(--text-primary);
+  color: #FFFFFF;
   font-family: var(--font-heading);
   font-weight: 700;
   object-fit: cover;

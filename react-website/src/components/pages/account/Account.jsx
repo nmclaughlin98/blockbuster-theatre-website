@@ -31,6 +31,14 @@ function formatDate(date) {
   }).format(new Date(`${date}T00:00:00Z`));
 }
 
+function formatMemberSince(value) {
+  const date = new Date(value);
+  if (typeof value !== 'string' || Number.isNaN(date.getTime())) return 'Not available';
+  return new Intl.DateTimeFormat('en-GB', {
+    day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC',
+  }).format(date);
+}
+
 function getProfile(session) {
   const claims = session.tokens?.idToken?.payload ?? {};
   const readClaim = (value) => typeof value === 'string' ? value.trim() : '';
@@ -38,6 +46,7 @@ function getProfile(session) {
     name: getCognitoFullName(session),
     email: readClaim(claims.email),
     phone: readClaim(claims.phone_number),
+    memberSince: readClaim(claims.member_since),
   };
 }
 
@@ -70,6 +79,10 @@ function Profile({ profile }) {
         <div className={styles.field}>
           <span>Phone number</span>
           <p>{profile.phone || 'Not available'}</p>
+        </div>
+        <div className={styles.field}>
+          <span>Member since</span>
+          <p>{formatMemberSince(profile.memberSince)}</p>
         </div>
       </div>
     </section>
