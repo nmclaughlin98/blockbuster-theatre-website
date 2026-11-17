@@ -138,9 +138,17 @@ export async function getBookedSeatDetails(showtimeId, date, signal, accessToken
   };
 }
 
-export async function getAccountBookings(accessToken, signal) {
-  if (!accessToken) throw new Error('Sign in to view your bookings.');
-  const data = await requestJson('/api/v1/bookings/account/history', { signal }, undefined, accessToken);
+/**
+ * @returns {Promise<{bookings: object[], newlyLinkedBookings: string[], linkNotificationSent?: false}>}
+ */
+export async function getAccountBookingHistory(idToken, signal) {
+  if (!idToken) throw new Error('Sign in to view your bookings.');
+  const data = await requestJson('/api/v1/bookings/account/history', { signal }, undefined, idToken);
+  if (!Array.isArray(data?.newlyLinkedBookings)
+    || data.newlyLinkedBookings.some((reference) => typeof reference !== 'string' || !reference)
+    || (data.linkNotificationSent !== undefined && data.linkNotificationSent !== false)) {
+    throw new Error('The booking service returned invalid account booking details.');
+  }
   if (!Array.isArray(data?.bookings) || data.bookings.some((booking) => {
     const date = typeof booking?.date === 'string' ? new Date(`${booking.date}T00:00:00Z`) : new Date(NaN);
     return !booking
@@ -167,7 +175,15 @@ export async function getAccountBookings(accessToken, signal) {
   })) {
     throw new Error('The booking service returned invalid account booking details.');
   }
-  return data.bookings;
+  return {
+    bookings: data.bookings,
+    newlyLinkedBookings: data.newlyLinkedBookings,
+    ...(data.linkNotificationSent === false && { linkNotificationSent: false }),
+  };
+}
+
+export async function getAccountBookings(token, signal) {
+  return (await getAccountBookingHistory(token, signal)).bookings;
 }
 
 export function createGuestBookingPayload({

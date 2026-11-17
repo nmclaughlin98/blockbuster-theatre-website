@@ -28,6 +28,7 @@ const { TicketDownloadButton } = await vite.ssrLoadModule('/src/components/share
 const { Header } = await vite.ssrLoadModule('/src/components/shared/Header/Header.jsx');
 const { UserAvatar } = await vite.ssrLoadModule('/src/components/shared/UserAvatar/UserAvatar.jsx');
 const { getAccountBookings } = await vite.ssrLoadModule('/src/components/pages/shared/bookingApi.js');
+const { getAccountBookingHistory } = await vite.ssrLoadModule('/src/components/pages/shared/bookingApi.js');
 const { COGNITO_AUTH_STATE_CHANGE_EVENT } = await vite.ssrLoadModule('/src/auth/cognitoAuth.js');
 after(() => vite.close());
 
@@ -35,6 +36,7 @@ const session = {
   tokens: {
     accessToken: { toString: () => 'access-token' },
     idToken: {
+      toString: () => 'id-token',
       payload: {
         given_name: 'Jane',
         family_name: 'Doe',
@@ -116,7 +118,7 @@ test('shows account bookings, switches to history, and logs out', async (t) => {
     authClient,
     onSignedOut: () => { redirected = true; },
     loadBookings: async (token) => {
-      assert.equal(token, 'access-token');
+      assert.equal(token, 'id-token');
       return [makeBooking('past', '2020-01-01', '10:00'), makeBooking('future', '2099-01-01', '10:00')];
     },
   }, ['/account']);
@@ -694,25 +696,40 @@ test('header shows account controls only when authenticated', async () => {
   await signedOut.unmount();
 });
 
+test('account history uses the ID token for verified email claims', async () => {
+  let token;
+  const view = await render(Account, {
+    authClient: { fetchAuthSession: async () => session },
+    loadBookings: async (value) => { token = value; return []; },
+  });
+  assert.equal(token, 'id-token');
+  await view.unmount();
+});
+
 test('booking history request uses the session token and rejects malformed data', async () => {
   const originalFetch = globalThis.fetch;
   try {
     globalThis.fetch = async (url, options) => {
       assert.equal(new URL(url).pathname, '/api/v1/bookings/account/history');
       assert.equal(options.headers.get('Authorization'), 'Bearer access-token');
-      return new Response(JSON.stringify({ bookings: [makeBooking('x', '2020-02-30', '10:00')] }));
+      return new Response(JSON.stringify({ bookings: [makeBooking('x', '2020-02-30', '10:00')], newlyLinkedBookings: [] }));
     };
     await assert.rejects(getAccountBookings('access-token'), /invalid account booking details/);
     await assert.rejects(getAccountBookings(''), /Sign in/);
     const booking = { ...makeBooking('x', '2099-01-01', '10:00'), movieId: '1003596', guestName: 'Alex Smith', ticketCount: 2, totalAmount: 0, currency: 'GBP' };
-    globalThis.fetch = async () => new Response(JSON.stringify({ bookings: [booking] }));
+    globalThis.fetch = async () => new Response(JSON.stringify({ bookings: [booking], newlyLinkedBookings: ['REF-x'] }));
     assert.deepEqual(await getAccountBookings('access-token'), [booking]);
-    globalThis.fetch = async () => new Response(JSON.stringify({ bookings: [{ ...booking, movieId: 'bad' }] }));
+    assert.deepEqual(await getAccountBookingHistory('id-token'), {
+      bookings: [booking], newlyLinkedBookings: ['REF-x'],
+    });
+    globalThis.fetch = async () => new Response(JSON.stringify({ bookings: [{ ...booking, movieId: 'bad' }], newlyLinkedBookings: [] }));
     await assert.rejects(getAccountBookings('access-token'), /invalid account booking details/);
     for (const invalid of [{ guestName: ' ' }, { ticketCount: 3 }, { totalAmount: -1 }, { currency: 'gbp' }]) {
-      globalThis.fetch = async () => new Response(JSON.stringify({ bookings: [{ ...booking, ...invalid }] }));
+      globalThis.fetch = async () => new Response(JSON.stringify({ bookings: [{ ...booking, ...invalid }], newlyLinkedBookings: [] }));
       await assert.rejects(getAccountBookings('access-token'), /invalid account booking details/);
     }
+    globalThis.fetch = async () => new Response(JSON.stringify({ bookings: [booking], newlyLinkedBookings: [null] }));
+    await assert.rejects(getAccountBookingHistory('id-token'), /invalid account booking details/);
     globalThis.fetch = async () => new Response(JSON.stringify({ message: 'Not authorized' }), { status: 401 });
     await assert.rejects(getAccountBookings('access-token'), /Not authorized/);
   } finally {

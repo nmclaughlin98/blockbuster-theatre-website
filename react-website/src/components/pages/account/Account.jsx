@@ -331,14 +331,15 @@ export function Account({
       try {
         const session = await authClient.fetchAuthSession();
         if (!active || currentRequest !== requestId) return;
-        const token = session.tokens?.accessToken?.toString();
-        if (!token) {
+        const accessToken = session.tokens?.accessToken?.toString();
+        if (!accessToken) {
           setAccount({ status: 'signed-out' });
           return;
         }
         const profile = getProfile(session);
         setAccount({ status: 'bookings-loading', profile });
-        const bookings = await loadBookings(token, requestController.signal);
+        const idToken = session.tokens?.idToken?.toString();
+        const bookings = await loadBookings(idToken || accessToken, requestController.signal);
         if (!active || currentRequest !== requestId) return;
         const movieIds = [...new Set(bookings.map((booking) => booking.movieId).filter(Boolean))];
         const posterEntries = await Promise.all(movieIds.map(async (movieId) => {
