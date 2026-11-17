@@ -1,5 +1,6 @@
 import styles from './NowShowing.module.css';
 import { useEffect, useMemo, useState } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
 import { MovieGrid } from '../../movies';
 import { DirectionalButton, Layout, SectionHeader } from '../../shared';
 import { CollectionsView } from '../collections/Collections';
@@ -64,7 +65,8 @@ function MovieFilters({ genres, search, sort, genre, onSearch, onSort, onGenre }
 }
 
 export function NowShowing({ initialView }) {
-    const requestedView = initialView || new URLSearchParams(window.location.search).get('view');
+    const [searchParams, setSearchParams] = useSearchParams();
+    const requestedView = initialView || searchParams.get('view');
     const [view, setView] = useState(requestedView === 'collections' ? 'collections' : 'movies');
     useEffect(() => {
         document.title = `Blockbuster Theatre - ${view === 'collections' ? 'Collections' : 'Now Showing'}`;
@@ -89,13 +91,10 @@ export function NowShowing({ initialView }) {
 
     function changeView(nextView) {
         setView(nextView);
-        const url = new URL(window.location.href);
-        if (/\/collections\.html$/i.test(url.pathname)) {
-            url.pathname = url.pathname.replace(/collections\.html$/i, 'nowShowing.html');
-        }
-        if (nextView === 'collections') url.searchParams.set('view', 'collections');
-        else url.searchParams.delete('view');
-        window.history.replaceState(window.history.state, '', `${url.pathname}${url.search}${url.hash}`);
+        const nextSearchParams = new URLSearchParams(searchParams);
+        if (nextView === 'collections') nextSearchParams.set('view', 'collections');
+        else nextSearchParams.delete('view');
+        setSearchParams(nextSearchParams, { replace: true });
     }
 
     const filtered = useMemo(() => {
@@ -135,7 +134,7 @@ export function NowShowing({ initialView }) {
                         : 'Discover connected stories and films gathered together.'}
                 >
                     {view === 'movies' && (
-                        <DirectionalButton className="button btn-glass" href="./timetable.html" direction="next" variant="glass">
+                        <DirectionalButton as={Link} to="/timetable" className="button btn-glass" direction="next" variant="glass">
                             View Timetable
                         </DirectionalButton>
                     )}

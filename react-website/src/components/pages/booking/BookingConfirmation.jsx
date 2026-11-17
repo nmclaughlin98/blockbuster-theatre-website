@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { asset, DirectionalButton, TicketPass } from '../../shared';
 import {
   convertGuestAccount,
@@ -265,7 +266,7 @@ export function BookingConfirmation({
           )}
         </section>
       )}
-      <DirectionalButton className="form-button previous home" href="./index.html" direction="previous">
+      <DirectionalButton as={Link} className="form-button previous home" to="/" direction="previous">
         Back to Home
       </DirectionalButton>
     </fieldset>

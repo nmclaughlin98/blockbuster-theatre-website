@@ -1,5 +1,6 @@
 import styles from './Detail.module.css';
 import { useEffect, useState } from 'react';
+import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { Countdown, movieSlug } from '../../movies/index.js';
 import { asset, Layout, ShowtimeChip, TrailerModal } from '../../shared';
 import { createBookingHref } from '../shared/showtimeNavigation';
@@ -113,13 +114,13 @@ function ShowtimeSchedule({ movie, selectedDay, selectedTime, onSelectTime, book
                 </div>
             )) : <p>No showtimes available.</p>}
             <br />
-            <a className="form-button book-now-button" href={bookingHref}>Book Now</a>
+            <Link className="form-button book-now-button" to={bookingHref}>Book Now</Link>
         </aside>
     );
 }
 
 function MovieContent({ movie, comingSoon }) {
-    const query = new URLSearchParams(window.location.search);
+    const [query] = useSearchParams();
     const [selectedDate, setSelectedDate] = useState(() => query.get('date') || '');
     const [selectedShowtimeId, setSelectedShowtimeId] = useState(() => query.get('showtimeId') || '');
     const [trailerUrl, setTrailerUrl] = useState('');
@@ -137,7 +138,7 @@ function MovieContent({ movie, comingSoon }) {
         ))?.[0] || '';
     });
     const movieIdentifier = movieSlug(movie);
-    const movieBookingUrl = `../bookNow?movie=${encodeURIComponent(movieIdentifier)}`;
+    const movieBookingUrl = `/book-now?movie=${encodeURIComponent(movieIdentifier)}`;
     const selectedShowtime = Object.entries(movie.showtimes || {}).flatMap(([day, slots]) => (
         (Array.isArray(slots) ? slots : []).map((slot) => ({ ...slot, day }))
     )).find((slot) => (
@@ -149,7 +150,7 @@ function MovieContent({ movie, comingSoon }) {
     ));
     const bookingHref = selectedShowtime
         ? createBookingHref(
-            '../bookNow',
+            '/book-now',
             movieIdentifier,
             selectedShowtime.date,
             selectedShowtime,
@@ -236,9 +237,9 @@ function MovieContent({ movie, comingSoon }) {
 }
 
 export function Detail({ comingSoon = false }) {
-    const id = new URLSearchParams(window.location.search).get('movie') || '';
+    const { slug = '' } = useParams();
     const [screeningDates] = useState(() => getUpcomingScreeningDates());
-    const { movie, loading, error } = useMovieDetail(id, screeningDates);
+    const { movie, loading, error } = useMovieDetail(slug, screeningDates);
 
     if (loading) {
         return (

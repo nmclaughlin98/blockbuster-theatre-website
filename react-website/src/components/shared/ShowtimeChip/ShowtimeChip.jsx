@@ -1,3 +1,5 @@
+import { Link } from 'react-router-dom';
+
 export function ShowtimeChip({
   time,
   screen,
@@ -20,10 +22,10 @@ export function ShowtimeChip({
 
   if (href) {
     return (
-      <a className={chipClassName} href={href} title={title}>
+      <Link className={chipClassName} to={href} title={title}>
         {content}
         {children}
-      </a>
+      </Link>
     );
   }
 

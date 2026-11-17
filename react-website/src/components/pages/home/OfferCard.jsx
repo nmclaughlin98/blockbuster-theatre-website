@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { asset } from '../../shared';
 import { getPosterSrc, getPosterSrcSet } from '../../../utils/posterImages';
 import styles from './OfferCard.module.css';
@@ -9,9 +10,9 @@ export function OfferCard({ offer, featuredMovie, isSlowConnection }) {
   const displayLabel = offer.displayLabel ?? offer.title;
 
   return (
-    <a
+    <Link
       className={styles.card}
-      href={`./bookNow?offerId=${encodeURIComponent(offer.offerId)}`}
+      to={`/book-now?offerId=${encodeURIComponent(offer.offerId)}`}
     >
       {featuredMovie?.poster && (
         <img
@@ -38,6 +39,6 @@ export function OfferCard({ offer, featuredMovie, isSlowConnection }) {
         {offer.priceDescription && <p className={styles.description}>{offer.priceDescription}</p>}
       </div>
       <span className={styles.chevron} aria-hidden="true">›</span>
-    </a>
+    </Link>
   );
 }

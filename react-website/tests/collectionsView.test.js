@@ -3,6 +3,7 @@ import { fileURLToPath } from 'node:url';
 import test from 'node:test';
 import { createElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
+import { MemoryRouter } from 'react-router-dom';
 import { createServer } from 'vite';
 
 test('shows collections unless they are explicitly inactive', async () => {
@@ -25,7 +26,7 @@ test('shows collections unless they are explicitly inactive', async () => {
       backdropUrl: '',
       ...(isActive === undefined ? {} : { isActive }),
     });
-    const markup = renderToStaticMarkup(createElement(CollectionsView, {
+    const markup = renderToStaticMarkup(createElement(MemoryRouter, null, createElement(CollectionsView, {
       collections: [
         collection('1', 'Active Collection', true),
         collection('2', 'Unspecified Collection'),
@@ -34,18 +35,18 @@ test('shows collections unless they are explicitly inactive', async () => {
       loading: false,
       error: null,
       onRetry: () => {},
-    }));
+    })));
 
     assert.match(markup, /Active Collection/);
     assert.match(markup, /Unspecified Collection/);
     assert.doesNotMatch(markup, /Inactive Collection/);
 
-    const emptyMarkup = renderToStaticMarkup(createElement(CollectionsView, {
+    const emptyMarkup = renderToStaticMarkup(createElement(MemoryRouter, null, createElement(CollectionsView, {
       collections: [collection('4', 'Only Inactive Collection', false)],
       loading: false,
       error: null,
       onRetry: () => {},
-    }));
+    })));
     assert.match(emptyMarkup, /No collections are available right now/);
     assert.doesNotMatch(emptyMarkup, /Only Inactive Collection/);
   } finally {

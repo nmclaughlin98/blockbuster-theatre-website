@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { Layout } from '../../shared';
 import { Toast } from '../../shared/Toast/Toast';
 import { useToast } from '../../shared/Toast/useToast';
@@ -80,10 +81,6 @@ function getSignInErrorMessage(error) {
   return 'Login error. Please try again later.';
 }
 
-function navigateToAccount() {
-  window.location.assign('/account');
-}
-
 function EmailInput({ disabled }) {
   return (
     <input
@@ -134,8 +131,9 @@ function PasswordInput({ disabled }) {
 
 export function Login({
   authClient = cognitoAuth,
-  onAuthenticated = navigateToAccount,
+  onAuthenticated,
 } = {}) {
+  const navigate = useNavigate();
   const { toast, setToastMessage } = useToast();
   const [statusMessage, setStatusMessage] = useState('Sign in with your existing account.');
   const [challenge, setChallenge] = useState(null);
@@ -171,8 +169,10 @@ export function Login({
   }, [authClient, setToastMessage]);
 
   useEffect(() => {
-    if (isRedirecting) onAuthenticated();
-  }, [isRedirecting, onAuthenticated]);
+    if (!isRedirecting) return;
+    if (onAuthenticated) onAuthenticated();
+    else navigate('/account', { replace: true });
+  }, [isRedirecting, navigate, onAuthenticated]);
 
   async function handleSubmit(event) {
     event.preventDefault();
@@ -265,9 +265,9 @@ export function Login({
                     : challenge?.kind === 'new-password' ? 'Set password' : 'Login'}
               </button>
               {!challenge && (
-                <a className={styles.signupLink} href="./signup.html">
+                <Link className={styles.signupLink} to="/signup">
                   Sign up
-                </a>
+                </Link>
               )}
             </form>
           )}

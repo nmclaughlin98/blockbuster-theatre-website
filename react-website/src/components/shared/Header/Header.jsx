@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { Link } from 'react-router-dom';
 import {
     COGNITO_AUTH_STATE_CHANGE_EVENT,
     cognitoAuth,
@@ -9,9 +10,9 @@ import { UserAvatar } from '../UserAvatar/UserAvatar';
 
 const links = [
     ['Home', '/', 'home'],
-    ['Now Showing', './nowShowing', 'now'],
-    ['Coming Soon', './comingSoon', 'coming'],
-    ['About', './about', 'about'],
+    ['Now Showing', '/now-showing', 'now'],
+    ['Coming Soon', '/coming-soon', 'coming'],
+    ['About', '/about', 'about'],
 ];
 
 // Helper to blur element on tap/click to strip sticky hover states on mobile
@@ -22,9 +23,9 @@ function handleBlurClick(e, callback) {
 
 function Brand({ onClick }) {
     return (
-        <a
+        <Link
             className="header-box"
-            href="/"
+            to="/"
             onClick={(e) => handleBlurClick(e, onClick)}
         >
             <picture>
@@ -35,7 +36,7 @@ function Brand({ onClick }) {
                 <img src={asset('assets/images/logo/png/logo-120.png')} alt="Blockbuster Theatre" className="logo" />
             </picture>
             <span className="header-text">BLOCKBUSTER<br />THEATRE</span>
-        </a>
+        </Link>
     );
 }
 
@@ -58,10 +59,10 @@ function SignOutIcon() {
 
 function SignInLink({ className = '', onClick }) {
     return (
-        <a className={`nav-account-cta-btn ${className}`} href="/login" onClick={onClick}>
+        <Link className={`nav-account-cta-btn ${className}`} to="/login" onClick={onClick}>
             <SignInIcon />
             <span>SIGN IN</span>
-        </a>
+        </Link>
     );
 }
 
@@ -124,8 +125,8 @@ function UserMenu({ account, authClient }) {
                         <strong>{account.displayName || 'Name unavailable'}</strong>
                         <span>{account.email || 'Email unavailable'}</span>
                     </div>
-                    <a href="/account" role="menuitem" onClick={closeMenu}>My Bookings</a>
-                    <a href="/account" role="menuitem" onClick={closeMenu}>Account Settings</a>
+                    <Link to="/account" role="menuitem" onClick={closeMenu}>My Bookings</Link>
+                    <Link to="/account" role="menuitem" onClick={closeMenu}>Account Settings</Link>
                     {signOutError && <p className="nav-signout-error" role="alert">{signOutError}</p>}
                     <button type="button" role="menuitem" onClick={handleSignOut} disabled={signingOut}>
                         <SignOutIcon />
@@ -144,13 +145,13 @@ function Navigation({ current, open, onNavigate, account, authClient }) {
             <ul className="menu">
                 {links.map(([label, href, key]) => (
                     <li key={key}>
-                        <a
+                        <Link
                             className={current === key ? 'current' : ''}
-                            href={href}
+                            to={href}
                             onClick={(e) => handleBlurClick(e, onNavigate)}
                         >
                             {label}
-                        </a>
+                        </Link>
                     </li>
                 ))}
                 <li className="nav-desktop-auth">
@@ -166,9 +167,9 @@ function Navigation({ current, open, onNavigate, account, authClient }) {
             <div className="nav-mobile-auth">
                 <div className="nav-auth-divider" />
                 {isAuthenticated ? (
-                    <a
+                    <Link
                 className="nav-mobile-profile"
-                href="/account"
+                to="/account"
                 onClick={(e) => handleBlurClick(e, onNavigate)}
                     >
                 <UserAvatar name={account.displayName} imageUrl={account.imageUrl} size="mobile" />
@@ -176,7 +177,7 @@ function Navigation({ current, open, onNavigate, account, authClient }) {
                     <strong>{account.displayName || 'Name unavailable'}</strong>
                     <span>View Profile</span>
                 </span>
-                    </a>
+                    </Link>
                 ) : (
                     <SignInLink onClick={(e) => handleBlurClick(e, onNavigate)} />
                 )}

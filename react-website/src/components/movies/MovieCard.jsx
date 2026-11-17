@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { asset } from '../shared';
 import { getPosterSrc, getPosterSrcSet } from '../../utils/posterImages';
 import { useNetworkSpeed } from '../../utils/useNetworkSpeed';
@@ -16,9 +17,9 @@ export function MovieCard({ movie, comingSoon = false }) {
 
     return (
         <div className={styles.posterCardContainer}>
-            <a
+            <Link
                 className={styles.posterColumn}
-                href={`./${comingSoon ? 'movie-detail-coming-soon' : 'movie-detail'}.html?movie=${encodeURIComponent(movieSlug(movie))}`}
+                to={`${comingSoon ? '/coming-soon' : '/movie'}/${encodeURIComponent(movieSlug(movie))}`}
                 aria-label={`View details for ${movie.title}`}
             >
                 <img
@@ -33,7 +34,7 @@ export function MovieCard({ movie, comingSoon = false }) {
                     <div className={styles.overlayText}>{movie.title}</div>
                     {comingSoon ? <Countdown movie={movie} /> : <div className={styles.runtime}>{movie.runtime || 0} mins</div>}
                 </div>
-            </a>
+            </Link>
         </div>
     );
 }

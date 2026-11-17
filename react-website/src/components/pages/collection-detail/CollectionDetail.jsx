@@ -1,5 +1,6 @@
 import styles from './CollectionDetail.module.css';
 import { useEffect, useMemo } from 'react';
+import { Link, useParams } from 'react-router-dom';
 import { MovieGrid } from '../../movies';
 import { DirectionalButton, Layout, SectionHeader } from '../../shared';
 import { CollectionArtwork } from '../collections/CollectionArtwork';
@@ -8,7 +9,7 @@ import { useCollection } from '../collections/useCollection';
 import { CollectionDetailSkeleton } from './CollectionDetailSkeleton';
 
 export function CollectionDetail() {
-  const collectionId = new URLSearchParams(window.location.search).get('collection') || '';
+  const { collectionId = '' } = useParams();
   const { collection, movies, loading, error } = useCollection(collectionId);
   const orderedMovies = useMemo(() => sortMoviesByReleaseDate(movies), [movies]);
 
@@ -33,7 +34,7 @@ export function CollectionDetail() {
             <p role={error ? 'alert' : undefined}>
               {error?.message || 'Choose a collection from the Collections tab in Now Showing.'}
             </p>
-            <DirectionalButton className="button btn-glass" href="./nowShowing.html?view=collections" direction="previous" variant="glass">
+            <DirectionalButton as={Link} to="/now-showing?view=collections" className="button btn-glass" direction="previous" variant="glass">
               Back to Collections
             </DirectionalButton>
           </div>
@@ -56,7 +57,8 @@ export function CollectionDetail() {
             <div className="collection-content">
               <DirectionalButton
                 className="button btn-glass collection-back-button"
-                href="./nowShowing.html?view=collections"
+                to="/now-showing?view=collections"
+                as={Link}
                 direction="previous"
                 variant="glass"
               >

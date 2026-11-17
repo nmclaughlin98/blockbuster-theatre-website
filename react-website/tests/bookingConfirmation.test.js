@@ -3,6 +3,7 @@ import { fileURLToPath } from 'node:url';
 import test from 'node:test';
 import { createElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
+import { MemoryRouter } from 'react-router-dom';
 import { QRCodeSVG } from 'qrcode.react';
 import { createServer } from 'vite';
 
@@ -18,7 +19,7 @@ test('confirms the backend booking reference and total when confirmation email f
     const { BookingConfirmation } = await vite.ssrLoadModule(
       '/src/components/pages/booking/BookingConfirmation.jsx',
     );
-    const markup = renderToStaticMarkup(createElement(BookingConfirmation, {
+    const markup = renderToStaticMarkup(createElement(MemoryRouter, null, createElement(BookingConfirmation, {
       movie: { title: 'Inception' },
       time: '12:15',
       screen: '5',
@@ -37,7 +38,7 @@ test('confirms the backend booking reference and total when confirmation email f
         confirmationEmailSent: false,
       },
       onToast: () => {},
-    }));
+    })));
 
     assert.match(markup, /Your reservation succeeded, but we could not send the confirmation email/);
     assert.match(markup, /Sun 1 Nov 2026 - 12:15/);

@@ -26,7 +26,9 @@ The booking wizard keeps selection and contact data in memory and does not requi
 
 ## Movie Collections
 
-Collections is a section of Now Showing, available through an animated page-level switch rather than the primary navigation. The browse view loads collection cards from `GET /collections`; each card opens `collection.html?collection={id}`. The detail page calls `GET /collections/{id}` and displays the available movie summaries in the order returned by the API.
+The site is a single-page app using React Router. Movie detail pages use `/movie/{slug}` (or `/coming-soon/{slug}` for upcoming titles), and collection detail pages use `/collection/{id}`. Legacy `.html` URLs redirect to their SPA routes.
+
+Collections is a section of Now Showing, available through an animated page-level switch rather than the primary navigation. The browse view loads collection cards from `GET /collections`; each card opens `/collection/{id}`. The detail page calls `GET /collections/{id}` and displays the available movie summaries in the order returned by the API.
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 

@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import {
   COGNITO_AUTH_STATE_CHANGE_EVENT,
   cognitoAuth,
@@ -94,10 +95,6 @@ function SecuritySettings() {
   );
 }
 
-function navigateToLogin() {
-  window.location.assign('/login');
-}
-
 function loadPosterImage(src, signal) {
   return new Promise((resolve, reject) => {
     if (signal.aborted) {
@@ -152,8 +149,9 @@ export function Account({
   authClient = cognitoAuth,
   loadBookings = getAccountBookings,
   loadMovieDetail = getMovieDetail,
-  onSignedOut = navigateToLogin,
+  onSignedOut,
 } = {}) {
+  const navigate = useNavigate();
   const [account, setAccount] = useState({ status: 'loading' });
   const [view, setView] = useState('upcoming');
   const [selectedBooking, setSelectedBooking] = useState(null);
@@ -262,7 +260,8 @@ export function Account({
       setSigningOut(false);
     }
     window.dispatchEvent(new window.Event(COGNITO_AUTH_STATE_CHANGE_EVENT));
-    onSignedOut();
+    if (onSignedOut) onSignedOut();
+    else navigate('/login', { replace: true });
   }
 
   const signedIn = ['ready', 'bookings-loading', 'bookings-error'].includes(account.status);
@@ -297,7 +296,7 @@ export function Account({
         </div>
         {signOutError && <p role="alert" className={styles.error}>{signOutError}</p>}
         {account.status === 'loading' && <p role="status">Checking sign-in status...</p>}
-        {account.status === 'signed-out' && <p>Please <a href="/login">log in</a> to view your account.</p>}
+        {account.status === 'signed-out' && <p>Please <Link to="/login">log in</Link> to view your account.</p>}
         {account.status === 'error' && <p role="alert" className={styles.error}>Could not check your account. Please refresh and try again.</p>}
         {signedIn && (
           <div className={styles.columns}>

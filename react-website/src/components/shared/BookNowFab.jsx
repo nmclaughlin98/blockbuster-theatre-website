@@ -1,5 +1,6 @@
 // Persistent floating "Book Tickets" button, visible on scroll across all pages except the booking flow itself.
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 
 export function BookNowFab() {
   const [visible, setVisible] = useState(false);
@@ -12,13 +13,13 @@ export function BookNowFab() {
   }, []);
 
   return (
-    <a
+    <Link
       className={`book-now-fab ${visible ? 'visible' : ''}`}
-      href="./bookNow"
+      to="/book-now"
       onClick={(e) => e.currentTarget.blur()}
     >
       <span className="material-symbols-outlined" aria-hidden="true">confirmation_number</span>
       Book Tickets
-    </a>
+    </Link>
   );
 }

@@ -1,7 +1,9 @@
+import { Link } from 'react-router-dom';
+
 export function BookingShortcut() {
   return (
-    <a className="booking-shortcut" href="./bookNow">
+    <Link className="booking-shortcut" to="/book-now">
       Book Tickets
-    </a>
+    </Link>
   );
 }

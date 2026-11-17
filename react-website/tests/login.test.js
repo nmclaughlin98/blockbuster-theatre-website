@@ -3,6 +3,7 @@ import { fileURLToPath } from 'node:url';
 import test, { after } from 'node:test';
 import { act, createElement } from 'react';
 import { createRoot } from 'react-dom/client';
+import { MemoryRouter } from 'react-router-dom';
 import { JSDOM } from 'jsdom';
 import { createServer } from 'vite';
 
@@ -35,7 +36,7 @@ async function renderLogin(authClient, onAuthenticated = () => { }) {
   document.body.append(container);
   const root = createRoot(container);
   await act(async () => {
-    root.render(createElement(Login, { authClient, onAuthenticated }));
+    root.render(createElement(MemoryRouter, null, createElement(Login, { authClient, onAuthenticated })));
     await new Promise((resolve) => setTimeout(resolve, 0));
   });
 
@@ -61,7 +62,7 @@ async function renderHeader(authClient) {
   document.body.append(container);
   const root = createRoot(container);
   await act(async () => {
-    root.render(createElement(Header, { authClient }));
+    root.render(createElement(MemoryRouter, null, createElement(Header, { authClient })));
     await new Promise((resolve) => setTimeout(resolve, 0));
   });
 
@@ -108,7 +109,7 @@ test('links to the signup page', async () => {
   const page = await renderLogin({
     fetchAuthSession: async () => ({ tokens: undefined }),
   });
-  const signupLink = page.container.querySelector('a[href="./signup.html"]');
+  const signupLink = page.container.querySelector('a[href="/signup"]');
   assert.equal(signupLink.textContent.trim(), 'Sign up');
   await page.unmount();
 });

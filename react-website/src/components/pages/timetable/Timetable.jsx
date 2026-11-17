@@ -1,5 +1,6 @@
 import styles from './Timetable.module.css';
 import { useEffect, useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { movieId, movieSlug } from '../../movies';
 import { CenteredHeadingBlock, Layout, ShowtimeChip } from '../../shared';
 import {
@@ -105,12 +106,12 @@ function TimetableMovie({ movie, day }) {
     return (
         <div className="movie-card">
             <div className="movie-info">
-                <a
+                <Link
                     className="movie-title"
-                    href={`./movie=${encodeURIComponent(movieSlug(movie))}`}
+                    to={`/movie/${encodeURIComponent(movieSlug(movie))}`}
                 >
                     {getMovieTitle(movie)}
-                </a>
+                </Link>
                 <div className="movie-meta">
                     <span className="badge-genre">{getMovieGenre(movie)}</span>
                 </div>
@@ -120,7 +121,7 @@ function TimetableMovie({ movie, day }) {
                     <ShowtimeChip
                         className="timetable-showtime-chip"
                         href={createBookingHref(
-                            '/bookNow',
+                            '/book-now',
                             movieSlug(movie) || getMovieTitle(movie),
                             slot.date,
                             slot,

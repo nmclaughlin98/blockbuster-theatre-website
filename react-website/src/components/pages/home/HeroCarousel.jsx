@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { movieId, movieSlug } from '../../movies';
 import { DirectionalButton, TrailerModal } from '../../shared';
 
@@ -101,13 +102,13 @@ export function HeroCarousel({ movies }) {
                                 <h2>{movie.title}</h2>
                                 <p>{movie.tagline}</p>
                                 <div className="hero-actions">
-                                    <a
+                                    <Link
                                         className="button"
-                                        href={`/bookNow?movie=${encodeURIComponent(movieSlug(movie))}`}
+                                        to={`/book-now?movie=${encodeURIComponent(movieSlug(movie))}`}
                                         onClick={(e) => e.currentTarget.blur()}
                                     >
                                         Book Tickets
-                                    </a>
+                                    </Link>
                                     {movie.trailer && (
                                         <button
                                             type="button"
@@ -117,13 +118,13 @@ export function HeroCarousel({ movies }) {
                                             Watch Trailer
                                         </button>
                                     )}
-                                    <a
+                                    <Link
                                         className="button btn-glass"
-                                        href={`/movie=${encodeURIComponent(movieSlug(movie))}`}
+                                        to={`/movie/${encodeURIComponent(movieSlug(movie))}`}
                                         onClick={(e) => e.currentTarget.blur()}
                                     >
                                         More Info
-                                    </a>
+                                    </Link>
                                 </div>
                             </div>
                         </div>

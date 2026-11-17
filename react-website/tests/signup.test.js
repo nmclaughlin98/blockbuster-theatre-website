@@ -3,6 +3,7 @@ import { fileURLToPath } from 'node:url';
 import test, { after } from 'node:test';
 import { act, createElement } from 'react';
 import { createRoot } from 'react-dom/client';
+import { MemoryRouter } from 'react-router-dom';
 import { JSDOM } from 'jsdom';
 import { createServer } from 'vite';
 
@@ -33,7 +34,7 @@ async function renderSignup(authClient) {
   document.body.append(container);
   const root = createRoot(container);
   await act(async () => {
-    root.render(createElement(Signup, { authClient }));
+    root.render(createElement(MemoryRouter, null, createElement(Signup, { authClient })));
     await new Promise((resolve) => setTimeout(resolve, 0));
   });
 
@@ -98,7 +99,7 @@ test('signs up with Cognito name attributes and confirms the email address', asy
       username: 'ada@example.com',
       confirmationCode: '123456',
     });
-    const loginLink = Array.from(page.container.querySelectorAll('a[href="./login"]')).find(
+    const loginLink = Array.from(page.container.querySelectorAll('a[href="/login"]')).find(
       (link) => link.textContent.trim() === 'Go to Log In',
     );
     assert.ok(loginLink);

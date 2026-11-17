@@ -1,11 +1,12 @@
 import styles from './About.module.css';
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { Layout, SectionHeader, asset } from '../../shared';
 
 const faqs = [
   {
     question: 'How do I book tickets at Blockbuster Theatre?',
-    answer: <>Reserve tickets online through the interactive <a href="./bookNow">booking page</a>, call our box office on <strong>028 7147 2869</strong>, or visit the venue ticket kiosk.</>,
+    answer: <>Reserve tickets online through the interactive <Link to="/book-now">booking page</Link>, call our box office on <strong>028 7147 2869</strong>, or visit the venue ticket kiosk.</>,
   },
   {
     question: 'What are the opening hours of Blockbuster Theatre?',

@@ -54,7 +54,7 @@ export function Home() {
               key={collectionId}
               title={collection.name}
               movies={movies}
-              viewAllHref={`./collection.html?collection=${encodeURIComponent(collectionId)}`}
+              viewAllHref={`/collection/${encodeURIComponent(collectionId)}`}
               viewAllLabel="View Collection"
             />
           )

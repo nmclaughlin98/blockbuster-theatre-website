@@ -1,4 +1,5 @@
 import { useLayoutEffect, useRef, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { MovieGrid } from '../../movies';
 import { ButtonLink, SectionHeader } from '../../shared';
 import { ChevronRightIcon } from '../../shared/Button/icons';
@@ -6,7 +7,7 @@ import { ChevronRightIcon } from '../../shared/Button/icons';
 export function MovieSection({
   title,
   movies,
-  viewAllHref = './nowShowing.html',
+  viewAllHref = '/now-showing',
   viewAllLabel = 'View All Movies',
 }) {
   const gridRef = useRef(null);
@@ -38,7 +39,7 @@ export function MovieSection({
   return (
     <section className="movie-poster">
       <SectionHeader title={title} className="movie-section-header">
-        <ButtonLink href={viewAllHref} variant="glass" shape="rounded" rightIcon={<ChevronRightIcon />}>
+        <ButtonLink as={Link} to={viewAllHref} variant="glass" shape="rounded" rightIcon={<ChevronRightIcon />}>
           {viewAllLabel}
         </ButtonLink>
       </SectionHeader>

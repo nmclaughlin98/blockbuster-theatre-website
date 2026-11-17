@@ -3,6 +3,7 @@ import { fileURLToPath } from 'node:url';
 import test, { after } from 'node:test';
 import { act, createElement } from 'react';
 import { createRoot } from 'react-dom/client';
+import { MemoryRouter } from 'react-router-dom';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { JSDOM } from 'jsdom';
 import { QRCodeSVG } from 'qrcode.react';
@@ -43,7 +44,7 @@ async function render(component, props) {
   document.body.append(container);
   const root = createRoot(container);
   await act(async () => {
-    root.render(createElement(component, props));
+    root.render(createElement(MemoryRouter, null, createElement(component, props)));
     await new Promise((resolve) => setTimeout(resolve, 0));
   });
   return {

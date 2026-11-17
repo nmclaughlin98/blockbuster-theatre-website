@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { cognitoAuth } from '../../../auth/cognitoAuth';
 import { Layout } from '../../shared';
 import { Toast } from '../../shared/Toast/Toast';
@@ -141,7 +142,7 @@ export function Signup({ authClient = cognitoAuth } = {}) {
           </p>
 
           {isComplete ? (
-            <a className={styles.submit} href="./login">Go to Log In</a>
+            <Link className={styles.submit} to="/login">Go to Log In</Link>
           ) : isConfirmationRequired ? (
             <form className={styles.form} onSubmit={handleConfirmation} aria-busy={isLoading}>
               <label className={styles.field} htmlFor="signup-confirmation-code">
@@ -221,7 +222,7 @@ export function Signup({ authClient = cognitoAuth } = {}) {
 
           <p className={styles.status} role="status">{statusMessage}</p>
           {!isComplete && (
-            <a className={styles.loginLink} href="./login">Already have an account? Log in</a>
+            <Link className={styles.loginLink} to="/login">Already have an account? Log in</Link>
           )}
         </div>
         <Toast
