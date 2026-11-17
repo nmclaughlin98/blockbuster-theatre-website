@@ -136,6 +136,19 @@
     text-decoration: underline;
 }
 
+.panelActionIcon {
+    display: inline-block;
+    color: currentColor;
+    font-family: 'Material Symbols Outlined';
+    font-size: 1.2em;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 1;
+    vertical-align: middle;
+    margin-right: 0.3rem;
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
 .identity {
     display: flex;
     align-items: center;
@@ -153,7 +166,7 @@
 
 .identityText strong {
     font-family: var(--font-heading);
-    font-size: 2rem;
+    font-size: 1.5rem;
 }
 
 .identityText span,

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { Link, Navigate, useNavigate, useSearchParams } from 'react-router-dom';
 import {
   COGNITO_AUTH_STATE_CHANGE_EVENT,
   cognitoAuth,
@@ -46,7 +46,10 @@ function Profile({ profile }) {
     <section className={styles.profileCard} aria-labelledby="profile-heading">
       <div className={styles.cardHeader}>
         <h2 id="profile-heading">My Profile</h2>
-        <Link className={styles.panelAction} to="/account?tab=settings">Edit Profile &amp; Security <span aria-hidden="true">→</span></Link>
+        <Link className={styles.panelAction} to="/account?tab=settings">
+          <span className={styles.panelActionIcon} aria-hidden="true">edit_line</span>
+          Edit Profile
+        </Link>
       </div>
       <div className={styles.identity}>
         <UserAvatar name={profile.name} size="profile" />
@@ -58,15 +61,15 @@ function Profile({ profile }) {
       <div className={styles.profileFields}>
         <div className={styles.field}>
           <span>Full name</span>
-          <strong>{profile.name || 'Not available'}</strong>
+          <p>{profile.name || 'Not available'}</p>
         </div>
         <div className={styles.field}>
           <span>Email address</span>
-          <strong>{profile.email || 'Not available'}</strong>
+          <p>{profile.email || 'Not available'}</p>
         </div>
         <div className={styles.field}>
           <span>Phone number</span>
-          <strong>{profile.phone || 'Not available'}</strong>
+          <p>{profile.phone || 'Not available'}</p>
         </div>
       </div>
     </section>
@@ -160,7 +163,10 @@ function BookingsPanel({
     <section className={styles.bookingsCard} aria-labelledby="bookings-heading">
       <div className={styles.cardHeader}>
         <h2 id="bookings-heading">My Bookings</h2>
-        {preview && <Link className={styles.panelAction} to="/account?tab=bookings">View all bookings <span aria-hidden="true">→</span></Link>}
+        {/* {preview && <Link className={styles.panelAction} to="/account?tab=bookings">View all bookings <span aria-hidden="true">→</span></Link>} */}
+        <Link className={styles.panelAction} to="/account?tab=settings">
+          <span className={styles.panelActionIcon} aria-hidden="true">confirmation_number</span> View all bookings
+        </Link>
       </div>
       <div className={styles.switcher} aria-label="Booking view">
         <button type="button" aria-pressed={view === 'upcoming'} onClick={() => setView('upcoming')}>Upcoming</button>
@@ -353,6 +359,8 @@ export function Account({
       const order = `${a.date} ${a.time}`.localeCompare(`${b.date} ${b.time}`);
       return view === 'upcoming' ? order : -order;
     });
+
+  if (account.status === 'signed-out') return <Navigate to="/login" replace />;
 
   return (
     <Layout className={styles.root} current="account">

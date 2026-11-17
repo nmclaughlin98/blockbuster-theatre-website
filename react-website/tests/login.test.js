@@ -363,7 +363,7 @@ test('hides navbar auth controls until Cognito resolves', async () => {
   assert.equal(page.container.querySelector('.nav-desktop-auth'), null);
   assert.equal(page.container.querySelector('.nav-mobile-auth'), null);
   assert.equal(page.container.querySelector('.nav-account-cta-btn'), null);
-  assert.equal(page.container.querySelector('.nav-avatar-trigger'), null);
+  assert.equal(page.container.querySelector('[aria-label^="Open account menu"]'), null);
 
   await act(async () => {
     resolveSession({ tokens: undefined });
@@ -379,7 +379,7 @@ test('shows the Cognito profile dropdown and supports dismiss and sign-out', asy
   let session = {
     tokens: {
       accessToken: { toString: () => 'access-token' },
-      idToken: { payload: { name: 'Jane Doe', email: 'jane@example.com' } },
+      idToken: { payload: { name: 'Jane Doe', email: 'Jane@Example.com' } },
     },
   };
   let signOutCalls = 0;
@@ -388,36 +388,46 @@ test('shows the Cognito profile dropdown and supports dismiss and sign-out', asy
     signOut: async () => { signOutCalls += 1; },
   });
 
-  const avatarTrigger = page.container.querySelector('.nav-avatar-trigger');
+  const avatarTrigger = page.container.querySelector('[aria-label^="Open account menu"]');
   assert.equal(avatarTrigger.querySelector('[role="img"]').textContent, 'JD');
   assert.equal(avatarTrigger.getAttribute('aria-label'), 'Open account menu for Jane Doe');
 
   await act(async () => {
     avatarTrigger.dispatchEvent(new window.MouseEvent('click', { bubbles: true }));
   });
-  assert.match(page.container.querySelector('.nav-dropdown').textContent, /Jane Doe/);
-  assert.match(page.container.querySelector('.nav-dropdown').textContent, /jane@example.com/);
-  assert.ok(page.container.querySelector('.nav-dropdown-header[href="/account"]'));
+  const dropdown = page.container.querySelector('[role="menu"]');
+  assert.match(dropdown.textContent, /Jane Doe/);
+  const dropdownHeader = dropdown.firstElementChild;
+  assert.ok(dropdownHeader);
+  assert.equal(dropdownHeader.querySelector('strong').textContent, 'Jane Doe');
+  assert.equal(dropdownHeader.querySelector('span').textContent, 'jane@example.com');
+  assert.equal(dropdownHeader.tagName, 'DIV');
+  assert.match(dropdown.textContent, /jane@example.com/);
+  assert.ok(page.container.querySelector('[role="menuitem"][href="/account"]'));
   assert.ok(page.container.querySelector('[role="menuitem"][href="/account?tab=bookings"]'));
   assert.ok(page.container.querySelector('[role="menuitem"][href="/account?tab=settings"]'));
-  assert.equal(page.container.querySelectorAll('.nav-dropdown a').length, 3);
+  assert.equal(dropdown.querySelectorAll('a').length, 3);
+  const signOutIcon = dropdown.querySelector('button[role="menuitem"] span[aria-hidden="true"]');
+  assert.equal(signOutIcon.tagName, 'SPAN');
+  assert.equal(signOutIcon.textContent, 'logout');
+  assert.equal(signOutIcon.getAttribute('aria-hidden'), 'true');
 
   await act(async () => {
     document.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
   });
-  assert.equal(page.container.querySelector('.nav-dropdown'), null);
+  assert.equal(page.container.querySelector('[role="menu"]'), null);
 
   await act(async () => {
     avatarTrigger.dispatchEvent(new window.MouseEvent('click', { bubbles: true }));
   });
   await act(async () => {
-    page.container.querySelector('.nav-dropdown button[role="menuitem"]').dispatchEvent(
+    page.container.querySelector('[role="menu"] button[role="menuitem"]').dispatchEvent(
       new window.MouseEvent('click', { bubbles: true }),
     );
     await Promise.resolve();
   });
   assert.equal(signOutCalls, 1);
-  assert.equal(page.container.querySelector('.nav-dropdown'), null);
+  assert.equal(page.container.querySelector('[role="menu"]'), null);
 
   session = { tokens: undefined };
   await act(async () => {

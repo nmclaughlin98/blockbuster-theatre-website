@@ -3,7 +3,7 @@ import { fileURLToPath } from 'node:url';
 import test, { after } from 'node:test';
 import { act, createElement } from 'react';
 import { createRoot } from 'react-dom/client';
-import { MemoryRouter } from 'react-router-dom';
+import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { JSDOM } from 'jsdom';
 import { QRCodeSVG } from 'qrcode.react';
@@ -56,6 +56,32 @@ async function render(component, props, initialEntries = ['/account']) {
   };
 }
 
+async function renderWithLocation(component, props, initialEntries) {
+  const container = document.createElement('div');
+  document.body.append(container);
+  const root = createRoot(container);
+  await act(async () => {
+    root.render(createElement(
+      MemoryRouter,
+      { initialEntries },
+      createElement(
+        Routes,
+        null,
+        createElement(Route, { path: '/account', element: createElement(component, props) }),
+        createElement(Route, { path: '/login', element: createElement('span', { 'data-login-route': true }) }),
+      ),
+    ));
+    await new Promise((resolve) => setTimeout(resolve, 0));
+  });
+  return {
+    container,
+    async unmount() {
+      await act(async () => root.unmount());
+      container.remove();
+    },
+  };
+}
+
 function mockPosterImages(t, autoLoad = false) {
   const originalImage = window.Image;
   const images = [];
@@ -70,25 +96,30 @@ function mockPosterImages(t, autoLoad = false) {
   return images;
 }
 
-test('shows account bookings, switches to history, and logs out', async () => {
+test('shows account bookings, switches to history, and logs out', async (t) => {
   let signedIn = true;
   let redirected = false;
   const authClient = {
     fetchAuthSession: async () => signedIn ? session : {},
     signOut: async () => { signedIn = false; },
   };
-  const page = await render(Account, {
+  const page = await renderWithLocation(Account, {
     authClient,
     onSignedOut: () => { redirected = true; },
     loadBookings: async (token) => {
       assert.equal(token, 'access-token');
       return [makeBooking('past', '2020-01-01', '10:00'), makeBooking('future', '2099-01-01', '10:00')];
     },
-  });
+  }, ['/account']);
+  t.after(() => page.unmount());
   assert.match(page.container.textContent, /Jane Doe/);
   assert.match(page.container.textContent, /jane@example.com/);
   assert.match(page.container.textContent, /Full name/);
   assert.match(page.container.textContent, /Phone number/);
+  const editProfile = [...page.container.querySelectorAll('a[href="/account?tab=settings"]')]
+    .find((link) => link.textContent.includes('Edit Profile'));
+  assert.equal(editProfile.textContent.trim(), 'Edit Profile edit_line');
+  assert.equal(editProfile.querySelector('span').getAttribute('aria-hidden'), 'true');
   assert.equal(page.container.querySelector('input[type="email"]'), null);
   assert.equal(page.container.querySelector('input[type="tel"]'), null);
   assert.equal(page.container.querySelector('#security-heading'), null);
@@ -105,10 +136,21 @@ test('shows account bookings, switches to history, and logs out', async () => {
   const logout = [...page.container.querySelectorAll('button')].find((button) => button.textContent === 'Log out');
   await act(async () => { logout.click(); await new Promise((resolve) => setTimeout(resolve, 0)); });
   assert.equal(redirected, true);
-  assert.match(page.container.textContent, /log in to view your account/i);
+  assert.ok(page.container.querySelector('[data-login-route]'));
   assert.doesNotMatch(page.container.textContent, /Film past/);
   assert.doesNotMatch(page.container.textContent, /jane@example.com/);
-  await page.unmount();
+});
+
+test('redirects signed-out users from every account tab to login', async () => {
+  for (const path of ['/account', '/account?tab=bookings', '/account?tab=settings']) {
+    const page = await renderWithLocation(Account, {
+      authClient: { fetchAuthSession: async () => ({}) },
+      loadBookings: async () => assert.fail('Bookings should not load while signed out'),
+    }, [path]);
+
+    assert.ok(page.container.querySelector('[data-login-route]'));
+    await page.unmount();
+  }
 });
 
 test('drives account tabs from the URL and shows the full bookings list outside the overview preview', async () => {
@@ -230,11 +272,11 @@ test('discards poster results after the session changes', async () => {
 test('cancels pending poster image loads when the session changes', async (t) => {
   const images = mockPosterImages(t);
   let signedIn = true;
-  const page = await render(Account, {
+  const page = await renderWithLocation(Account, {
     authClient: { fetchAuthSession: async () => signedIn ? session : {} },
     loadBookings: async () => [{ ...makeBooking('private', '2099-01-01', '10:00'), movieId: '1' }],
     loadMovieDetail: async () => ({ poster: 'https://image.tmdb.org/t/p/original/poster.jpg' }),
-  });
+  }, ['/account']);
   assert.equal(images.length, 1);
   assert.match(page.container.textContent, /Loading bookings/);
   signedIn = false;
@@ -244,8 +286,8 @@ test('cancels pending poster image loads when the session changes', async (t) =>
   });
   assert.equal(images[0].onload, null);
   assert.equal(images[0].onerror, null);
+  assert.ok(page.container.querySelector('[data-login-route]'));
   assert.doesNotMatch(page.container.textContent, /Film private/);
-  assert.match(page.container.textContent, /log in to view your account/i);
   await page.unmount();
 });
 
@@ -561,10 +603,10 @@ test('does not show previous bookings after the session changes', async () => {
   let signedIn = true;
   let resolveBookings;
   const pending = new Promise((resolve) => { resolveBookings = resolve; });
-  const page = await render(Account, {
+  const page = await renderWithLocation(Account, {
     authClient: { fetchAuthSession: async () => signedIn ? session : {} },
     loadBookings: async () => pending,
-  });
+  }, ['/account']);
   signedIn = false;
   await act(async () => {
     window.dispatchEvent(new window.Event(COGNITO_AUTH_STATE_CHANGE_EVENT));
@@ -572,7 +614,7 @@ test('does not show previous bookings after the session changes', async () => {
     resolveBookings([makeBooking('private', '2099-01-01', '10:00')]);
     await Promise.resolve();
   });
-  assert.match(page.container.textContent, /log in to view your account/i);
+  assert.ok(page.container.querySelector('[data-login-route]'));
   assert.doesNotMatch(page.container.textContent, /Film private/);
   await page.unmount();
 });
@@ -599,7 +641,7 @@ test('keeps the account visible when logout fails', async () => {
 
 test('header shows account controls only when authenticated', async () => {
   const signedIn = await render(Header, { authClient: { fetchAuthSession: async () => session } });
-  assert.equal(signedIn.container.querySelector('.nav-avatar-trigger').getAttribute('aria-label'), 'Open account menu for Jane Doe');
+  assert.equal(signedIn.container.querySelector('[aria-label^="Open account menu"]').getAttribute('aria-label'), 'Open account menu for Jane Doe');
   assert.equal(signedIn.container.querySelector('.nav-mobile-profile').getAttribute('href'), '/account');
   await signedIn.unmount();
   const signedOut = await render(Header, { authClient: { fetchAuthSession: async () => ({}) } });
