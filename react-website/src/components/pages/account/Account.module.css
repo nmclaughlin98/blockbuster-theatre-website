@@ -15,6 +15,7 @@
 .titleRow {
     display: flex;
     align-items: center;
+    justify-content: space-between;
     gap: 1.25rem;
     flex-wrap: wrap;
 }
@@ -92,20 +93,6 @@
     gap: 1rem;
     padding-bottom: 1.5rem;
     border-bottom: 1px solid var(--border-subtle);
-}
-
-.avatar {
-    display: grid;
-    place-items: center;
-    flex: 0 0 3.75rem;
-    height: 3.75rem;
-    border: 1px solid var(--border-accent);
-    border-radius: 50%;
-    background: var(--accent-red-transparent);
-    color: var(--text-primary);
-    font-family: var(--font-heading);
-    font-size: 1.4rem;
-    font-weight: 600;
 }
 
 .identityText {
@@ -246,7 +233,7 @@
     white-space: nowrap;
     padding: 8px 20px;
     font-family: var(--font-heading);
-    font-size: 0.85rem;
+    font-size: 1rem;
     font-weight: 500;
     color: var(--text-secondary);
     background: var(--bg-surface-elevated);

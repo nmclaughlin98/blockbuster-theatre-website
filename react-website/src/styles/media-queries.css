@@ -106,6 +106,66 @@
         font-size: 1.05rem;
     }
 
+    .primary-nav .menu .nav-desktop-auth {
+        display: none;
+    }
+
+    .primary-nav .nav-mobile-auth {
+        display: grid;
+        justify-items: center;
+        gap: 1.25rem;
+        padding: 1rem 10px 1.5rem;
+    }
+
+    .nav-auth-divider {
+        width: 100%;
+        border-top: 1px solid var(--border-subtle);
+    }
+
+    .nav-mobile-auth .nav-account-cta-btn {
+        min-width: 9.25rem;
+        padding: 12px 23px;
+        border: 1px solid var(--accent-red);
+        border-radius: var(--radius-full);
+        background: rgba(255, 255, 255, 0.03);
+        color: var(--text-primary);
+        font-family: var(--font-heading);
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        text-align: center;
+        text-decoration: none;
+    }
+
+    .nav-mobile-profile {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 1rem;
+        max-width: 100%;
+        color: var(--text-primary);
+        text-decoration: none;
+    }
+
+    .nav-mobile-profile-text {
+        display: grid;
+        gap: 0.25rem;
+        min-width: 0;
+        text-align: left;
+    }
+
+    .nav-mobile-profile-text strong {
+        overflow: hidden;
+        font-family: var(--font-heading);
+        font-size: 1.2rem;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .nav-mobile-profile-text > span {
+        color: var(--text-secondary);
+        font-size: 0.95rem;
+    }
+
     .form-group {
         font-size: 1.25rem;
         width: 100%
@@ -373,6 +433,14 @@ header {
         width: auto;
         padding: 8px 12px;
         font-size: 0.8rem;
+    }
+
+    .primary-nav .menu .nav-desktop-auth {
+        display: list-item;
+    }
+
+    .primary-nav .nav-mobile-auth {
+        display: none;
     }
 
     .hamburger {

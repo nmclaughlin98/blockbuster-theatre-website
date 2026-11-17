@@ -1,0 +1,30 @@
+.avatar {
+  display: inline-grid;
+  flex: 0 0 auto;
+  place-items: center;
+  overflow: hidden;
+  border: 1px solid var(--border-accent);
+  border-radius: 50%;
+  background: var(--accent-red-dark);
+  color: var(--text-primary);
+  font-family: var(--font-heading);
+  font-weight: 700;
+  object-fit: cover;
+  font-size: 1.9rem;
+}
+
+.nav {
+  width: 2.5rem;
+  height: 2.5rem;
+  font-size: 1.2rem;
+}
+
+.mobile {
+  width: 4.375rem;
+  height: 4.375rem;
+}
+
+.profile {
+  width: 3.75rem;
+  height: 3.75rem;
+}

@@ -84,7 +84,7 @@ test('shows account bookings, switches to history, and logs out', async () => {
       return [makeBooking('past', '2020-01-01', '10:00'), makeBooking('future', '2099-01-01', '10:00')];
     },
   });
-  assert.match(page.container.textContent, /Welcome, Jane Doe/);
+  assert.match(page.container.textContent, /Jane Doe/);
   assert.equal(page.container.querySelector('input[type="email"]').value, 'jane@example.com');
   assert.equal(page.container.querySelector('input[type="tel"]').placeholder, 'Not available');
   assert.ok(page.container.querySelector('input[type="email"]').readOnly);
@@ -567,16 +567,18 @@ test('keeps the account visible when logout fails', async () => {
   });
   assert.match(page.container.querySelector('[role="alert"]').textContent, /Could not log out/);
   assert.equal(redirected, false);
-  assert.match(page.container.textContent, /Welcome, Jane Doe/);
+  assert.match(page.container.textContent, /Jane Doe/);
   await page.unmount();
 });
 
-test('header links to the account only when authenticated', async () => {
+test('header shows account controls only when authenticated', async () => {
   const signedIn = await render(Header, { authClient: { fetchAuthSession: async () => session } });
-  assert.equal(signedIn.container.querySelector('.nav-account-cta-btn').getAttribute('href'), '/account');
+  assert.equal(signedIn.container.querySelector('.nav-avatar-trigger').getAttribute('aria-label'), 'Open account menu for Jane Doe');
+  assert.equal(signedIn.container.querySelector('.nav-mobile-profile').getAttribute('href'), '/account');
   await signedIn.unmount();
   const signedOut = await render(Header, { authClient: { fetchAuthSession: async () => ({}) } });
-  assert.equal(signedOut.container.querySelector('.nav-account-cta-btn').getAttribute('href'), '/login');
+  assert.equal(signedOut.container.querySelector('.nav-desktop-auth .nav-account-cta-btn').getAttribute('href'), '/login');
+  assert.equal(signedOut.container.querySelector('.nav-mobile-auth .nav-account-cta-btn').getAttribute('href'), '/login');
   await signedOut.unmount();
 });
 

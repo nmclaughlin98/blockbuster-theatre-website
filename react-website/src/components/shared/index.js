@@ -17,3 +17,4 @@ export { TicketDownloadButton } from './TicketDownloadButton/TicketDownloadButto
 export { TicketPass } from './TicketPass/TicketPass';
 export { TicketQRCode } from './TicketQRCode/TicketQRCode';
 export { TrailerModal } from './TrailerModal/TrailerModal';
+export { UserAvatar } from './UserAvatar/UserAvatar';

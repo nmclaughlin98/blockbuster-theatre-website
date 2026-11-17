@@ -4,7 +4,7 @@ import {
   cognitoAuth,
   getCognitoFullName,
 } from '../../../auth/cognitoAuth';
-import { Button, Layout, TicketDownloadButton, TicketModal } from '../../shared';
+import { Button, Layout, TicketDownloadButton, TicketModal, UserAvatar } from '../../shared';
 import { EyeIcon, DownloadIcon } from '../../shared/Button/icons';
 import { getPosterUrl } from '../../../utils/posterImages';
 import { getAccountBookings, getMovieDetail } from '../shared/bookingApi';
@@ -41,14 +41,11 @@ function getProfile(session) {
 }
 
 function Profile({ profile }) {
-  const initials = profile.name.split(/\s+/).filter(Boolean).slice(0, 2)
-    .map((part) => Array.from(part)[0].toLocaleUpperCase()).join('');
-
   return (
     <div className={styles.profileCard}>
       <h2>My Profile</h2>
       <div className={styles.identity}>
-        <div className={styles.avatar} aria-hidden="true">{initials || '?'}</div>
+        <UserAvatar name={profile.name} size="profile" />
         <div className={styles.identityText}>
           <strong>{profile.name || 'Name unavailable'}</strong>
           <span>{profile.email || 'Email unavailable'}</span>

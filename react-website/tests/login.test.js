@@ -338,28 +338,68 @@ test('immediately redirects an existing Cognito session without showing account 
   await page.unmount();
 });
 
-test('shows the signed-in name and account icon in the header', async () => {
+test('shows sign-in controls in the desktop navbar and mobile drawer when signed out', async () => {
+  const page = await renderHeader({
+    fetchAuthSession: async () => ({ tokens: undefined }),
+  });
+  const desktopSignIn = page.container.querySelector('.nav-desktop-auth .nav-account-cta-btn');
+  const mobileSignIn = page.container.querySelector('.nav-mobile-auth .nav-account-cta-btn');
+
+  assert.equal(desktopSignIn.textContent.trim(), 'SIGN IN');
+  assert.equal(desktopSignIn.getAttribute('href'), '/login');
+  assert.ok(desktopSignIn.querySelector('.nav-account-icon'));
+  assert.equal(mobileSignIn.getAttribute('href'), '/login');
+  assert.equal(mobileSignIn.textContent.trim(), 'SIGN IN');
+  await page.unmount();
+});
+
+test('shows the Cognito profile dropdown and supports dismiss and sign-out', async () => {
   let session = {
     tokens: {
       accessToken: { toString: () => 'access-token' },
-      idToken: { payload: { given_name: 'Jane', family_name: 'Doe' } },
+      idToken: { payload: { name: 'Jane Doe', email: 'jane@example.com' } },
     },
   };
+  let signOutCalls = 0;
   const page = await renderHeader({
     fetchAuthSession: async () => session,
+    signOut: async () => { signOutCalls += 1; },
   });
 
-  const accountLink = page.container.querySelector('.nav-account-cta-btn');
-  assert.equal(accountLink.textContent.trim(), 'Jane Doe');
-  assert.equal(accountLink.getAttribute('aria-label'), 'Account for Jane Doe');
-  assert.ok(accountLink.querySelector('.nav-account-icon'));
+  const avatarTrigger = page.container.querySelector('.nav-avatar-trigger');
+  assert.equal(avatarTrigger.querySelector('[role="img"]').textContent, 'JD');
+  assert.equal(avatarTrigger.getAttribute('aria-label'), 'Open account menu for Jane Doe');
+
+  await act(async () => {
+    avatarTrigger.dispatchEvent(new window.MouseEvent('click', { bubbles: true }));
+  });
+  assert.match(page.container.querySelector('.nav-dropdown').textContent, /Jane Doe/);
+  assert.match(page.container.querySelector('.nav-dropdown').textContent, /jane@example.com/);
+  assert.ok(page.container.querySelector('[role="menuitem"][href="/account"]'));
+  assert.equal(page.container.querySelectorAll('.nav-dropdown a').length, 2);
+
+  await act(async () => {
+    document.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+  });
+  assert.equal(page.container.querySelector('.nav-dropdown'), null);
+
+  await act(async () => {
+    avatarTrigger.dispatchEvent(new window.MouseEvent('click', { bubbles: true }));
+  });
+  await act(async () => {
+    page.container.querySelector('.nav-dropdown button[role="menuitem"]').dispatchEvent(
+      new window.MouseEvent('click', { bubbles: true }),
+    );
+    await Promise.resolve();
+  });
+  assert.equal(signOutCalls, 1);
+  assert.equal(page.container.querySelector('.nav-dropdown'), null);
 
   session = { tokens: undefined };
   await act(async () => {
     window.dispatchEvent(new window.Event(COGNITO_AUTH_STATE_CHANGE_EVENT));
     await new Promise((resolve) => setTimeout(resolve, 0));
   });
-  assert.equal(accountLink.textContent.trim(), 'Login');
-  assert.equal(accountLink.querySelector('.nav-account-icon'), null);
+  assert.equal(page.container.querySelector('.nav-desktop-auth .nav-account-cta-btn').textContent.trim(), 'SIGN IN');
   await page.unmount();
 });

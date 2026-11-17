@@ -107,6 +107,7 @@ export function getCognitoFirstName(session) {
 
 export function getCognitoFullName(session) {
   const claims = session.tokens?.idToken?.payload ?? {};
+  if (typeof claims.name === 'string' && claims.name.trim()) return claims.name.trim();
   return [claims.given_name, claims.family_name]
     .filter((name) => typeof name === 'string' && name.trim())
     .map((name) => name.trim())
