@@ -930,10 +930,10 @@ html.seat-selection-dragging {
     align-items: center;
     justify-content: center;
     gap: 8px;
-    padding: 18px 30px;
+    padding: clamp(16px, 2vw, 24px);
     font-family: var(--font-heading);
     font-weight: 800;
-    font-size: 1.1rem;
+    font-size: clamp(14px, 2vw, 18px);
     letter-spacing: 0.04em;
     text-transform: uppercase;
     border-radius: var(--radius-full);
