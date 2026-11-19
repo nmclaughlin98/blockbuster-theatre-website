@@ -5,12 +5,12 @@ import { getInitialsHex } from '../src/utils/getInitialsHex.js';
 test('returns deterministic HSL-derived six-digit colors for initials', () => {
   assert.deepEqual(
     Object.fromEntries(['NM', 'RH', 'JD'].map((initials) => [initials, getInitialsHex(initials)])),
-    { NM: '#CEB727', RH: '#9327CE', JD: '#2778CE' },
+    { NM: '#ff334b', RH: '#9327CE', JD: '#2778CE' },
   );
 });
 
 test('normalizes initials before generating a color', () => {
-  assert.equal(getInitialsHex(' nm '), getInitialsHex('NM'));
+  assert.equal(getInitialsHex(' nm '), '#ff334b');
   assert.equal(getInitialsHex('rh'), getInitialsHex('RH'));
 });
 

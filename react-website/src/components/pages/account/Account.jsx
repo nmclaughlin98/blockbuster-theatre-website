@@ -245,7 +245,6 @@ function OverviewBookingsCard({ account, bookings, posters, view, setView, setSe
           <span className={styles.panelActionIcon} aria-hidden="true">confirmation_number</span> View all bookings
         </Link>
       </div>
-      <BookingViewControls view={view} setView={setView} />
       <BookingListContent
         account={account}
         bookings={bookings}

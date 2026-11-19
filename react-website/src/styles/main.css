@@ -27,7 +27,7 @@
     --border-highlight: rgba(255, 255, 255, 0.18);
     --border-accent: rgba(255, 51, 75, 0.4);
 
-    --glass-bg: rgba(12, 13, 18, 0.85);
+    --glass-bg: rgba(12, 13, 18, 0.96);
     --glass-card: rgba(20, 23, 34, 0.65);
 
     --font-display: 'Oswald', 'Outfit', sans-serif;
@@ -282,7 +282,7 @@ header {
     gap: 8px;
 }
 
-.primary-nav .menu > li > a {
+.primary-nav .menu>li>a {
     display: block;
     padding: 13px 18px;
     font-weight: 600;
@@ -295,24 +295,24 @@ header {
     position: relative;
 }
 
-.primary-nav .menu > li > a:hover {
+.primary-nav .menu>li>a:hover {
     color: var(--text-primary);
     background: var(--accent-hover-grey);
     transform: translateY(-2px) !important;
 }
 
-.primary-nav .menu > li > a.current {
+.primary-nav .menu>li>a.current {
     color: #fff;
     background: var(--accent-red);
     box-shadow: 0 4px 18px var(--accent-glow);
     transition: all var(--transition-smooth);
 }
 
-.primary-nav .menu > li > a.current:hover {
+.primary-nav .menu>li>a.current:hover {
     background: var(--accent-red-hover);
 }
 
-.primary-nav .menu > li > .nav-account-cta-btn {
+.primary-nav .menu>li>.nav-account-cta-btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -329,7 +329,7 @@ header {
     touch-action: manipulation;
 }
 
-.primary-nav .menu > li .nav-account-icon {
+.primary-nav .menu>li .nav-account-icon {
     width: 1.15rem;
     height: 1.15rem;
     margin-right: 0.5rem;
@@ -349,13 +349,13 @@ header {
     stroke-linejoin: round;
 }
 
-.primary-nav .menu > li > .nav-account-cta-btn:hover {
+.primary-nav .menu>li>.nav-account-cta-btn:hover {
     background: var(--accent-red-hover-transparent);
     color: #fff;
     transform: translateY(-2px);
 }
 
-.primary-nav .menu > li > .nav-account-cta-btn.current {
+.primary-nav .menu>li>.nav-account-cta-btn.current {
     background: var(--accent-red-dark);
     border-color: var(--accent-red-dark);
 }
@@ -924,7 +924,7 @@ html.seat-selection-dragging {
 
 .book-now-fab {
     position: fixed;
-    bottom: 88px;
+    bottom: clamp(28px, 5vw, 88px);
     right: 28px;
     display: inline-flex;
     align-items: center;

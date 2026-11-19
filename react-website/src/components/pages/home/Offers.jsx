@@ -25,18 +25,23 @@ export function Offers({ movies = [] }) {
     return () => controller.abort();
   }, []);
 
+  const visibleOffers = state.offers.flatMap((offer) => {
+    const featuredMovie = movies.find((movie) => (
+      movie.visible === true
+      && String(movie.movieId) === String(offer.featuredMovieId)
+    ));
+    return featuredMovie ? [{ offer, featuredMovie }] : [];
+  });
+
+  if (state.loading) return null;
+  if (state.error) return <p className="form-notice" role="alert">{state.error}</p>;
+  if (!visibleOffers.length) return null;
+
   return (
     <section className="offers">
       <SectionHeader title="Special Offers" />
-      {state.loading && <p role="status">Loading special offers...</p>}
-      {state.error && <p className="form-notice" role="alert">{state.error}</p>}
-      {!state.loading && !state.error && !state.offers.length
-        && <p>No special offers are currently available.</p>}
       <div className="offers-grid">
-        {state.offers.map((offer) => {
-          const featuredMovie = movies.find((movie) => (
-            String(movie.movieId) === String(offer.featuredMovieId)
-          ));
+        {visibleOffers.map(({ offer, featuredMovie }) => {
           return (
             <OfferCard
               key={`${offer.type}:${offer.id}`}

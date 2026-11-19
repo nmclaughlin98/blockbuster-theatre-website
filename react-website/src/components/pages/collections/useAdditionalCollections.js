@@ -13,13 +13,10 @@ export async function loadAdditionalCollections(collectionIds, signal) {
     }
   }));
   const collections = [];
-  const errors = [];
 
   for (const item of results) {
     if ('error' in item) {
-      const { collectionId, error } = item;
-      const message = error instanceof Error ? error.message : String(error);
-      errors.push(`Collection ${collectionId} could not be loaded: ${message}`);
+      // Silently ignore collections that cannot be loaded
       continue;
     }
 
@@ -33,7 +30,7 @@ export async function loadAdditionalCollections(collectionIds, signal) {
 
   return {
     collections,
-    error: errors.length ? new Error(errors.join(' ')) : null,
+    error: null,
   };
 }
 
