@@ -66,6 +66,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+
     .dropdown,
     .closing {
         animation: none;

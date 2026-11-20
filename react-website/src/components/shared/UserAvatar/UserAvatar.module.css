@@ -11,6 +11,12 @@
   font-weight: 700;
   object-fit: cover;
   font-size: 1.9rem;
+  user-select: none;
+  transition: transform 0.2s ease-in-out;
+}
+
+.avatar:hover {
+  transform: scale(1.1);
 }
 
 .nav {
@@ -25,6 +31,6 @@
 }
 
 .profile {
-  width: 3.75rem;
-  height: 3.75rem;
+  width: 4rem;
+  height: 4rem;
 }

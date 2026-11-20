@@ -38,7 +38,7 @@ export function UserAvatar({ name = '', imageUrl, size = 'nav', className = '' }
       className={classes}
       role="img"
       aria-label={`${name || 'User'} initials`}
-      style={{ backgroundColor: getInitialsHex(colorInitials) }}
+      style={{ backgroundColor: getInitialsHex(colorInitials), borderColor: getInitialsHex(colorInitials) }}
     >
       {initials}
     </span>
