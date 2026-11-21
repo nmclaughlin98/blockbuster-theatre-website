@@ -3,7 +3,7 @@ import { fileURLToPath } from 'node:url';
 import test, { after } from 'node:test';
 import { act, createElement } from 'react';
 import { createRoot } from 'react-dom/client';
-import { MemoryRouter } from 'react-router-dom';
+import { MemoryRouter, useLocation } from 'react-router-dom';
 import { JSDOM } from 'jsdom';
 import { createServer } from 'vite';
 
@@ -61,13 +61,24 @@ async function renderHeader(authClient) {
   const container = document.createElement('div');
   document.body.append(container);
   const root = createRoot(container);
+  let pathname;
+  function LocationObserver() {
+    pathname = useLocation().pathname;
+    return null;
+  }
   await act(async () => {
-    root.render(createElement(MemoryRouter, null, createElement(Header, { authClient })));
+    root.render(createElement(
+      MemoryRouter,
+      { initialEntries: ['/about'] },
+      createElement(LocationObserver),
+      createElement(Header, { authClient }),
+    ));
     await new Promise((resolve) => setTimeout(resolve, 0));
   });
 
   return {
     container,
+    get pathname() { return pathname; },
     async unmount() {
       await act(async () => root.unmount());
       container.remove();
@@ -114,7 +125,13 @@ test('links to the signup page', async () => {
   await page.unmount();
 });
 
-test('signs in with SRP and navigates immediately after the session is confirmed', async () => {
+test('signs in with SRP and navigates immediately after the session is confirmed', async (t) => {
+  const notifications = [];
+  const onAuthChange = (event) => {
+    if (event.detail?.toastMessage) notifications.push(event.detail.toastMessage);
+  };
+  window.addEventListener(COGNITO_AUTH_STATE_CHANGE_EVENT, onAuthChange);
+  t.after(() => window.removeEventListener(COGNITO_AUTH_STATE_CHANGE_EVENT, onAuthChange));
   let resolveSignIn;
   const signInPromise = new Promise((resolve) => {
     resolveSignIn = resolve;
@@ -154,6 +171,7 @@ test('signs in with SRP and navigates immediately after the session is confirmed
     await new Promise((resolve) => setTimeout(resolve, 0));
   });
   assert.equal(authenticated, true);
+  assert.deepEqual(notifications, ['Login successful.']);
   assert.doesNotMatch(page.container.textContent, /Welcome back|Signed in as|Log out/);
   assert.equal(page.container.querySelector('form'), null);
   await page.unmount();
@@ -314,7 +332,13 @@ test('accepts Cognito required-new-password challenges', async () => {
   await page.unmount();
 });
 
-test('immediately redirects an existing Cognito session without showing account details', async () => {
+test('immediately redirects an existing Cognito session without showing account details', async (t) => {
+  const notifications = [];
+  const onAuthChange = (event) => {
+    if (event.detail?.toastMessage) notifications.push(event.detail.toastMessage);
+  };
+  window.addEventListener(COGNITO_AUTH_STATE_CHANGE_EVENT, onAuthChange);
+  t.after(() => window.removeEventListener(COGNITO_AUTH_STATE_CHANGE_EVENT, onAuthChange));
   let redirects = 0;
   const authClient = {
     signIn: async () => assert.fail('Sign-in should not be available while logged in'),
@@ -334,6 +358,7 @@ test('immediately redirects an existing Cognito session without showing account 
   const page = await renderLogin(authClient, () => { redirects += 1; });
 
   assert.equal(redirects, 1);
+  assert.deepEqual(notifications, []);
   assert.doesNotMatch(page.container.textContent, /Welcome back|Signed in as|Log out|Refresh session/);
   assert.equal(page.container.querySelector('form'), null);
   await page.unmount();
@@ -375,7 +400,13 @@ test('hides navbar auth controls until Cognito resolves', async () => {
   await page.unmount();
 });
 
-test('shows the Cognito profile dropdown and supports dismiss and sign-out', async () => {
+test('shows the Cognito profile dropdown and supports dismiss and sign-out', async (t) => {
+  const notifications = [];
+  const onAuthChange = (event) => {
+    if (event.detail?.toastMessage) notifications.push(event.detail.toastMessage);
+  };
+  window.addEventListener(COGNITO_AUTH_STATE_CHANGE_EVENT, onAuthChange);
+  t.after(() => window.removeEventListener(COGNITO_AUTH_STATE_CHANGE_EVENT, onAuthChange));
   let session = {
     tokens: {
       accessToken: { toString: () => 'access-token' },
@@ -429,6 +460,8 @@ test('shows the Cognito profile dropdown and supports dismiss and sign-out', asy
     await Promise.resolve();
   });
   assert.equal(signOutCalls, 1);
+  assert.equal(page.pathname, '/login');
+  assert.deepEqual(notifications, ['Logged out successfully.']);
   await act(async () => new Promise((resolve) => window.setTimeout(resolve, 200)));
   assert.equal(page.container.querySelector('[role="menu"]'), null);
 
@@ -439,4 +472,26 @@ test('shows the Cognito profile dropdown and supports dismiss and sign-out', asy
   });
   assert.equal(page.container.querySelector('.nav-desktop-auth .nav-account-cta-btn').textContent.trim(), 'SIGN IN');
   await page.unmount();
+});
+
+test('stays on the current page if signing out from the header fails', async () => {
+  const page = await renderHeader({
+    fetchAuthSession: async () => ({
+      tokens: { accessToken: { toString: () => 'access-token' } },
+    }),
+    signOut: async () => { throw new Error('Sign-out failed'); },
+  });
+  try {
+    await act(async () => {
+      page.container.querySelector('[aria-label^="Open account menu"]').click();
+    });
+    await act(async () => {
+      page.container.querySelector('[role="menu"] button[role="menuitem"]').click();
+      await Promise.resolve();
+    });
+    assert.equal(page.pathname, '/about');
+    assert.match(page.container.querySelector('[role="alert"]').textContent, /Could not sign out/);
+  } finally {
+    await page.unmount();
+  }
 });

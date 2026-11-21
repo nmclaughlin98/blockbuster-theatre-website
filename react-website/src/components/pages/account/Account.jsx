@@ -337,8 +337,7 @@ export function Account({
         }
         const profile = getProfile(session);
         setAccount({ status: 'bookings-loading', profile });
-        const idToken = session.tokens?.idToken?.toString();
-        const bookings = await loadBookings(idToken || accessToken, requestController.signal);
+        const bookings = await loadBookings(requestController.signal);
         if (!active || currentRequest !== requestId) return;
         const movieIds = [...new Set(bookings.map((booking) => booking.movieId).filter(Boolean))];
         const posterEntries = await Promise.all(movieIds.map(async (movieId) => {
@@ -393,7 +392,9 @@ export function Account({
     } finally {
       setSigningOut(false);
     }
-    window.dispatchEvent(new window.Event(COGNITO_AUTH_STATE_CHANGE_EVENT));
+    window.dispatchEvent(new window.CustomEvent(COGNITO_AUTH_STATE_CHANGE_EVENT, {
+      detail: { toastMessage: 'Logged out successfully.' },
+    }));
     if (onSignedOut) onSignedOut();
     else navigate('/login', { replace: true });
   }

@@ -10,6 +10,8 @@ The Login page signs in with Cognito using Amplify's SRP flow. The Sign Up page 
 
 After signing in, users are redirected immediately to My Account, where they can see their name, upcoming bookings and booking history, or log out and return to the login page. Signed-in users who open the login page are also redirected to My Account. Booking history requires the backend's authenticated `GET /api/v1/bookings/account/history` endpoint; deploy that backend change before using the page. Only bookings linked to the account, including converted guest bookings, are shown. Newly linked bookings may take a short time to appear.
 
+Booking history sends the Cognito access token. The current backend only automatically links guest bookings when it receives a verified ID token, so opening the account page will not trigger automatic linking.
+
 The account profile displays name, email and phone claims when present in the Cognito ID token. Profile editing, password changes and email/SMS alert preferences are placeholders, not saved settings. Booking cards load catalogue posters using the booking's movie ID; they use a placeholder when the ID or artwork is unavailable. This requires the booking-history endpoint to return `movieId`. Tickets with a booking reference can be viewed on the account page; older bookings without one cannot generate a QR code.
 
 Booking confirmations and account tickets render QR codes locally from the booking reference, matching the payload in the confirmation email. Account tickets also show the guest name, ticket count and total when these are available from the booking-history endpoint.

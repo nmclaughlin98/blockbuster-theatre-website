@@ -201,7 +201,9 @@ export function Login({
         if (!session.tokens?.accessToken) {
           throw new Error('Cognito returned a session without an access token.');
         }
-        window.dispatchEvent(new window.Event(COGNITO_AUTH_STATE_CHANGE_EVENT));
+        window.dispatchEvent(new window.CustomEvent(COGNITO_AUTH_STATE_CHANGE_EVENT, {
+          detail: { toastMessage: 'Login successful.' },
+        }));
         setIsRedirecting(true);
         return;
       }

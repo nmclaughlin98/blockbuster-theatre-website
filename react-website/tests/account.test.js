@@ -117,8 +117,8 @@ test('shows account bookings, switches to history, and logs out', async (t) => {
   const page = await renderWithLocation(Account, {
     authClient,
     onSignedOut: () => { redirected = true; },
-    loadBookings: async (token) => {
-      assert.equal(token, 'id-token');
+    loadBookings: async (signal) => {
+      assert.ok(signal instanceof AbortSignal);
       return [makeBooking('past', '2020-01-01', '10:00'), makeBooking('future', '2099-01-01', '10:00')];
     },
   }, ['/account']);
@@ -685,6 +685,33 @@ test('keeps the account visible when logout fails', async () => {
   await page.unmount();
 });
 
+test('announces successful logout from the account page', async (t) => {
+  let signedIn = true;
+  const notifications = [];
+  const onAuthChange = (event) => {
+    if (event.detail?.toastMessage) notifications.push(event.detail.toastMessage);
+  };
+  window.addEventListener(COGNITO_AUTH_STATE_CHANGE_EVENT, onAuthChange);
+  t.after(() => window.removeEventListener(COGNITO_AUTH_STATE_CHANGE_EVENT, onAuthChange));
+  const page = await render(Account, {
+    authClient: {
+      fetchAuthSession: async () => signedIn ? session : {},
+      signOut: async () => { signedIn = false; },
+    },
+    loadBookings: async () => [],
+    onSignedOut: () => {},
+  });
+  try {
+    await act(async () => {
+      [...page.container.querySelectorAll('button')].find((button) => button.textContent === 'Log out').click();
+      await Promise.resolve();
+    });
+    assert.deepEqual(notifications, ['Logged out successfully.']);
+  } finally {
+    await page.unmount();
+  }
+});
+
 test('header shows account controls only when authenticated', async () => {
   const signedIn = await render(Header, { authClient: { fetchAuthSession: async () => session } });
   assert.equal(signedIn.container.querySelector('[aria-label^="Open account menu"]').getAttribute('aria-label'), 'Open account menu for Jane Doe');
@@ -696,14 +723,55 @@ test('header shows account controls only when authenticated', async () => {
   await signedOut.unmount();
 });
 
-test('account history uses the ID token for verified email claims', async () => {
-  let token;
+test('account history passes an abort signal rather than the ID token', async () => {
+  let signal;
   const view = await render(Account, {
     authClient: { fetchAuthSession: async () => session },
-    loadBookings: async (value) => { token = value; return []; },
+    loadBookings: async (value) => { signal = value; return []; },
   });
-  assert.equal(token, 'id-token');
+  assert.ok(signal instanceof AbortSignal);
   await view.unmount();
+  assert.equal(signal.aborted, true);
+});
+
+test('booking history retrieves the current access token and requires sign-in', async () => {
+  const testVite = await createServer({
+    configFile: fileURLToPath(new URL('../vite.config.js', import.meta.url)),
+    server: { middlewareMode: true },
+    appType: 'custom',
+    logLevel: 'silent',
+    plugins: [{
+      name: 'test-cognito-access-token',
+      enforce: 'pre',
+      transform(_source, id) {
+        if (id.replaceAll('\\', '/').endsWith('/src/auth/cognitoAuth.js')) {
+          return 'export async function getCognitoAccessToken() { return globalThis.testAccessToken; }';
+        }
+        return null;
+      },
+    }],
+  });
+  const originalFetch = globalThis.fetch;
+  const controller = new AbortController();
+  try {
+    const { getAccountBookingHistory: loadHistory } = await testVite.ssrLoadModule(
+      '/src/components/pages/shared/bookingApi.js',
+    );
+    globalThis.testAccessToken = 'current-access-token';
+    globalThis.fetch = async (url, options) => {
+      assert.equal(new URL(url).pathname, '/api/v1/bookings/account/history');
+      assert.equal(options.headers.get('Authorization'), 'Bearer current-access-token');
+      assert.equal(options.signal, controller.signal);
+      return new Response(JSON.stringify({ bookings: [], newlyLinkedBookings: [] }));
+    };
+    assert.deepEqual(await loadHistory(controller.signal), { bookings: [], newlyLinkedBookings: [] });
+    globalThis.testAccessToken = null;
+    await assert.rejects(loadHistory(), /Sign in to view your bookings\./);
+  } finally {
+    delete globalThis.testAccessToken;
+    globalThis.fetch = originalFetch;
+    await testVite.close();
+  }
 });
 
 test('booking history request uses the session token and rejects malformed data', async () => {
@@ -714,24 +782,24 @@ test('booking history request uses the session token and rejects malformed data'
       assert.equal(options.headers.get('Authorization'), 'Bearer access-token');
       return new Response(JSON.stringify({ bookings: [makeBooking('x', '2020-02-30', '10:00')], newlyLinkedBookings: [] }));
     };
-    await assert.rejects(getAccountBookings('access-token'), /invalid account booking details/);
-    await assert.rejects(getAccountBookings(''), /Sign in/);
+    await assert.rejects(getAccountBookings(undefined, 'access-token'), /invalid account booking details/);
+    await assert.rejects(getAccountBookings(undefined, null), /Sign in to view your bookings\./);
     const booking = { ...makeBooking('x', '2099-01-01', '10:00'), movieId: '1003596', guestName: 'Alex Smith', ticketCount: 2, totalAmount: 0, currency: 'GBP' };
     globalThis.fetch = async () => new Response(JSON.stringify({ bookings: [booking], newlyLinkedBookings: ['REF-x'] }));
-    assert.deepEqual(await getAccountBookings('access-token'), [booking]);
-    assert.deepEqual(await getAccountBookingHistory('id-token'), {
+    assert.deepEqual(await getAccountBookings(undefined, 'access-token'), [booking]);
+    assert.deepEqual(await getAccountBookingHistory(undefined, 'access-token'), {
       bookings: [booking], newlyLinkedBookings: ['REF-x'],
     });
     globalThis.fetch = async () => new Response(JSON.stringify({ bookings: [{ ...booking, movieId: 'bad' }], newlyLinkedBookings: [] }));
-    await assert.rejects(getAccountBookings('access-token'), /invalid account booking details/);
+    await assert.rejects(getAccountBookings(undefined, 'access-token'), /invalid account booking details/);
     for (const invalid of [{ guestName: ' ' }, { ticketCount: 3 }, { totalAmount: -1 }, { currency: 'gbp' }]) {
       globalThis.fetch = async () => new Response(JSON.stringify({ bookings: [{ ...booking, ...invalid }], newlyLinkedBookings: [] }));
-      await assert.rejects(getAccountBookings('access-token'), /invalid account booking details/);
+      await assert.rejects(getAccountBookings(undefined, 'access-token'), /invalid account booking details/);
     }
     globalThis.fetch = async () => new Response(JSON.stringify({ bookings: [booking], newlyLinkedBookings: [null] }));
-    await assert.rejects(getAccountBookingHistory('id-token'), /invalid account booking details/);
+    await assert.rejects(getAccountBookingHistory(undefined, 'access-token'), /invalid account booking details/);
     globalThis.fetch = async () => new Response(JSON.stringify({ message: 'Not authorized' }), { status: 401 });
-    await assert.rejects(getAccountBookings('access-token'), /Not authorized/);
+    await assert.rejects(getAccountBookings(undefined, 'access-token'), /Not authorized/);
   } finally {
     globalThis.fetch = originalFetch;
   }

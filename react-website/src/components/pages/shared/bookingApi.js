@@ -141,9 +141,12 @@ export async function getBookedSeatDetails(showtimeId, date, signal, accessToken
 /**
  * @returns {Promise<{bookings: object[], newlyLinkedBookings: string[], linkNotificationSent?: false}>}
  */
-export async function getAccountBookingHistory(idToken, signal) {
-  if (!idToken) throw new Error('Sign in to view your bookings.');
-  const data = await requestJson('/api/v1/bookings/account/history', { signal }, undefined, idToken);
+export async function getAccountBookingHistory(signal, accessTokenOverride) {
+  const accessToken = accessTokenOverride === undefined
+    ? await getCognitoAccessToken()
+    : accessTokenOverride;
+  if (!accessToken) throw new Error('Sign in to view your bookings.');
+  const data = await requestJson('/api/v1/bookings/account/history', { signal }, undefined, accessToken);
   if (!Array.isArray(data?.newlyLinkedBookings)
     || data.newlyLinkedBookings.some((reference) => typeof reference !== 'string' || !reference)
     || (data.linkNotificationSent !== undefined && data.linkNotificationSent !== false)) {
@@ -182,8 +185,8 @@ export async function getAccountBookingHistory(idToken, signal) {
   };
 }
 
-export async function getAccountBookings(token, signal) {
-  return (await getAccountBookingHistory(token, signal)).bookings;
+export async function getAccountBookings(signal, accessTokenOverride) {
+  return (await getAccountBookingHistory(signal, accessTokenOverride)).bookings;
 }
 
 export function createGuestBookingPayload({

@@ -1,3 +1,4 @@
+import { useCallback, useEffect } from 'react';
 import {
   Navigate,
   Route,
@@ -19,6 +20,9 @@ import {
   Signup,
   Timetable,
 } from './components/pages';
+import { COGNITO_AUTH_STATE_CHANGE_EVENT } from './auth/cognitoAuth';
+import { Toast } from './components/shared/Toast/Toast';
+import { useToast } from './components/shared/Toast/useToast';
 
 function LegacyPageRedirect({ to, preserveSearch = false }) {
   const { search } = useLocation();
@@ -62,8 +66,24 @@ function LegacyMovieParamRedirect() {
 
 export default function App() {
   const location = useLocation();
+  const { toast, setToastMessage } = useToast();
+  const dismissToast = useCallback(() => setToastMessage(''), [setToastMessage]);
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+  }, [location.pathname]);
+
+  useEffect(() => {
+    function handleAuthChange(event) {
+      if (event.detail?.toastMessage) setToastMessage(event.detail.toastMessage, 'success');
+    }
+
+    window.addEventListener(COGNITO_AUTH_STATE_CHANGE_EVENT, handleAuthChange);
+    return () => window.removeEventListener(COGNITO_AUTH_STATE_CHANGE_EVENT, handleAuthChange);
+  }, [setToastMessage]);
 
   return (
+    <>
     <div className="app-shell" key={`${location.pathname}${location.search}`}>
       <Routes>
         <Route path="/" element={<Home />} />
@@ -100,5 +120,7 @@ export default function App() {
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </div>
+    <Toast message={toast.message} type={toast.type} onDismiss={dismissToast} />
+    </>
   );
 }

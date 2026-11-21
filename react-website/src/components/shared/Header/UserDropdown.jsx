@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { COGNITO_AUTH_STATE_CHANGE_EVENT } from '../../../auth/cognitoAuth';
 import { UserAvatar } from '../UserAvatar/UserAvatar';
 import styles from './UserDropdown.module.css';
@@ -7,6 +7,7 @@ import styles from './UserDropdown.module.css';
 const CLOSE_ANIMATION_DURATION_MS = 180;
 
 export function UserDropdown({ account, authClient }) {
+    const navigate = useNavigate();
     const [menuOpen, setMenuOpen] = useState(false);
     const [menuMounted, setMenuMounted] = useState(false);
     const [menuClosing, setMenuClosing] = useState(false);
@@ -76,8 +77,11 @@ export function UserDropdown({ account, authClient }) {
         setSignOutError('');
         try {
             await authClient.signOut();
-            window.dispatchEvent(new window.Event(COGNITO_AUTH_STATE_CHANGE_EVENT));
+            window.dispatchEvent(new window.CustomEvent(COGNITO_AUTH_STATE_CHANGE_EVENT, {
+                detail: { toastMessage: 'Logged out successfully.' },
+            }));
             closeMenu();
+            navigate('/login', { replace: true });
         } catch (error) {
             console.error('Unable to sign out from the navigation menu.', error);
             setSignOutError('Could not sign out. Please try again.');
