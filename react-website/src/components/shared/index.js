@@ -1,6 +1,6 @@
 export { asset } from './asset/asset';
 export { BackToTop } from './BackToTop/BackToTop';
-export { BookNowFab } from './BookNowFab';
+export { BookNowFab } from './BookingShortcut/BookNowFab';
 export { Button, ButtonLink } from './Button';
 export { CenteredHeadingBlock } from './CenteredHeadingBlock/CenteredHeadingBlock';
 export { DatePicker } from './DatePicker/DatePicker';

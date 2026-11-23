@@ -1,10 +1,10 @@
 import { useLocation } from 'react-router-dom';
-import { BookNowFab } from '../BookNowFab';
+import { BookNowFab } from '../BookingShortcut/BookNowFab';
 import { BackToTop } from '../BackToTop/BackToTop';
 import { Footer } from '../Footer/Footer';
 import { Header } from '../Header/Header';
 
-const bookNowFabExcludedPages = new Set(['booking', 'login', 'account', 'movie']);
+const bookNowFabExcludedPages = new Set(['booking', 'login', 'account', 'movie', 'about']);
 const bookNowFabExcludedPaths = ['/movie/', '/coming-soon/'];
 
 export function Layout({ current, children, loading = false, className }) {

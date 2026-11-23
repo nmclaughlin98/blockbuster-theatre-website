@@ -84,43 +84,43 @@ export default function App() {
 
   return (
     <>
-    <div className="app-shell" key={`${location.pathname}${location.search}`}>
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/movie/:slug" element={<Detail />} />
-        <Route path="/coming-soon/:slug" element={<Detail comingSoon />} />
-        <Route path="/book-now" element={<Booking />} />
-        <Route path="/now-showing" element={<NowShowing />} />
-        <Route path="/coming-soon" element={<ComingSoon />} />
-        <Route path="/about" element={<About />} />
-        <Route path="/account" element={<Account />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<Signup />} />
-        <Route path="/timetable" element={<Timetable />} />
-        <Route path="/collection/:collectionId" element={<CollectionDetail />} />
-        <Route path="/collections" element={<Navigate to="/now-showing?view=collections" replace />} />
+      <div className="app-shell" key={`${location.pathname}${location.search}`}>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/movie/:slug" element={<Detail />} />
+          <Route path="/coming-soon/:slug" element={<Detail comingSoon />} />
+          <Route path="/book-now" element={<Booking />} />
+          <Route path="/now-showing" element={<NowShowing />} />
+          <Route path="/coming-soon" element={<ComingSoon />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/account" element={<Account />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/timetable" element={<Timetable />} />
+          <Route path="/collection/:collectionId" element={<CollectionDetail />} />
+          <Route path="/collections" element={<Navigate to="/now-showing?view=collections" replace />} />
 
-        <Route path="/movie-detail.html" element={<LegacyMovieRedirect />} />
-        <Route path="/movie-detail-coming-soon.html" element={<LegacyMovieRedirect comingSoon />} />
-        <Route path="/movie=:slug" element={<LegacyMovieParamRedirect />} />
-        <Route path="/collection.html" element={<LegacyCollectionRedirect />} />
-        <Route path="/collections.html" element={<LegacyNowShowingRedirect />} />
-        <Route path="/nowShowing" element={<LegacyNowShowingRedirect />} />
-        <Route path="/nowShowing.html" element={<LegacyNowShowingRedirect />} />
-        <Route path="/comingSoon" element={<LegacyPageRedirect to="/coming-soon" />} />
-        <Route path="/comingSoon.html" element={<LegacyPageRedirect to="/coming-soon" />} />
-        <Route path="/bookNow" element={<LegacyPageRedirect to="/book-now" preserveSearch />} />
-        <Route path="/bookNow.html" element={<LegacyPageRedirect to="/book-now" preserveSearch />} />
-        <Route path="/about.html" element={<LegacyPageRedirect to="/about" />} />
-        <Route path="/account.html" element={<LegacyPageRedirect to="/account" />} />
-        <Route path="/login.html" element={<LegacyPageRedirect to="/login" />} />
-        <Route path="/signup.html" element={<LegacyPageRedirect to="/signup" />} />
-        <Route path="/timetable.html" element={<LegacyPageRedirect to="/timetable" />} />
-        <Route path="/index.html" element={<Navigate to="/" replace />} />
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    </div>
-    <Toast message={toast.message} type={toast.type} onDismiss={dismissToast} />
+          <Route path="/movie-detail.html" element={<LegacyMovieRedirect />} />
+          <Route path="/movie-detail-coming-soon.html" element={<LegacyMovieRedirect comingSoon />} />
+          <Route path="/movie=:slug" element={<LegacyMovieParamRedirect />} />
+          <Route path="/collection.html" element={<LegacyCollectionRedirect />} />
+          <Route path="/collections.html" element={<LegacyNowShowingRedirect />} />
+          <Route path="/nowShowing" element={<LegacyNowShowingRedirect />} />
+          <Route path="/nowShowing.html" element={<LegacyNowShowingRedirect />} />
+          <Route path="/comingSoon" element={<LegacyPageRedirect to="/coming-soon" />} />
+          <Route path="/comingSoon.html" element={<LegacyPageRedirect to="/coming-soon" />} />
+          <Route path="/bookNow" element={<LegacyPageRedirect to="/book-now" preserveSearch />} />
+          <Route path="/bookNow.html" element={<LegacyPageRedirect to="/book-now" preserveSearch />} />
+          <Route path="/about.html" element={<LegacyPageRedirect to="/about" />} />
+          <Route path="/account.html" element={<LegacyPageRedirect to="/account" />} />
+          <Route path="/login.html" element={<LegacyPageRedirect to="/login" />} />
+          <Route path="/signup.html" element={<LegacyPageRedirect to="/signup" />} />
+          <Route path="/timetable.html" element={<LegacyPageRedirect to="/timetable" />} />
+          <Route path="/index.html" element={<Navigate to="/" replace />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </div>
+      <Toast message={toast.message} type={toast.type} onDismiss={dismissToast} />
     </>
   );
 }
