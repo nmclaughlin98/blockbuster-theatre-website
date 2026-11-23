@@ -1,42 +1,4 @@
 /* Timetable page styles, scoped to this page. */
-.root :global(.page-banner) {
-    width: 100%;
-    max-width: var(--content-width);
-    margin: 0 auto;
-    padding: 46px 20px 18px;
-    text-align: center;
-    position: relative;
-}
-
-.root :global(.page-banner)::before {
-    content: "";
-    position: absolute;
-    inset: 18px 18% auto;
-    height: 120px;
-    background: radial-gradient(circle, rgba(255, 51, 75, 0.25), transparent 68%);
-    filter: blur(28px);
-    pointer-events: none;
-}
-
-.root :global(.page-banner) h1 {
-    font-family: var(--font-display);
-    font-size: clamp(2.5rem, 5vw, 4.2rem);
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    margin-bottom: 8px;
-    position: relative;
-    background: linear-gradient(135deg, #fff 30%, #ffb0ba 55%, #ffd7d7 100%);
-    background-clip: text;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-}
-
-.root :global(.page-banner) p {
-    color: var(--text-secondary);
-    font-size: 1rem;
-    position: relative;
-}
-
 .root :global(.timetable-controls) {
     width: 100%;
     max-width: var(--content-width);
@@ -220,11 +182,11 @@
 @media print {
 
     .root :global(.timetable-controls),
-    .root :global(.page-banner) p {
+    .root :global(.timetable-banner) p {
         display: none !important;
     }
 
-    .root :global(.page-banner) {
+    .root :global(.timetable-banner) {
         padding-top: 0;
         margin-bottom: 12px;
     }
@@ -255,15 +217,6 @@
     color: var(--text-secondary);
     font-weight: 700;
     margin-left: 5px;
-}
-
-.root :global(.page-banner) {
-    padding: clamp(2rem, 5vw, 2.875rem) var(--page-gutter) 1.125rem;
-}
-
-.root :global(.page-banner) h1 {
-    font-size: clamp(1.8rem, 5vw, 4.2rem);
-    overflow-wrap: anywhere;
 }
 
 .root :global(.timetable-controls),
@@ -354,6 +307,7 @@
 
     .root :global(.timetable-toolbar) {
         align-items: stretch;
+        flex-direction: column-reverse;
     }
 
     .root :global(.filter-bar) {
@@ -369,10 +323,6 @@
 }
 
 @media (max-width: 480px) {
-
-    .root :global(.page-banner) h1 {
-        font-size: clamp(1.65rem, 8vw, 2.5rem);
-    }
 
     .root :global(.movie-card) {
         gap: 1rem;

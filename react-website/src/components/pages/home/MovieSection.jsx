@@ -1,11 +1,13 @@
 import { useLayoutEffect, useRef, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { MovieGrid } from '../../movies';
-import { DirectionalButton } from '../../shared';
+import { ButtonLink, SectionHeader } from '../../shared';
+import { ChevronRightIcon } from '../../shared/Button/icons';
 
 export function MovieSection({
   title,
   movies,
-  viewAllHref = './nowShowing.html',
+  viewAllHref = '/now-showing',
   viewAllLabel = 'View All Movies',
 }) {
   const gridRef = useRef(null);
@@ -36,12 +38,11 @@ export function MovieSection({
 
   return (
     <section className="movie-poster">
-      <div className="section-header movie-section-header">
-        <h1>{title}</h1>
-        <DirectionalButton className="btn-glass button" href={viewAllHref} direction="next" variant="glass">
+      <SectionHeader title={title} className="movie-section-header">
+        <ButtonLink as={Link} to={viewAllHref} variant="glass" shape="rounded" rightIcon={<ChevronRightIcon />}>
           {viewAllLabel}
-        </DirectionalButton>
-      </div>
+        </ButtonLink>
+      </SectionHeader>
       <MovieGrid movies={movies.slice(0, visibleCount)} containerRef={gridRef} />
     </section>
   );

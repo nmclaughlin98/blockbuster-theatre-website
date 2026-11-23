@@ -1,7 +1,7 @@
 {
   "name": "blockbuster-theatre-website",
   "private": true,
-  "version": "2.0.1",
+  "version": "2.1.0",
   "type": "module",
   "scripts": {
     "predev": "node scripts/generate-config.js development",
@@ -13,10 +13,14 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "aws-amplify": "^6.22.2",
+    "html2canvas": "^1.4.1",
     "jspdf": "^4.2.1",
+    "qrcode.react": "^4.2.0",
     "react": "^19.2.8",
     "react-datepicker": "^9.1.0",
-    "react-dom": "^19.2.8"
+    "react-dom": "^19.2.8",
+    "react-router-dom": "^6.14.2"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
@@ -27,6 +31,7 @@
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.6",
     "globals": "^17.12.0",
+    "jsdom": "^31.0.0",
     "vite": "^8.3.4"
   }
 }

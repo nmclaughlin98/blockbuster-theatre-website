@@ -1,8 +1,8 @@
 import styles from './Timetable.module.css';
 import { useEffect, useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { movieId, movieSlug } from '../../movies';
-import { Layout, ShowtimeChip } from '../../shared';
-import { PageLoader } from '../../shared/PageLoader';
+import { CenteredHeadingBlock, Layout, ShowtimeChip } from '../../shared';
 import {
     getMoviesForDates,
     getUpcomingScreeningDates,
@@ -12,6 +12,7 @@ import {
 import { createBookingHref } from '../shared/showtimeNavigation';
 import { useMovies } from '../shared/useMovies';
 import { openTimetablePdf } from './timetablePdf';
+import { TimetableSkeleton } from './TimetableSkeleton';
 
 const maxShowtimeButtons = 4;
 
@@ -105,12 +106,12 @@ function TimetableMovie({ movie, day }) {
     return (
         <div className="movie-card">
             <div className="movie-info">
-                <a
+                <Link
                     className="movie-title"
-                    href={`./movie-detail.html?movie=${encodeURIComponent(movieSlug(movie))}`}
+                    to={`/movie/${encodeURIComponent(movieSlug(movie))}`}
                 >
                     {getMovieTitle(movie)}
-                </a>
+                </Link>
                 <div className="movie-meta">
                     <span className="badge-genre">{getMovieGenre(movie)}</span>
                 </div>
@@ -120,7 +121,7 @@ function TimetableMovie({ movie, day }) {
                     <ShowtimeChip
                         className="timetable-showtime-chip"
                         href={createBookingHref(
-                            './bookNow.html',
+                            '/book-now',
                             movieSlug(movie) || getMovieTitle(movie),
                             slot.date,
                             slot,
@@ -162,7 +163,7 @@ export function Timetable() {
     if (loading) {
         return (
             <Layout className={styles.root} current="now" loading>
-                <PageLoader label="Loading movie timetable" />
+                <TimetableSkeleton />
             </Layout>
         );
     }
@@ -198,11 +199,13 @@ export function Timetable() {
 
     return (
         <Layout className={styles.root} current="now">
-            <div id="timetablePrintArea">
-                <section className="page-banner">
-                    <h1>Weekly Movie Timetable</h1>
-                    <p id="weekCommencingLabel">Schedule for Week Commencing {weekCommencing}</p>
-                </section>
+            <section id="timetablePrintArea">
+                <CenteredHeadingBlock
+                    className="timetable-banner"
+                    title="Weekly Movie Timetable"
+                    description={`Schedule for Week Commencing ${weekCommencing}`}
+                    descriptionId="weekCommencingLabel"
+                />
                 <TimetableControls
                     days={days}
                     day={day}
@@ -229,7 +232,7 @@ export function Timetable() {
                                 key={movieId(movie)} />)
                             : <p>No movies available for this search and day.</p>}
                 </div>
-            </div>
+            </section>
         </Layout>
     );
 }

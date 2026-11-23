@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import { CollectionArtwork } from './CollectionArtwork';
 
 function formatLastUpdated(value) {
@@ -10,9 +11,9 @@ export function CollectionCard({ collection }) {
   const lastUpdated = formatLastUpdated(collection.lastUpdated);
 
   return (
-    <a
+    <Link
       className="collection-card"
-      href={`./collection.html?collection=${encodeURIComponent(collection.collectionId)}`}
+      to={`/collection/${encodeURIComponent(collection.collectionId)}`}
       aria-label={`View ${collection.name} collection`}
     >
       <div className="collection-card-artwork">
@@ -26,6 +27,6 @@ export function CollectionCard({ collection }) {
         <h2>{collection.name}</h2>
         <p>{collection.description || 'Description unavailable.'}</p>
       </div>
-    </a>
+    </Link>
   );
 }

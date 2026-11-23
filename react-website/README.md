@@ -4,7 +4,17 @@
 
 The movies API base URL is written to the gitignored `src/config.js` before each development server start and production build. `VITE_MOVIES_API_URL` is required; there is no hardcoded URL fallback.
 
-For local development, create `.env.local` and set `VITE_MOVIES_API_URL` to the API invoke base URL. Include a stage path if the API uses one, but do not append a route such as `/movies`. You can also use mode-specific `.env.development.local` and `.env.production.local` files. For GitHub Pages deployments, add a repository Actions variable named `VITE_MOVIES_API_URL` under Settings → Secrets and variables → Actions → Variables. The deployment workflow requires this variable and passes it into the production build.
+For local development, copy `.env.example` to `.env.local`. Set `VITE_MOVIES_API_URL` to the API invoke base URL, including a stage path if the API uses one, but do not append a route such as `/movies`. Set `VITE_COGNITO_REGION`, `VITE_COGNITO_USER_POOL_ID`, and `VITE_COGNITO_USER_POOL_CLIENT_ID` using the backend stack's region and `UserPoolId` / `UserPoolClientId` outputs. The current backend region is `eu-west-2`. The public app client must have no client secret. You can also use mode-specific `.env.development.local` and `.env.production.local` files. For GitHub Pages deployments, add all four `VITE_...` values as repository Actions variables under Settings → Secrets and variables → Actions → Variables; the deploy workflow validates and passes them into the production build.
+
+The Login page signs in with Cognito using Amplify's SRP flow. The Sign Up page creates accounts with email, `given_name`, and `family_name` attributes and confirms the email address with Cognito's verification code when required. Amplify manages the session; frontend API requests use its access token as a bearer token. MFA verification codes and Cognito's required-new-password challenge are supported; other account recovery/setup steps direct users to the theatre administrator.
+
+After signing in, users are redirected immediately to My Account, where they can see their name, upcoming bookings and booking history, or log out and return to the login page. Signed-in users who open the login page are also redirected to My Account. Booking history requires the backend's authenticated `GET /api/v1/bookings/account/history` endpoint; deploy that backend change before using the page. Only bookings linked to the account, including converted guest bookings, are shown. Newly linked bookings may take a short time to appear.
+
+Booking history sends the Cognito access token. The current backend only automatically links guest bookings when it receives a verified ID token, so opening the account page will not trigger automatic linking.
+
+The account profile displays name, email and phone claims when present in the Cognito ID token. Profile editing, password changes and email/SMS alert preferences are placeholders, not saved settings. Booking cards load catalogue posters using the booking's movie ID; they use a placeholder when the ID or artwork is unavailable. This requires the booking-history endpoint to return `movieId`. Tickets with a booking reference can be viewed on the account page; older bookings without one cannot generate a QR code.
+
+Booking confirmations and account tickets render QR codes locally from the booking reference, matching the payload in the confirmation email. Account tickets also show the guest name, ticket count and total when these are available from the booking-history endpoint.
 
 ## Wallet passes
 
@@ -18,7 +28,9 @@ The booking wizard keeps selection and contact data in memory and does not requi
 
 ## Movie Collections
 
-Collections is a section of Now Showing, available through an animated page-level switch rather than the primary navigation. The browse view loads collection cards from `GET /collections`; each card opens `collection.html?collection={id}`. The detail page calls `GET /collections/{id}` and displays the available movie summaries in the order returned by the API.
+The site is a single-page app using React Router. Movie detail pages use `/movie/{slug}` (or `/coming-soon/{slug}` for upcoming titles), and collection detail pages use `/collection/{id}`. Legacy `.html` URLs redirect to their SPA routes.
+
+Collections is a section of Now Showing, available through an animated page-level switch rather than the primary navigation. The browse view loads collection cards from `GET /collections`; each card opens `/collection/{id}`. The detail page calls `GET /collections/{id}` and displays the available movie summaries in the order returned by the API.
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 

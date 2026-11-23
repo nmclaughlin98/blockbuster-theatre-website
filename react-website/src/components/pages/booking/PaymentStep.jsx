@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
 import {
-  createGuestBooking,
+  createBooking,
   createGuestBookingPayload,
   getBookedSeats,
   sortSeatIds,
@@ -25,7 +25,7 @@ function formatScreeningDate(date, time) {
 }
 
 export function PaymentStep({
-  initialData, onBack, onNext, onSeatConflict, onTicketIssue, onToast,
+  initialData, onBack, onNext, onSeatConflict, onTicketIssue, onToast, skipGuestInfo = false,
 }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submissionStatus, setSubmissionStatus] = useState('');
@@ -82,7 +82,7 @@ export function PaymentStep({
           ? { offerId: initialData.selection.offerId }
           : {}),
       });
-      const details = await createGuestBooking(payload);
+      const details = await createBooking(payload);
       if (details.showtimeId !== showtime.showtimeId || details.date !== showtime.date) {
         throw new Error('The booking service returned a confirmation for a different screening. Please contact support.');
       }
@@ -109,7 +109,7 @@ export function PaymentStep({
   return (
     <fieldset className="active" data-step="3">
       <StepHeader
-        title="Step 4: Review Your Booking"
+        title={`Step ${skipGuestInfo ? 3 : 4}: Review Your Booking`}
         description="Review the details below to reserve your seats. No card details are collected or submitted."
       />
       <div className="review-details-grid">

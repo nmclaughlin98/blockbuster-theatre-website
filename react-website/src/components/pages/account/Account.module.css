@@ -1,0 +1,444 @@
+.root {
+    min-height: 100%;
+}
+
+.page {
+    width: min(100% - 2 * var(--page-gutter), 75rem);
+    margin: 0 auto;
+    padding: clamp(2.5rem, 6vw, 4.5rem) 0;
+}
+
+.heading {
+    margin-bottom: 1.25rem;
+}
+
+.titleRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.25rem;
+    flex-wrap: wrap;
+}
+
+.heading h1 {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: clamp(1.5rem, 3vw, 2rem);
+    line-height: 1.15;
+    text-transform: uppercase;
+}
+
+.eyebrow {
+    margin: 0 0 0.4rem;
+    color: var(--accent-red);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-weight: 700;
+    font-size: 0.8rem;
+}
+
+.welcome {
+    margin: 0.5rem 0 0;
+    color: var(--text-secondary);
+}
+
+.columns {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 2rem;
+    align-items: stretch;
+}
+
+.fullWidth,
+.settings {
+    width: 100%;
+}
+
+.settings {
+    max-width: 56rem;
+}
+
+.tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 2rem;
+    padding-bottom: 1.25rem;
+    border-bottom: 1px solid var(--border-subtle);
+}
+
+.tab {
+    padding: 0.65rem 1.1rem;
+    color: var(--text-secondary);
+    background: var(--bg-surface-elevated);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-full);
+    font-family: var(--font-heading);
+    font-weight: 600;
+    text-decoration: none;
+    transition: all var(--transition);
+}
+
+.tab:hover,
+.tab[aria-current='page'] {
+    color: #fff;
+    background: var(--accent-red);
+    border-color: var(--accent-red);
+    box-shadow: 0 4px 15px var(--accent-glow);
+}
+
+.profileCard,
+.securityCard,
+.bookingsCard {
+    min-width: 0;
+    padding: clamp(1.25rem, 3vw, 1.75rem);
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+}
+
+.profileCard,
+.bookingsCard {
+    display: flex;
+    flex-direction: column;
+}
+
+.cardHeader {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+}
+
+.profileCard h2,
+.securityCard h2,
+.bookingsCard h2 {
+    margin: 0;
+    font-family: var(--font-heading);
+    font-size: 1.5rem;
+}
+
+.panelAction {
+    flex: 0 0 auto;
+    margin-left: auto;
+    color: var(--accent-red);
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-align: right;
+    text-decoration: none;
+}
+
+.panelAction:hover {
+    color: var(--accent-red-hover);
+    text-decoration: underline;
+}
+
+.panelActionIcon {
+    display: inline-block;
+    color: currentColor;
+    font-family: 'Material Symbols Outlined';
+    font-size: 1.2em;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 1;
+    vertical-align: middle;
+    margin-right: 0.3rem;
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
+.identity {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border-subtle);
+}
+
+.identityText {
+    display: grid;
+    min-width: 0;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+}
+
+.identityText strong {
+    font-family: var(--font-heading);
+    font-size: 1.5rem;
+}
+
+.identityText span,
+.note {
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+}
+
+.profileFields {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1rem 1.25rem;
+    margin-top: 1.5rem;
+}
+
+.field {
+    display: grid;
+    gap: 0.35rem;
+}
+
+.field span {
+    color: var(--text-secondary);
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.field strong {
+    color: var(--text-primary);
+    font-weight: 600;
+    overflow-wrap: anywhere;
+}
+
+.note {
+    margin: 0;
+}
+
+.securityContent {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1.25rem;
+    flex-wrap: wrap;
+}
+
+.alertSettings {
+    display: grid;
+    gap: 0.75rem;
+    min-width: min(100%, 14rem);
+}
+
+.alertSetting {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.alertSetting input {
+    position: absolute;
+    opacity: 0;
+}
+
+.switch {
+    position: relative;
+    flex: 0 0 2.5rem;
+    height: 1.4rem;
+    border-radius: var(--radius-full);
+    background: #454b59;
+}
+
+.switch::after {
+    position: absolute;
+    top: 0.2rem;
+    left: 0.2rem;
+    width: 1rem;
+    height: 1rem;
+    border-radius: 50%;
+    background: var(--text-secondary);
+    content: '';
+}
+
+.securityCard>.note {
+    margin-top: 1.25rem;
+}
+
+.switcher {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-bottom: 1rem;
+}
+
+.switcher button {
+    flex: 0 0 auto;
+    white-space: nowrap;
+    padding: 8px 20px;
+    font-family: var(--font-heading);
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    background: var(--bg-surface-elevated);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-full);
+    cursor: pointer;
+    transition: all var(--transition);
+    touch-action: manipulation;
+}
+
+.switcher button:hover,
+.switcher button[aria-pressed='true'] {
+    color: #fff;
+    background: var(--accent-red);
+    border-color: var(--accent-red);
+    box-shadow: 0 4px 15px var(--accent-glow);
+}
+
+.bookings {
+    display: grid;
+    gap: 1rem;
+    list-style: none;
+    padding: 0;
+}
+
+.booking {
+    min-width: 0;
+    padding: 1rem;
+    border: 1px solid var(--border-highlight);
+    border-radius: var(--radius-md);
+    background: var(--bg-surface-elevated);
+}
+
+.bookingDetails {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.85rem;
+    min-width: 0;
+    padding-bottom: 1rem;
+    border-bottom: 1px dashed var(--border-highlight);
+}
+
+.posterPlaceholder {
+    display: grid;
+    place-items: center;
+    flex: 0 0 3.5rem;
+    height: 5rem;
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-sm);
+    background: var(--bg-main);
+    color: var(--text-secondary);
+    overflow: hidden;
+}
+
+.posterPlaceholder img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.posterPlaceholder svg {
+    width: 1.5rem;
+    stroke: currentColor;
+    stroke-width: 1.5;
+}
+
+.bookingText {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.booking h3 {
+    margin: 0 0 0.4rem;
+    font-family: var(--font-heading);
+    font-size: 1.15rem;
+    line-height: 1.3;
+}
+
+.bookingText p {
+    margin: 0.2rem 0;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+}
+
+.bookingActions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin-top: 1rem;
+}
+
+.ticketActionButton {
+    flex: 1 1 9rem;
+    min-width: min(100%, 9rem);
+    font-family: var(--font-display);
+    text-transform: uppercase;
+    font-weight: 700;
+    font-size: 0.75rem;
+    padding: 0.5rem 0.9rem;
+}
+
+.ticketButtonPrimary:not(:disabled) {
+    background: var(--accent-red);
+    border-color: var(--accent-red);
+    color: #fff;
+}
+
+.downloadError {
+    flex-basis: 100%;
+    margin: 0;
+    color: var(--accent-red);
+    font-size: 0.875rem;
+}
+
+.booking>.note {
+    margin-top: 0.5rem;
+    text-align: center;
+}
+
+.empty {
+    margin: 1.5rem 0 0;
+    color: var(--text-secondary);
+}
+
+.loading {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+    color: var(--text-secondary);
+}
+
+.loading :global(.loader) {
+    --size: 0.5px;
+    flex-shrink: 0;
+}
+
+.error {
+    margin-top: 1rem;
+    color: var(--accent-red);
+}
+
+@media (min-width: 851px) {
+    .bookingsCard {
+        height: 100%;
+    }
+
+    .bookingContent {
+        padding-top: 0.5rem;
+    }
+}
+
+@media (max-width: 850px) {
+    .columns {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+}
+
+@media (max-width: 480px) {
+    .panelAction {
+        text-align: right;
+    }
+
+    .tabs {
+        gap: 0.4rem;
+    }
+
+    .tab {
+        padding: 0.55rem 0.8rem;
+        font-size: 0.9rem;
+    }
+}

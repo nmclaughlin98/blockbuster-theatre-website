@@ -1,15 +1,17 @@
+import { Link } from 'react-router-dom';
+
 const links = [
     ['Home', '/'],
-    ['Now Showing', './nowShowing.html'],
-    ['Coming Soon', './comingSoon.html'],
-    ['About', './about.html'],
+    ['Now Showing', '/now-showing'],
+    ['Coming Soon', '/coming-soon'],
+    ['About', '/about'],
 ];
 
 export function Footer() {
     return (
         <footer>
             <nav className="nav secondary-nav">
-                <ul>{ links.map(([label, href]) => <li key={ label }><a href={ href }>{ label }</a></li>) }</ul>
+                <ul>{ links.map(([label, to]) => <li key={ label }><Link to={ to }>{ label }</Link></li>) }</ul>
             </nav>
             {/*<small>&copy; { new Date().getFullYear() } Blockbuster Theatre</small>*/ }
             <small><strong>Disclaimer: This is a demo website - Not for public use</strong></small>

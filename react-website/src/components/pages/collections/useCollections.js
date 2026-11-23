@@ -24,6 +24,7 @@ export function useCollections(enabled) {
   return {
     collections: state.collections,
     loading: enabled && state.attempt !== attempt,
+    initialLoadComplete: state.attempt >= 0,
     error: state.error,
     retry: () => setAttempt((current) => current + 1),
   };

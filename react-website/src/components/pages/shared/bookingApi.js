@@ -1,4 +1,5 @@
 import { MOVIES_API_URL } from '../../../config.js';
+import { getCognitoAccessToken } from '../../../auth/cognitoAuth.js';
 
 export const CINEMA_SEAT_CAPACITY = 71;
 
@@ -15,8 +16,17 @@ export function getApiErrorMessage(data) {
   return message || null;
 }
 
-async function requestJson(path, options = {}, expectedStatus) {
-  const response = await fetch(`${MOVIES_API_URL}${path}`, options);
+async function requestJson(path, options = {}, expectedStatus, accessTokenOverride) {
+  const accessToken = accessTokenOverride === undefined
+    ? await getCognitoAccessToken()
+    : accessTokenOverride;
+  let requestOptions = options;
+  if (accessToken) {
+    const headers = new Headers(options.headers);
+    headers.set('Authorization', `Bearer ${accessToken}`);
+    requestOptions = { ...options, headers };
+  }
+  const response = await fetch(`${MOVIES_API_URL}${path}`, requestOptions);
   let data;
 
   try {
@@ -93,6 +103,92 @@ export async function getBookedSeats(showtimeId, date, signal) {
   return data.bookedSeats;
 }
 
+export async function getBookedSeatDetails(showtimeId, date, signal, accessTokenOverride) {
+  if (!isShowtimeIdForDate(showtimeId, date)) {
+    throw new Error('The selected showtime ID does not match the screening date.');
+  }
+
+  const accessToken = accessTokenOverride === undefined
+    ? await getCognitoAccessToken()
+    : accessTokenOverride;
+  const endpoint = accessToken
+    ? '/api/v1/bookings/account'
+    : '/api/v1/bookings/guest';
+  const query = new URLSearchParams({ showtimeId, date });
+  const data = await requestJson(`${endpoint}?${query.toString()}`, { signal }, undefined, accessToken);
+  if (data.showtimeId !== showtimeId || data.date !== date) {
+    throw new Error('The booking service returned seat availability for a different screening.');
+  }
+  if (!Array.isArray(data.bookedSeats) || data.bookedSeats.some((seat) => (
+    typeof seat !== 'string' || !/^[A-G](?:[1-9]|1[01])$/.test(seat)
+  ))) {
+    throw new Error('The booking service returned an invalid booked seat list.');
+  }
+  const myBookedSeats = accessToken ? data.myBookedSeats : [];
+  if (!Array.isArray(myBookedSeats) || myBookedSeats.some((seat) => (
+    typeof seat !== 'string'
+    || !/^[A-G](?:[1-9]|1[01])$/.test(seat)
+    || !data.bookedSeats.includes(seat)
+  ))) {
+    throw new Error('The booking service returned an invalid personal booked seat list.');
+  }
+  return {
+    bookedSeats: data.bookedSeats,
+    myBookedSeats: sortSeatIds([...new Set(myBookedSeats)]),
+  };
+}
+
+/**
+ * @returns {Promise<{bookings: object[], newlyLinkedBookings: string[], linkNotificationSent?: false}>}
+ */
+export async function getAccountBookingHistory(signal, accessTokenOverride) {
+  const accessToken = accessTokenOverride === undefined
+    ? await getCognitoAccessToken()
+    : accessTokenOverride;
+  if (!accessToken) throw new Error('Sign in to view your bookings.');
+  const data = await requestJson('/api/v1/bookings/account/history', { signal }, undefined, accessToken);
+  if (!Array.isArray(data?.newlyLinkedBookings)
+    || data.newlyLinkedBookings.some((reference) => typeof reference !== 'string' || !reference)
+    || (data.linkNotificationSent !== undefined && data.linkNotificationSent !== false)) {
+    throw new Error('The booking service returned invalid account booking details.');
+  }
+  if (!Array.isArray(data?.bookings) || data.bookings.some((booking) => {
+    const date = typeof booking?.date === 'string' ? new Date(`${booking.date}T00:00:00Z`) : new Date(NaN);
+    return !booking
+      || typeof booking.bookingId !== 'string' || !booking.bookingId
+      || (booking.bookingRef !== undefined
+        && (typeof booking.bookingRef !== 'string' || !booking.bookingRef))
+      || (booking.movieId !== undefined
+        && (typeof booking.movieId !== 'string' || !/^\d+$/.test(booking.movieId)))
+      || typeof booking.movieTitle !== 'string' || !booking.movieTitle
+      || !/^\d{4}-\d{2}-\d{2}$/.test(booking.date)
+      || Number.isNaN(date.getTime()) || date.toISOString().slice(0, 10) !== booking.date
+      || typeof booking.time !== 'string' || !/^(?:[01]\d|2[0-3]):[0-5]\d$/.test(booking.time)
+      || typeof booking.screen !== 'string' || !booking.screen
+      || !Array.isArray(booking.seats) || booking.seats.some((seat) => typeof seat !== 'string')
+      || (booking.guestName !== undefined
+        && (typeof booking.guestName !== 'string' || !booking.guestName.trim()))
+      || (booking.ticketCount !== undefined
+        && (!Number.isSafeInteger(booking.ticketCount) || booking.ticketCount < 1
+          || booking.ticketCount !== booking.seats.length))
+      || (booking.totalAmount !== undefined
+        && (typeof booking.totalAmount !== 'number' || !Number.isFinite(booking.totalAmount) || booking.totalAmount < 0))
+      || (booking.currency !== undefined
+        && (typeof booking.currency !== 'string' || !/^[A-Z]{3}$/.test(booking.currency)));
+  })) {
+    throw new Error('The booking service returned invalid account booking details.');
+  }
+  return {
+    bookings: data.bookings,
+    newlyLinkedBookings: data.newlyLinkedBookings,
+    ...(data.linkNotificationSent === false && { linkNotificationSent: false }),
+  };
+}
+
+export async function getAccountBookings(signal, accessTokenOverride) {
+  return (await getAccountBookingHistory(signal, accessTokenOverride)).bookings;
+}
+
 export function createGuestBookingPayload({
   showtimeId, date, seats, email, customerName, tickets, offerId,
 }) {
@@ -131,12 +227,18 @@ export function createGuestBookingPayload({
   return payload;
 }
 
-export async function createGuestBooking(payload) {
-  const data = await requestJson('/api/v1/bookings/guest', {
+export async function createBooking(payload, accessTokenOverride) {
+  const accessToken = accessTokenOverride === undefined
+    ? await getCognitoAccessToken()
+    : accessTokenOverride;
+  const endpoint = accessToken
+    ? '/api/v1/bookings/account'
+    : '/api/v1/bookings/guest';
+  const data = await requestJson(endpoint, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
-  }, 201);
+  }, 201, accessToken);
   if (!data || typeof data !== 'object' || Array.isArray(data)
     || typeof data.bookingId !== 'string' || !data.bookingId
     || typeof data.bookingRef !== 'string' || !data.bookingRef
@@ -165,9 +267,13 @@ export async function createGuestBooking(payload) {
     || typeof data.confirmationEmailSent !== 'boolean'
     || (data.conversionToken != null && typeof data.conversionToken !== 'string')
     || (data.conversionTokenExpiresAt != null && typeof data.conversionTokenExpiresAt !== 'string')) {
-    throw new Error('The booking service returned invalid guest booking details.');
+    throw new Error('The booking service returned invalid booking details.');
   }
   return { ...data, seats: sortSeatIds(data.seats) };
+}
+
+export async function createGuestBooking(payload) {
+  return createBooking(payload);
 }
 
 export async function convertGuestAccount(conversionToken, password) {

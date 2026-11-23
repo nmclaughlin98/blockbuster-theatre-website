@@ -2,12 +2,15 @@ import { DirectionalButton } from '../../shared';
 
 const steps = ['Tickets', 'Select Seats', 'Guest Info', 'Review', 'Confirmed'];
 
-export function ProgressBar({ currentStep }) {
+export function ProgressBar({ currentStep: rawStep, skipGuestInfo = false }) {
+  const visibleSteps = skipGuestInfo ? steps.filter((label) => label !== 'Guest Info') : steps;
+  const currentStep = skipGuestInfo && rawStep > 2 ? rawStep - 1 : rawStep;
+
   return (
     <ol id="progressbar" aria-label="Booking progress">
-      {steps.map((label, index) => (
+      {visibleSteps.map((label, index) => (
         <li
-          className={`${index <= currentStep ? 'active' : ''} ${index < currentStep || (index === currentStep && currentStep === steps.length - 1) ? 'completed' : ''
+          className={`${index <= currentStep ? 'active' : ''} ${index < currentStep || (index === currentStep && currentStep === visibleSteps.length - 1) ? 'completed' : ''
             }`}
           key={label}
         >

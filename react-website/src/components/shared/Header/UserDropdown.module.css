@@ -1,0 +1,172 @@
+.userMenu {
+    position: relative;
+}
+
+.avatarTrigger {
+    display: grid;
+    place-items: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    cursor: pointer;
+}
+
+.avatarTrigger:focus-visible {
+    outline: 2px solid var(--text-primary);
+    outline-offset: 3px;
+}
+
+.dropdown {
+    --dropdown-link-padding: 13px 18px;
+    position: absolute;
+    top: calc(100% + 0.6rem);
+    right: 0;
+    z-index: 1002;
+    width: 22rem;
+    max-width: calc(100vw - 2rem);
+    padding: 0.5rem;
+    border: 1px solid var(--border-accent);
+    border-radius: var(--radius-md);
+    background: var(--glass-bg);
+    box-shadow: 0 8px 26px rgba(0, 0, 0, 0.45), 0 0 18px var(--accent-red-hover-transparent);
+    box-sizing: border-box;
+    animation: slideOpen 180ms ease-out both;
+}
+
+.closing {
+    animation: slideClose 180ms ease-in both;
+    pointer-events: none;
+}
+
+@keyframes slideOpen {
+    from {
+        opacity: 0;
+        transform: translateY(-0.4rem);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideClose {
+    from {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    to {
+        opacity: 0;
+        transform: translateY(-0.4rem);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+    .dropdown,
+    .closing {
+        animation: none;
+    }
+}
+
+.header {
+    display: grid;
+    gap: 0.25rem;
+    min-width: 0;
+    padding: 0.55rem 0.65rem;
+    border-bottom: 1px solid var(--border-subtle);
+    margin-bottom: 0.5rem;
+}
+
+.header strong,
+.header span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.header strong {
+    color: var(--text-primary);
+    font-family: var(--font-heading);
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+.header span {
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    text-transform: lowercase;
+}
+
+.dropdownLink {
+    display: block;
+    width: 100%;
+    padding: 0.8rem 0.65rem;
+    border-radius: var(--radius-full);
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    position: relative;
+    text-decoration: none;
+    text-transform: uppercase;
+    transition: all var(--transition);
+    box-sizing: border-box;
+}
+
+.dropdownLink:hover {
+    background: var(--accent-hover-grey);
+    color: var(--text-primary);
+    transform: translateY(-2px);
+}
+
+.signOutError {
+    margin: 0.4rem 0.65rem;
+    color: var(--accent-red);
+    font-size: 0.8rem;
+}
+
+.signOut {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    width: auto;
+    padding: 0.55rem 0.65rem;
+    border: 0;
+    border-radius: var(--radius-sm);
+    background: transparent;
+    color: var(--accent-red);
+    font-family: var(--font-heading);
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-align: left;
+    text-transform: none;
+    cursor: pointer;
+}
+
+.signOut:hover:not(:disabled) {
+    background: transparent;
+    color: var(--accent-red-hover);
+    text-decoration: underline;
+}
+
+.signOut:disabled {
+    cursor: wait;
+    opacity: 0.7;
+}
+
+.signOutIcon {
+    display: inline-block;
+    flex: 0 0 auto;
+    color: currentColor;
+    font-family: 'Material Symbols Outlined';
+    font-size: 1.1rem;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 1;
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}

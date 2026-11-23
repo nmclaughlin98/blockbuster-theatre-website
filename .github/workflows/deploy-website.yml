@@ -45,12 +45,25 @@ jobs:
       - name: Install dependencies
         working-directory: react-website
         run: npm ci
-      - name: Validate API base URL
+      - name: Validate frontend configuration
         env:
           VITE_MOVIES_API_URL: ${{ vars.VITE_MOVIES_API_URL }}
+          VITE_COGNITO_REGION: ${{ vars.VITE_COGNITO_REGION }}
+          VITE_COGNITO_USER_POOL_ID: ${{ vars.VITE_COGNITO_USER_POOL_ID }}
+          VITE_COGNITO_USER_POOL_CLIENT_ID: ${{ vars.VITE_COGNITO_USER_POOL_CLIENT_ID }}
         run: |
           if [ -z "$VITE_MOVIES_API_URL" ]; then
             echo "::error::Set the VITE_MOVIES_API_URL repository variable to the deployed API base URL."
+            exit 1
+          fi
+          for name in VITE_COGNITO_REGION VITE_COGNITO_USER_POOL_ID VITE_COGNITO_USER_POOL_CLIENT_ID; do
+            if [ -z "${!name}" ]; then
+              echo "::error::Set the $name repository variable from the deployed Cognito stack."
+              exit 1
+            fi
+          done
+          if [[ "$VITE_COGNITO_USER_POOL_ID" != "${VITE_COGNITO_REGION}_"* ]]; then
+            echo "::error::VITE_COGNITO_REGION must match the region prefix in VITE_COGNITO_USER_POOL_ID."
             exit 1
           fi
       - name: Build React site
@@ -58,6 +71,9 @@ jobs:
         run: npm run build
         env:
           VITE_MOVIES_API_URL: ${{ vars.VITE_MOVIES_API_URL }}
+          VITE_COGNITO_REGION: ${{ vars.VITE_COGNITO_REGION }}
+          VITE_COGNITO_USER_POOL_ID: ${{ vars.VITE_COGNITO_USER_POOL_ID }}
+          VITE_COGNITO_USER_POOL_CLIENT_ID: ${{ vars.VITE_COGNITO_USER_POOL_CLIENT_ID }}
       - name: Setup Pages
         uses: actions/configure-pages@v6
       - name: Upload artifact

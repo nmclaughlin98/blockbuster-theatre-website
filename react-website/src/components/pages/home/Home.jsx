@@ -25,10 +25,10 @@ export function Home() {
 
   const {
     collections: additionalCollections,
-    error: additionalCollectionsError,
   } = useAdditionalCollections(ADDITIONAL_COLLECTION_IDS);
-  const current = movies.filter((movie) => movie.visible !== false && movie.isComingSoon !== true);
-  const carousel = movies.filter((movie) => movie.visible !== false && movie.isCarousel === true);
+  const visibleMovies = movies.filter((movie) => movie.visible !== false);
+  const current = visibleMovies.filter((movie) => movie.isComingSoon !== true);
+  const carousel = visibleMovies.filter((movie) => movie.isCarousel === true);
 
   if (loading) {
     return (
@@ -45,22 +45,19 @@ export function Home() {
       {!error && <>
         <MovieSection title="What's On" movies={[...current].sort((a, b) => new Date(b.releaseDate || 0) - new Date(a.releaseDate || 0)).slice(0, 7)} />
         <MovieSection title="Top Picks" movies={[...current].sort((a, b) => (b.score ?? 0) - (a.score ?? 0)).slice(0, 7)} />
-        {additionalCollectionsError && (
-          <p role="alert">{additionalCollectionsError.message}</p>
-        )}
         {additionalCollections.map(({ collection, collectionId, movies }) => (
           collection.isActive !== false && movies.length > 0 && (
             <MovieSection
               key={collectionId}
               title={collection.name}
               movies={movies}
-              viewAllHref={`./collection.html?collection=${encodeURIComponent(collectionId)}`}
+              viewAllHref={`/collection/${encodeURIComponent(collectionId)}`}
               viewAllLabel="View Collection"
             />
           )
         ))}
       </>}
-      <Offers />
+      <Offers movies={visibleMovies} />
     </Layout>
   );
 }

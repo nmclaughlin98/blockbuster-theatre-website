@@ -4,27 +4,33 @@ import { getCollection } from './collectionApi.js';
 const MAX_ADDITIONAL_COLLECTIONS = 3;
 
 export async function loadAdditionalCollections(collectionIds, signal) {
-  const collections = [];
-  const errors = [];
-
-  for (const collectionId of collectionIds) {
-    if (collections.length === MAX_ADDITIONAL_COLLECTIONS) break;
-
+  const results = await Promise.all(collectionIds.map(async (collectionId) => {
     try {
-      const result = await getCollection(collectionId, signal);
-      if (result.collection.isActive !== false) {
-        collections.push({ ...result, collectionId });
-      }
+      return { collectionId, result: await getCollection(collectionId, signal) };
     } catch (error) {
       if (signal?.aborted) throw error;
-      const message = error instanceof Error ? error.message : String(error);
-      errors.push(`Collection ${collectionId} could not be loaded: ${message}`);
+      return { collectionId, error };
+    }
+  }));
+  const collections = [];
+
+  for (const item of results) {
+    if ('error' in item) {
+      // Silently ignore collections that cannot be loaded
+      continue;
+    }
+
+    if (
+      item.result.collection.isActive !== false
+      && collections.length < MAX_ADDITIONAL_COLLECTIONS
+    ) {
+      collections.push({ ...item.result, collectionId: item.collectionId });
     }
   }
 
   return {
     collections,
-    error: errors.length ? new Error(errors.join(' ')) : null,
+    error: null,
   };
 }
 

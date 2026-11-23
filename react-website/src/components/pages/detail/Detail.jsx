@@ -1,11 +1,12 @@
 import styles from './Detail.module.css';
 import { useEffect, useState } from 'react';
+import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { Countdown, movieSlug } from '../../movies/index.js';
-import { asset, Layout, ShowtimeChip } from '../../shared';
-import { PageLoader } from '../../shared/PageLoader';
+import { asset, Layout, ShowtimeChip, TrailerModal } from '../../shared';
 import { createBookingHref } from '../shared/showtimeNavigation';
 import { getUpcomingScreeningDates } from '../shared/bookingApi';
 import { useMovieDetail } from './useMovieDetail';
+import { DetailSkeleton } from './DetailSkeleton';
 
 function formatPeople(people) {
     if (Array.isArray(people))
@@ -113,15 +114,16 @@ function ShowtimeSchedule({ movie, selectedDay, selectedTime, onSelectTime, book
                 </div>
             )) : <p>No showtimes available.</p>}
             <br />
-            <a className="form-button book-now-button" href={bookingHref}>Book Now</a>
+            <Link className="form-button book-now-button" to={bookingHref}>Book Now</Link>
         </aside>
     );
 }
 
 function MovieContent({ movie, comingSoon }) {
-    const query = new URLSearchParams(window.location.search);
+    const [query] = useSearchParams();
     const [selectedDate, setSelectedDate] = useState(() => query.get('date') || '');
     const [selectedShowtimeId, setSelectedShowtimeId] = useState(() => query.get('showtimeId') || '');
+    const [trailerUrl, setTrailerUrl] = useState('');
     const [selectedTime, setSelectedTime] = useState(
         () => query.get('time') || '',
     );
@@ -136,7 +138,7 @@ function MovieContent({ movie, comingSoon }) {
         ))?.[0] || '';
     });
     const movieIdentifier = movieSlug(movie);
-    const movieBookingUrl = `../bookNow.html?movie=${encodeURIComponent(movieIdentifier)}`;
+    const movieBookingUrl = `/book-now?movie=${encodeURIComponent(movieIdentifier)}`;
     const selectedShowtime = Object.entries(movie.showtimes || {}).flatMap(([day, slots]) => (
         (Array.isArray(slots) ? slots : []).map((slot) => ({ ...slot, day }))
     )).find((slot) => (
@@ -148,7 +150,7 @@ function MovieContent({ movie, comingSoon }) {
     ));
     const bookingHref = selectedShowtime
         ? createBookingHref(
-            '../bookNow.html',
+            '/book-now',
             movieIdentifier,
             selectedShowtime.date,
             selectedShowtime,
@@ -182,14 +184,25 @@ function MovieContent({ movie, comingSoon }) {
                     <div className="move-trailer"
                         aria-label={`${movie.title} ${movie.trailer ? 'trailer' : 'still'}`}>
                         {movie.trailer ? (
-                            <iframe
-                                className="trailer-media"
-                                src={movie.trailer}
-                                title={`${movie.title} trailer`}
-                                referrerPolicy="strict-origin-when-cross-origin"
-                                allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
-                                allowFullScreen
-                            />
+                            <div className={styles.trailerLauncher}>
+                                <iframe
+                                    className="trailer-media"
+                                    src={movie.trailer}
+                                    title={`${movie.title} trailer preview`}
+                                    aria-hidden="true"
+                                    tabIndex="-1"
+                                    referrerPolicy="strict-origin-when-cross-origin"
+                                    allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
+                                    allowFullScreen
+                                />
+                                <button
+                                    className={styles.trailerLaunchButton}
+                                    type="button"
+                                    aria-label={`Watch ${movie.title} trailer`}
+                                    onClick={() => setTrailerUrl(movie.trailer)}
+                                >
+                                </button>
+                            </div>
                         ) : (
                             <img
                                 className="trailer-media trailer-still"
@@ -214,19 +227,24 @@ function MovieContent({ movie, comingSoon }) {
                     />
                 )}
             </section>
+            <TrailerModal
+                url={trailerUrl}
+                onClose={() => setTrailerUrl('')}
+                title={`${movie.title} trailer`}
+            />
         </>
     );
 }
 
 export function Detail({ comingSoon = false }) {
-    const id = new URLSearchParams(window.location.search).get('movie') || '';
+    const { slug = '' } = useParams();
     const [screeningDates] = useState(() => getUpcomingScreeningDates());
-    const { movie, loading, error } = useMovieDetail(id, screeningDates);
+    const { movie, loading, error } = useMovieDetail(slug, screeningDates);
 
     if (loading) {
         return (
             <Layout className={styles.root} loading>
-                <PageLoader label="Loading movie details" />
+                <DetailSkeleton comingSoon={comingSoon} />
             </Layout>
         );
     }
