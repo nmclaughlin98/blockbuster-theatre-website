@@ -32,9 +32,50 @@ function getSignupErrorMessage(error) {
   return 'Sign-up error. Please check your details and try again later.';
 }
 
+function PasswordField({
+  id,
+  label,
+  name,
+  isVisible,
+  onToggleVisibility,
+  disabled,
+}) {
+  return (
+    <div className={styles.field}>
+      <label htmlFor={id}>{label}</label>
+      <div className={styles.passwordInput}>
+        <input
+          className={styles.input}
+          id={id}
+          type={isVisible ? 'text' : 'password'}
+          name={name}
+          autoComplete="new-password"
+          required
+          disabled={disabled}
+        />
+        <button
+          className={styles.passwordToggle}
+          type="button"
+          aria-label={isVisible ? 'Hide passwords' : 'Show passwords'}
+          aria-pressed={isVisible}
+          disabled={disabled}
+          onClick={onToggleVisibility}
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path d="M2.25 12s3.5-6.25 9.75-6.25 9.75 6.25 9.75 6.25-3.5 6.25-9.75 6.25S2.25 12 2.25 12Z" />
+            <circle cx="12" cy="12" r="2.75" />
+            {isVisible && <path d="m3 3 18 18" />}
+          </svg>
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export function Signup({ authClient = cognitoAuth } = {}) {
   const { toast, setToastMessage } = useToast();
   const [email, setEmail] = useState('');
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [isConfirmationRequired, setIsConfirmationRequired] = useState(false);
   const [isComplete, setIsComplete] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -60,9 +101,15 @@ export function Signup({ authClient = cognitoAuth } = {}) {
     const lastName = String(formData.get('lastName') ?? '').trim();
     const username = String(formData.get('email') ?? '').trim();
     const password = String(formData.get('password') ?? '');
+    const confirmPassword = String(formData.get('confirmPassword') ?? '');
 
-    if (!firstName || !lastName || !username || !password) {
+    if (!firstName || !lastName || !username || !password || !confirmPassword) {
       setToastMessage('Please complete all fields before creating your account.', 'warning');
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      setToastMessage('Passwords do not match. Please check both fields and try again.', 'warning');
       return;
     }
 
@@ -127,6 +174,8 @@ export function Signup({ authClient = cognitoAuth } = {}) {
       setIsLoading(false);
     }
   }
+
+  const togglePasswordVisibility = () => setIsPasswordVisible((visible) => !visible);
 
   return (
     <Layout className={styles.root} current="login">
@@ -202,18 +251,22 @@ export function Signup({ authClient = cognitoAuth } = {}) {
                   disabled={isLoading}
                 />
               </label>
-              <label className={styles.field} htmlFor="signup-password">
-                Password
-                <input
-                  className={styles.input}
-                  id="signup-password"
-                  type="password"
-                  name="password"
-                  autoComplete="new-password"
-                  required
-                  disabled={isLoading}
-                />
-              </label>
+              <PasswordField
+                id="signup-password"
+                label="Password"
+                name="password"
+                isVisible={isPasswordVisible}
+                onToggleVisibility={togglePasswordVisibility}
+                disabled={isLoading}
+              />
+              <PasswordField
+                id="signup-confirm-password"
+                label="Confirm password"
+                name="confirmPassword"
+                isVisible={isPasswordVisible}
+                onToggleVisibility={togglePasswordVisibility}
+                disabled={isLoading}
+              />
               <button className={styles.submit} type="submit" disabled={isLoading}>
                 {isLoading ? 'Creating account...' : 'Create account'}
               </button>
