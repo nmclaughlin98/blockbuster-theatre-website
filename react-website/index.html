@@ -13,6 +13,14 @@
     <link rel="stylesheet" href="/src/styles/main.css" />
     <link rel="stylesheet" href="/src/styles/media-queries.css" />
     <title>Blockbuster Theatre</title>
+    <style>
+        html,
+        body {
+            margin: 0;
+            min-height: 100dvh;
+            background-color: #0c0d12;
+        }
+    </style>
     <script>
         // Single Page Apps for GitHub Pages
         // https://github.com/rafgraph/spa-github-pages
@@ -39,88 +47,10 @@
             }
         })(window.location);
     </script>
-    <script>
-        if (window.location.pathname === '/' || /^\/index\.html$/i.test(window.location.pathname)) {
-            document.documentElement.classList.add('home-route');
-        }
-    </script>
 </head>
 
 <body class="app-booting">
-    <div id="root">
-        <header>
-            <a class="header-box" href="/">
-                <picture>
-                    <source
-                        srcset="/assets/images/logo/logo-60.webp 1x, /assets/images/logo/logo-120.webp 2x, /assets/images/logo/logo-180.webp 3x"
-                        type="image/webp" />
-                    <img src="/assets/images/logo/png/logo-120.png" alt="Blockbuster Theatre" class="logo" />
-                </picture>
-                <span class="header-text">BLOCKBUSTER<br />THEATRE</span>
-            </a>
-            <nav class="nav primary-nav">
-                <ul class="menu">
-                    <li><a class="current" href="/">Home</a></li>
-                    <li><a href="/now-showing">Now Showing</a></li>
-                    <li><a href="/coming-soon">Coming Soon</a></li>
-                    <li><a href="/about">About</a></li>
-                </ul>
-            </nav>
-            <button class="hamburger" aria-label="Toggle navigation">
-                <span class="line"></span>
-                <span class="line"></span>
-                <span class="line"></span>
-            </button>
-        </header>
-        <a class="book-now-fab" href="/book-now">
-            <span class="material-symbols-outlined" aria-hidden="true">confirmation_number</span>
-            BookTickets
-        </a>
-        <div class="ham-overlay"></div>
-        <div class="home-skeleton-page" role="status" aria-label="Loading home page" aria-busy="true">
-            <div class="home-skeleton-hero" aria-hidden="true">
-                <div class="home-skeleton-hero-caption">
-                    <span class="home-skeleton home-skeleton-title"></span>
-                    <span class="home-skeleton home-skeleton-tagline"></span>
-                    <div class="home-skeleton-hero-actions">
-                        <span class="home-skeleton home-skeleton-action"></span>
-                        <span class="home-skeleton home-skeleton-action home-skeleton-action-secondary"></span>
-                        <span class="home-skeleton home-skeleton-action home-skeleton-action-short"></span>
-                    </div>
-                </div>
-            </div>
-            <section class="home-skeleton-section" aria-hidden="true">
-                <div class="home-skeleton-section-header">
-                    <span class="home-skeleton home-skeleton-heading"></span>
-                    <span class="home-skeleton home-skeleton-link"></span>
-                </div>
-                <div class="home-skeleton-movies">
-                    <span class="home-skeleton home-skeleton-poster"></span>
-                    <span class="home-skeleton home-skeleton-poster"></span>
-                    <span class="home-skeleton home-skeleton-poster"></span>
-                    <span class="home-skeleton home-skeleton-poster"></span>
-                    <span class="home-skeleton home-skeleton-poster"></span>
-                    <span class="home-skeleton home-skeleton-poster"></span>
-                    <span class="home-skeleton home-skeleton-poster"></span>
-                </div>
-            </section>
-            <section class="home-skeleton-section" aria-hidden="true">
-                <div class="home-skeleton-section-header">
-                    <span class="home-skeleton home-skeleton-heading"></span>
-                    <span class="home-skeleton home-skeleton-link"></span>
-                </div>
-                <div class="home-skeleton-movies">
-                    <span class="home-skeleton home-skeleton-poster"></span>
-                    <span class="home-skeleton home-skeleton-poster"></span>
-                    <span class="home-skeleton home-skeleton-poster"></span>
-                    <span class="home-skeleton home-skeleton-poster"></span>
-                    <span class="home-skeleton home-skeleton-poster"></span>
-                    <span class="home-skeleton home-skeleton-poster"></span>
-                    <span class="home-skeleton home-skeleton-poster"></span>
-                </div>
-            </section>
-        </div>
-    </div>
+    <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
 </body>
 

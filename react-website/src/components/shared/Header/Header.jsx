@@ -5,6 +5,7 @@ import {
     cognitoAuth,
     getCognitoFullName,
 } from '../../../auth/cognitoAuth';
+import { useConfig } from '../../../context/ConfigContext';
 import { asset } from '../asset/asset';
 import { UserAvatar } from '../UserAvatar/UserAvatar';
 import { UserDropdown } from './UserDropdown';
@@ -59,9 +60,11 @@ function SignInLink({ className = '', onClick }) {
     );
 }
 
-function Navigation({ current, open, onNavigate, account, authClient }) {
+function Navigation({ current, open, onNavigate, account, authClient, loginEnabled }) {
     const isAuthenticated = account.isAuthenticated;
     const isLoading = account.status === 'loading';
+    const showAuthControls = loginEnabled && !isLoading;
+
     return (
         <nav className={`nav primary-nav ${open ? 'open' : ''}`}>
             <ul className="menu">
@@ -76,7 +79,7 @@ function Navigation({ current, open, onNavigate, account, authClient }) {
                         </Link>
                     </li>
                 ))}
-                {!isLoading && (
+                {showAuthControls && (
                     <li className="nav-desktop-auth">
                         {isAuthenticated ? (
                             <UserDropdown account={account} authClient={authClient} />
@@ -88,7 +91,7 @@ function Navigation({ current, open, onNavigate, account, authClient }) {
                     </li>
                 )}
             </ul>
-            {!isLoading && (
+            {showAuthControls && (
                 <div className="nav-mobile-auth">
                     <div className="nav-auth-divider" />
                     {isAuthenticated ? (
@@ -129,6 +132,9 @@ function MenuButton({ open, onClick }) {
 }
 
 export function Header({ current, authClient = cognitoAuth }) {
+    const { config } = useConfig();
+    const { loginEnabled } = config.features;
+
     const [open, setOpen] = useState(false);
     const [account, setAccount] = useState({
         status: 'loading',
@@ -140,6 +146,17 @@ export function Header({ current, authClient = cognitoAuth }) {
     const closeMenu = () => setOpen(false);
 
     useEffect(() => {
+        if (!loginEnabled) {
+            setAccount({
+                status: 'signed-out',
+                isAuthenticated: false,
+                displayName: '',
+                email: '',
+                imageUrl: undefined,
+            });
+            return undefined;
+        }
+
         let active = true;
         let requestId = 0;
 
@@ -172,7 +189,7 @@ export function Header({ current, authClient = cognitoAuth }) {
             active = false;
             window.removeEventListener(COGNITO_AUTH_STATE_CHANGE_EVENT, updateAccount);
         };
-    }, [authClient]);
+    }, [authClient, loginEnabled]);
 
     useEffect(() => {
         if (!open) return undefined;
@@ -194,6 +211,7 @@ export function Header({ current, authClient = cognitoAuth }) {
                     onNavigate={closeMenu}
                     account={account}
                     authClient={authClient}
+                    loginEnabled={loginEnabled}
                 />
                 <MenuButton open={open} onClick={() => setOpen((value) => !value)} />
             </header>

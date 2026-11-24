@@ -23,6 +23,15 @@ import {
 import { COGNITO_AUTH_STATE_CHANGE_EVENT } from './auth/cognitoAuth';
 import { Toast } from './components/shared/Toast/Toast';
 import { useToast } from './components/shared/Toast/useToast';
+import { useConfig } from './context/ConfigContext';
+import { StatusScreen } from './components/shared/StatusScreen/StatusScreen';
+
+function FeatureRoute({ enabled, children }) {
+  if (!enabled) {
+    return <Navigate to="/" replace />;
+  }
+  return children;
+}
 
 function LegacyPageRedirect({ to, preserveSearch = false }) {
   const { search } = useLocation();
@@ -38,10 +47,12 @@ function LegacyMovieRedirect({ comingSoon = false }) {
   const remainingParams = new URLSearchParams(searchParams);
   remainingParams.delete('movie');
   const query = remainingParams.toString();
-  return <Navigate
-    to={`${route}/${encodeURIComponent(slug)}${query ? `?${query}` : ''}`}
-    replace
-  />;
+  return (
+    <Navigate
+      to={`${route}/${encodeURIComponent(slug)}${query ? `?${query}` : ''}`}
+      replace
+    />
+  );
 }
 
 function LegacyCollectionRedirect() {
@@ -67,6 +78,7 @@ function LegacyMovieParamRedirect() {
 export default function App() {
   const location = useLocation();
   const { toast, setToastMessage } = useToast();
+  const { config, isConfigLoading, isOffline, refreshConfig } = useConfig();
   const dismissToast = useCallback(() => setToastMessage(''), [setToastMessage]);
 
   useEffect(() => {
@@ -78,9 +90,47 @@ export default function App() {
       if (event.detail?.toastMessage) setToastMessage(event.detail.toastMessage, 'success');
     }
 
+    function handleToastEvent(event) {
+      if (event.detail?.message) {
+        setToastMessage(event.detail.message, event.detail.type || 'info');
+      }
+    }
+
     window.addEventListener(COGNITO_AUTH_STATE_CHANGE_EVENT, handleAuthChange);
-    return () => window.removeEventListener(COGNITO_AUTH_STATE_CHANGE_EVENT, handleAuthChange);
+    window.addEventListener('blockbuster:toast', handleToastEvent);
+    return () => {
+      window.removeEventListener(COGNITO_AUTH_STATE_CHANGE_EVENT, handleAuthChange);
+      window.removeEventListener('blockbuster:toast', handleToastEvent);
+    };
   }, [setToastMessage]);
+
+  // 1. Wait for S3 config before mounting routes so disabled UI never flashes
+  if (isConfigLoading) {
+    return <StatusScreen mode="loading" />;
+  }
+
+  // 2. Full-site lockdown when maintenance mode is active or browser is offline
+  if (config.maintenanceMode) {
+    return (
+      <StatusScreen
+        mode="maintenance"
+        message={config.maintenanceMessage}
+        onRetry={refreshConfig}
+      />
+    );
+  }
+
+  if (isOffline) {
+    return (
+      <StatusScreen
+        mode="offline"
+        message="You appear to be offline. Check your connection and try again."
+        onRetry={refreshConfig}
+      />
+    );
+  }
+
+  const { loginEnabled, bookingEnabled } = config.features;
 
   return (
     <>
@@ -89,13 +139,41 @@ export default function App() {
           <Route path="/" element={<Home />} />
           <Route path="/movie/:slug" element={<Detail />} />
           <Route path="/coming-soon/:slug" element={<Detail comingSoon />} />
-          <Route path="/book-now" element={<Booking />} />
+          <Route
+            path="/book-now"
+            element={
+              <FeatureRoute enabled={bookingEnabled}>
+                <Booking />
+              </FeatureRoute>
+            }
+          />
           <Route path="/now-showing" element={<NowShowing />} />
           <Route path="/coming-soon" element={<ComingSoon />} />
           <Route path="/about" element={<About />} />
-          <Route path="/account" element={<Account />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<Signup />} />
+          <Route
+            path="/account"
+            element={
+              <FeatureRoute enabled={loginEnabled}>
+                <Account />
+              </FeatureRoute>
+            }
+          />
+          <Route
+            path="/login"
+            element={
+              <FeatureRoute enabled={loginEnabled}>
+                <Login />
+              </FeatureRoute>
+            }
+          />
+          <Route
+            path="/signup"
+            element={
+              <FeatureRoute enabled={loginEnabled}>
+                <Signup />
+              </FeatureRoute>
+            }
+          />
           <Route path="/timetable" element={<Timetable />} />
           <Route path="/collection/:collectionId" element={<CollectionDetail />} />
           <Route path="/collections" element={<Navigate to="/now-showing?view=collections" replace />} />

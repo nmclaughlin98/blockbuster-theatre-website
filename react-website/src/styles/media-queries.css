@@ -89,18 +89,18 @@
         opacity: 1;
     }
 
-    .primary-nav .menu > li > a {
+    .primary-nav .menu>li>a {
         width: 100%;
         text-align: center;
         padding: 12px 23px;
         font-size: 1.05rem;
     }
 
-    .primary-nav .menu > li > a.current {
+    .primary-nav .menu>li>a.current {
         box-shadow: 0 10px 22px var(--accent-glow);
     }
 
-    .primary-nav .menu > li > .nav-account-cta-btn {
+    .primary-nav .menu>li>.nav-account-cta-btn {
         width: 100%;
         padding: 12px 23px;
         font-size: 1.05rem;
@@ -161,7 +161,7 @@
         white-space: nowrap;
     }
 
-    .nav-mobile-profile-text > span {
+    .nav-mobile-profile-text>span {
         color: var(--text-secondary);
         font-size: 0.95rem;
     }
@@ -188,10 +188,6 @@
 
 header {
     height: var(--header-height);
-}
-
-#root {
-    padding-top: var(--header-height);
 }
 
 .logo {
@@ -243,7 +239,7 @@ header {
 
 @media (max-width: 650px) {
 
-    .primary-nav .menu > li > a {
+    .primary-nav .menu>li>a {
         padding: 12px 18px;
         font-size: 0.95rem;
     }
@@ -312,7 +308,7 @@ header {
         gap: 13px;
     }
 
-    .primary-nav .menu > li > a {
+    .primary-nav .menu>li>a {
         padding: 12px 18px;
         font-size: 0.95rem;
     }
@@ -359,12 +355,12 @@ header {
         gap: 4px;
     }
 
-    .primary-nav .menu > li > a {
+    .primary-nav .menu>li>a {
         padding: 7px 12px;
         font-size: 0.75rem;
     }
 
-    .primary-nav .menu > li > .nav-account-cta-btn {
+    .primary-nav .menu>li>.nav-account-cta-btn {
         padding: 7px 12px;
         font-size: 0.75rem;
     }
@@ -423,13 +419,13 @@ header {
         opacity: 1;
     }
 
-    .primary-nav .menu > li > a {
+    .primary-nav .menu>li>a {
         width: auto;
         padding: 9px 8px;
         font-size: 0.8rem;
     }
 
-    .primary-nav .menu > li > .nav-account-cta-btn {
+    .primary-nav .menu>li>.nav-account-cta-btn {
         width: auto;
         padding: 8px 12px;
         font-size: 0.8rem;

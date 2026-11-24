@@ -2,6 +2,7 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import App from './App';
+import { ConfigProvider } from './context/ConfigContext';
 
 const rootElement = document.getElementById('root');
 
@@ -13,8 +14,10 @@ document.body.classList.remove('app-booting');
 
 createRoot(rootElement).render(
   <StrictMode>
-    <BrowserRouter>
-      <App />
-    </BrowserRouter>
+    <ConfigProvider>
+      <BrowserRouter>
+        <App />
+      </BrowserRouter>
+    </ConfigProvider>
   </StrictMode>,
 );
