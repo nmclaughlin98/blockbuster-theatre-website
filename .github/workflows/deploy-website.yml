@@ -51,6 +51,7 @@ jobs:
           VITE_COGNITO_REGION: ${{ vars.VITE_COGNITO_REGION }}
           VITE_COGNITO_USER_POOL_ID: ${{ vars.VITE_COGNITO_USER_POOL_ID }}
           VITE_COGNITO_USER_POOL_CLIENT_ID: ${{ vars.VITE_COGNITO_USER_POOL_CLIENT_ID }}
+          VITE_CONFIG_URL: ${{ vars.VITE_CONFIG_URL }}
         run: |
           if [ -z "$VITE_MOVIES_API_URL" ]; then
             echo "::error::Set the VITE_MOVIES_API_URL repository variable to the deployed API base URL."
