@@ -2,7 +2,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;500;600;700&display=swap');
 
 :root {
-    --bg-main: #0c0d12;
+    --bg-main: #3c51bcb5;
     --bg-surface: #13151f;
     --bg-surface-elevated: #1a1d2e;
     --bg-card: rgba(22, 25, 38, 0.85);
@@ -93,19 +93,13 @@ body {
     min-height: 100svh;
 }
 
-#root {
+.app-shell {
     display: flex;
     flex: 1;
     flex-direction: column;
     min-height: 100vh;
     min-height: 100svh;
     padding-top: var(--header-height);
-}
-
-.app-shell {
-    display: flex;
-    flex: 1;
-    flex-direction: column;
 }
 
 .material-icons-outlined {
