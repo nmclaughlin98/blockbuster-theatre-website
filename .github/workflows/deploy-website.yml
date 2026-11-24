@@ -16,13 +16,13 @@ on:
   # Allows manual triggers directly from the Actions tab
   workflow_dispatch:
 
-# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages[cite: 2]
+# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
 permissions:
   contents: read
   pages: write
   id-token: write
 
-# Allow only one concurrent deployment[cite: 2]
+# Allow only one concurrent deployment
 concurrency:
   group: "pages"
   cancel-in-progress: false
@@ -30,7 +30,7 @@ concurrency:
 jobs:
   # Build job
   build:
-    # Only run if triggered manually OR if the upstream TMDB workflow succeeded[cite: 2]
+    # Only run if triggered manually OR if the upstream TMDB workflow succeeded
     if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     steps:
@@ -57,6 +57,10 @@ jobs:
             echo "::error::Set the VITE_MOVIES_API_URL repository variable to the deployed API base URL."
             exit 1
           fi
+          if [ -z "$VITE_CONFIG_URL" ]; then
+            echo "::error::Set the VITE_CONFIG_URL repository variable to the S3 config.json URL."
+            exit 1
+          fi
           for name in VITE_COGNITO_REGION VITE_COGNITO_USER_POOL_ID VITE_COGNITO_USER_POOL_CLIENT_ID; do
             if [ -z "${!name}" ]; then
               echo "::error::Set the $name repository variable from the deployed Cognito stack."
@@ -75,6 +79,7 @@ jobs:
           VITE_COGNITO_REGION: ${{ vars.VITE_COGNITO_REGION }}
           VITE_COGNITO_USER_POOL_ID: ${{ vars.VITE_COGNITO_USER_POOL_ID }}
           VITE_COGNITO_USER_POOL_CLIENT_ID: ${{ vars.VITE_COGNITO_USER_POOL_CLIENT_ID }}
+          VITE_CONFIG_URL: ${{ vars.VITE_CONFIG_URL }}
       - name: Setup Pages
         uses: actions/configure-pages@v6
       - name: Upload artifact
