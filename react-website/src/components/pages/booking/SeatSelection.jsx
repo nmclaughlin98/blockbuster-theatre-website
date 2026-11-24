@@ -326,7 +326,7 @@ export function SeatSelection({ initialData, onBack, onNext, onToast }) {
       <StepActions
         onBack={onBack}
         onContinue={continueToGuestDetails}
-        continueLabel="Guest Info"
+        continueLabel="Next"
       />
     </fieldset>
   );
