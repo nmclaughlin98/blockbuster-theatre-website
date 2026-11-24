@@ -90,8 +90,18 @@ export default function App() {
       if (event.detail?.toastMessage) setToastMessage(event.detail.toastMessage, 'success');
     }
 
+    function handleToastEvent(event) {
+      if (event.detail?.message) {
+        setToastMessage(event.detail.message, event.detail.type || 'info');
+      }
+    }
+
     window.addEventListener(COGNITO_AUTH_STATE_CHANGE_EVENT, handleAuthChange);
-    return () => window.removeEventListener(COGNITO_AUTH_STATE_CHANGE_EVENT, handleAuthChange);
+    window.addEventListener('blockbuster:toast', handleToastEvent);
+    return () => {
+      window.removeEventListener(COGNITO_AUTH_STATE_CHANGE_EVENT, handleAuthChange);
+      window.removeEventListener('blockbuster:toast', handleToastEvent);
+    };
   }, [setToastMessage]);
 
   // 1. Wait for S3 config before mounting routes so disabled UI never flashes

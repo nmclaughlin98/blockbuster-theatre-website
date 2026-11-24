@@ -7,6 +7,7 @@ import { createBookingHref } from '../shared/showtimeNavigation';
 import { getUpcomingScreeningDates } from '../shared/bookingApi';
 import { useMovieDetail } from './useMovieDetail';
 import { DetailSkeleton } from './DetailSkeleton';
+import { useConfig } from '../../../context/ConfigContext';
 
 function formatPeople(people) {
     if (Array.isArray(people))
@@ -90,8 +91,17 @@ function sortShowtimesFromToday(showtimes) {
 }
 
 function ShowtimeSchedule({ movie, selectedDay, selectedTime, onSelectTime, bookingHref }) {
+    const { config } = useConfig();
+    const { bookingEnabled } = config.features;
     const showtimes = sortShowtimesFromToday(movie.showtimes)
         .filter(([, slots]) => Array.isArray(slots) && slots.length > 0);
+
+    function handleDisabledBookingClick(event) {
+        event.preventDefault();
+        window.dispatchEvent(new CustomEvent('blockbuster:toast', {
+            detail: { message: 'Booking is currently disabled.', type: 'error' },
+        }));
+    }
 
     return (
         <aside className="col col-1-3 showtimes-schedule">
@@ -103,9 +113,15 @@ function ShowtimeSchedule({ movie, selectedDay, selectedTime, onSelectTime, book
                         {(Array.isArray(times) ? times : []).map((slot) => (
                             <ShowtimeChip
                                 className="detail-showtime-chip"
-                                active={selectedDay === day && selectedTime === slot.time}
+                                active={bookingEnabled && selectedDay === day && selectedTime === slot.time}
                                 key={`${slot.time}-${slot.screen}`}
-                                onClick={() => onSelectTime(day, slot.time, slot)}
+                                onClick={() => (
+                                    bookingEnabled
+                                        ? onSelectTime(day, slot.time, slot)
+                                        : window.dispatchEvent(new CustomEvent('blockbuster:toast', {
+                                            detail: { message: 'Booking is currently disabled.', type: 'error' },
+                                        }))
+                                )}
                                 time={slot.time}
                                 screen={slot.screen}
                             />
@@ -114,7 +130,14 @@ function ShowtimeSchedule({ movie, selectedDay, selectedTime, onSelectTime, book
                 </div>
             )) : <p>No showtimes available.</p>}
             <br />
-            <Link className="form-button book-now-button" to={bookingHref}>Book Now</Link>
+            <Link
+                className="form-button book-now-button"
+                to={bookingHref}
+                aria-disabled={!bookingEnabled}
+                onClick={!bookingEnabled ? handleDisabledBookingClick : undefined}
+            >
+                Book Now
+            </Link>
         </aside>
     );
 }

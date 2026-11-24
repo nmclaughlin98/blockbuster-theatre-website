@@ -13,6 +13,7 @@ import { createBookingHref } from '../shared/showtimeNavigation';
 import { useMovies } from '../shared/useMovies';
 import { openTimetablePdf } from './timetablePdf';
 import { TimetableSkeleton } from './TimetableSkeleton';
+import { useConfig } from '../../../context/ConfigContext';
 
 const maxShowtimeButtons = 4;
 
@@ -100,8 +101,16 @@ function TimetableControls({ days, day, search, onDayChange, onSearch, onDownloa
 }
 
 function TimetableMovie({ movie, day }) {
+    const { config } = useConfig();
+    const { bookingEnabled } = config.features;
     const times = getShowtimes(movie, day).slice(0, maxShowtimeButtons);
     if (!times.length) return null;
+
+    function handleDisabledBooking() {
+        window.dispatchEvent(new CustomEvent('blockbuster:toast', {
+            detail: { message: 'Booking is currently disabled.', type: 'error' },
+        }));
+    }
 
     return (
         <div className="movie-card">
@@ -120,12 +129,15 @@ function TimetableMovie({ movie, day }) {
                 {times.map((slot) => (
                     <ShowtimeChip
                         className="timetable-showtime-chip"
-                        href={createBookingHref(
-                            '/book-now',
-                            movieSlug(movie) || getMovieTitle(movie),
-                            slot.date,
-                            slot,
-                        )}
+                        href={bookingEnabled
+                            ? createBookingHref(
+                                '/book-now',
+                                movieSlug(movie) || getMovieTitle(movie),
+                                slot.date,
+                                slot,
+                            )
+                            : undefined}
+                        onClick={!bookingEnabled ? handleDisabledBooking : undefined}
                         key={slot.showtimeId}
                         time={slot.time}
                         screen={slot.screen}
