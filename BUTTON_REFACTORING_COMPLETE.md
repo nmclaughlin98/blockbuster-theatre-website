@@ -123,7 +123,7 @@ The Button component uses existing CSS variables from the design system:
 
 ### Created (6 files):
 ```
-react-website/src/components/shared/Button/
+src/components/shared/Button/
   ├── Button.jsx               (45 lines) - Main component
   ├── Button.module.css        (80 lines) - Scoped styles
   ├── ButtonLink.jsx           (40 lines) - Link variant
@@ -134,7 +134,7 @@ react-website/src/components/shared/Button/
 
 ### Modified (5 files):
 ```
-react-website/src/components/
+src/components/
   ├── pages/account/Account.jsx           (+imports, -30 lines CSS usage)
   ├── pages/account/Account.module.css    (-60 lines cleanup)
   ├── pages/home/MovieSection.jsx         (+icon import, -DirectionalButton)
@@ -243,7 +243,7 @@ Future enhancements to consider:
 
 ## Documentation
 
-- 📖 [Component README](react-website/src/components/shared/Button/README.md) — Usage examples, API reference
+- 📖 [Component README](src/components/shared/Button/README.md) — Usage examples, API reference
 - 📋 [Refactoring Summary](BUTTON_REFACTORING_SUMMARY.md) — Implementation details, design tokens
 - 💾 [Git Commit](https://github.com/nmclaughlin98/blockbuster-theatre-website/commit/29bc47f) — Full changeset
 
