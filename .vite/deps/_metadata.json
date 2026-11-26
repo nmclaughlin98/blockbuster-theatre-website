@@ -1,8 +1,102 @@
 {
-  "hash": "f0fb3640",
+  "hash": "c6663696",
   "configHash": "a59e66f9",
-  "lockfileHash": "e3b0c442",
-  "browserHash": "fbb903f7",
-  "optimized": {},
-  "chunks": {}
+  "lockfileHash": "cea76ded",
+  "browserHash": "f39ce752",
+  "optimized": {
+    "aws-amplify": {
+      "src": "../../node_modules/aws-amplify/dist/esm/index.mjs",
+      "file": "aws-amplify.js",
+      "fileHash": "ae40f501",
+      "needsInterop": false
+    },
+    "aws-amplify/auth": {
+      "src": "../../node_modules/aws-amplify/dist/esm/auth/index.mjs",
+      "file": "aws-amplify_auth.js",
+      "fileHash": "a14513f2",
+      "needsInterop": false
+    },
+    "jspdf": {
+      "src": "../../node_modules/jspdf/dist/jspdf.es.min.js",
+      "file": "jspdf.js",
+      "fileHash": "add7e42b",
+      "needsInterop": false
+    },
+    "qrcode.react": {
+      "src": "../../node_modules/qrcode.react/lib/esm/index.js",
+      "file": "qrcode__react.js",
+      "fileHash": "de23e242",
+      "needsInterop": false
+    },
+    "react-datepicker": {
+      "src": "../../node_modules/react-datepicker/dist/index.es.js",
+      "file": "react-datepicker.js",
+      "fileHash": "6cefdb56",
+      "needsInterop": false
+    },
+    "react-dom": {
+      "src": "../../node_modules/react-dom/index.js",
+      "file": "react-dom.js",
+      "fileHash": "89b46d26",
+      "needsInterop": true
+    },
+    "react-dom/client": {
+      "src": "../../node_modules/react-dom/client.js",
+      "file": "react-dom_client.js",
+      "fileHash": "c1d8eb86",
+      "needsInterop": true
+    },
+    "react-router-dom": {
+      "src": "../../node_modules/react-router-dom/dist/index.js",
+      "file": "react-router-dom.js",
+      "fileHash": "676aecd7",
+      "needsInterop": false
+    },
+    "react": {
+      "src": "../../node_modules/react/index.js",
+      "file": "react.js",
+      "fileHash": "cc50f510",
+      "needsInterop": true
+    },
+    "react/jsx-dev-runtime": {
+      "src": "../../node_modules/react/jsx-dev-runtime.js",
+      "file": "react_jsx-dev-runtime.js",
+      "fileHash": "e4011050",
+      "needsInterop": true
+    }
+  },
+  "chunks": {
+    "html2canvas-DtvViWnx": {
+      "file": "html2canvas-DtvViWnx.js",
+      "isDynamicEntry": true
+    },
+    "index.es-WWow0FOp": {
+      "file": "index.es-WWow0FOp.js",
+      "isDynamicEntry": true
+    },
+    "purify.es-BSEqxv49": {
+      "file": "purify.es-BSEqxv49.js",
+      "isDynamicEntry": true
+    },
+    "react-BmuWtXci": {
+      "file": "react-BmuWtXci.js",
+      "isDynamicEntry": false
+    },
+    "react-dom-MaqAqy1-": {
+      "file": "react-dom-MaqAqy1-.js",
+      "isDynamicEntry": false
+    },
+    "rolldown-runtime-CuZPuSbt": {
+      "file": "rolldown-runtime-CuZPuSbt.js",
+      "isDynamicEntry": false
+    },
+    "signInWithRedirect-_5wIpnUp": {
+      "file": "signInWithRedirect-_5wIpnUp.js",
+      "isDynamicEntry": false
+    },
+    "typeof-KEtdrNHU": {
+      "file": "typeof-KEtdrNHU.js",
+      "isDynamicEntry": false
+    }
+  }
 }

@@ -26,4 +26,4 @@ dist-ssr
 *.vscode
 
 src/config.js
-node_modules
+node_modules/
