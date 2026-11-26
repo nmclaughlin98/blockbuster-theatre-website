@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Link, Navigate, useNavigate, useSearchParams } from 'react-router-dom';
+import { useConfig } from '../../../context/ConfigContext';
 import {
   COGNITO_AUTH_STATE_CHANGE_EVENT,
   cognitoAuth,
@@ -281,6 +282,7 @@ export function Account({
   loadMovieDetail = getMovieDetail,
   onSignedOut,
 } = {}) {
+  const { config } = useConfig();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const requestedTab = searchParams.get('tab');
@@ -450,6 +452,11 @@ export function Account({
               </Link>
             ))}
           </nav>
+        )}
+        {signedIn && config.features.allowLinkBookings && (
+          <p className="form-notice" role="status">
+            Guest bookings made with your verified account email may be linked automatically.
+          </p>
         )}
         {signOutError && <p role="alert" className={styles.error}>{signOutError}</p>}
         {account.status === 'loading' && <p role="status">Checking sign-in status...</p>}

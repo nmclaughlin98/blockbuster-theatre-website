@@ -557,6 +557,25 @@ test('includes an offer ID and verifies ticket quantities match selected seats',
   }), /Ticket quantities/);
 });
 
+test('enforces the configured ticket maximum when building a booking payload', () => {
+  const booking = {
+    showtimeId: '559924_2026-11-01_1215',
+    date: '2026-11-01',
+    seats: ['F10', 'F11'],
+    email: 'customer@example.com',
+    customerName: 'Niall McLaughlin',
+    tickets: [{ tierId: 'adult', quantity: 2 }],
+    maxTickets: 2,
+  };
+
+  assert.equal(createGuestBookingPayload(booking).tickets[0].quantity, 2);
+  assert.throws(() => createGuestBookingPayload({
+    ...booking,
+    seats: ['F10', 'F11', 'G1'],
+    tickets: [{ tierId: 'adult', quantity: 3 }],
+  }), /A maximum of 2 tickets/);
+});
+
 test('logs API error messages and preserves HTTP 409 status', async () => {
   const restoreFetch = mockFetch(async () => new Response(
     JSON.stringify({ message: 'One or more seats are no longer available.' }),

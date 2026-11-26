@@ -52,6 +52,7 @@ test('keeps ticket selection visible with a subtle button loading state', async 
     const { TicketSelection } = await vite.ssrLoadModule(
       '/src/components/pages/booking/TicketSelection.jsx',
     );
+    const { ConfigProvider } = await vite.ssrLoadModule('/src/context/ConfigContext.jsx');
     const selection = {
       type: 'movie',
       id: '123',
@@ -59,15 +60,19 @@ test('keeps ticket selection visible with a subtle button loading state', async 
       title: 'Inception',
       label: 'Inception',
     };
-    const markup = renderToStaticMarkup(createElement(TicketSelection, {
-      initialData: {
-        selection,
-        date: '2026-10-25',
-        tickets: {},
-      },
-      onNext: () => {},
-      onToast: () => {},
-    }));
+    const markup = renderToStaticMarkup(createElement(
+      ConfigProvider,
+      null,
+      createElement(TicketSelection, {
+        initialData: {
+          selection,
+          date: '2026-10-25',
+          tickets: {},
+        },
+        onNext: () => {},
+        onToast: () => {},
+      }),
+    ));
 
     assert.match(markup, /id="booking-movie"/);
     assert.match(markup, /id="booking-date"/);

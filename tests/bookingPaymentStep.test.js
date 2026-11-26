@@ -17,26 +17,31 @@ test('formats the screening date and sorts selected seats on review', async () =
     const { PaymentStep } = await vite.ssrLoadModule(
       '/src/components/pages/booking/PaymentStep.jsx',
     );
-    const markup = renderToStaticMarkup(createElement(PaymentStep, {
-      initialData: {
-        selection: { title: 'Inception' },
-        showtime: {
-          showtimeId: '559924_2025-10-30_1100',
-          date: '2025-10-30',
-          time: '11:00',
-          screen: '5',
+    const { ConfigProvider } = await vite.ssrLoadModule('/src/context/ConfigContext.jsx');
+    const markup = renderToStaticMarkup(createElement(
+      ConfigProvider,
+      null,
+      createElement(PaymentStep, {
+        initialData: {
+          selection: { title: 'Inception' },
+          showtime: {
+            showtimeId: '559924_2025-10-30_1100',
+            date: '2025-10-30',
+            time: '11:00',
+            screen: '5',
+          },
+          tickets: { adult: 2 },
+          quote: { total: 12 },
+          seats: ['D2', 'D1'],
+          customer: { firstName: 'Niall', surname: 'McLaughlin', email: 'customer@example.com' },
         },
-        tickets: { adult: 2 },
-        quote: { total: 12 },
-        seats: ['D2', 'D1'],
-        customer: { firstName: 'Niall', surname: 'McLaughlin', email: 'customer@example.com' },
-      },
-      onBack: () => {},
-      onNext: () => {},
-      onSeatConflict: () => {},
-      onTicketIssue: () => {},
-      onToast: () => {},
-    }));
+        onBack: () => {},
+        onNext: () => {},
+        onSeatConflict: () => {},
+        onTicketIssue: () => {},
+        onToast: () => {},
+      }),
+    ));
 
     assert.match(markup, /Thurs 30 Oct 2025 - 11:00/);
     assert.match(markup, /Seats<\/span><strong>D1, D2<\/strong>/);

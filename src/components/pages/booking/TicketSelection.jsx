@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { useConfig } from '../../../context/ConfigContext';
 import {
   CINEMA_SEAT_CAPACITY,
   createCheckoutPayload,
@@ -19,6 +20,20 @@ import { StepHeader } from './BookingStepComponents';
 import { TicketTypeCard } from './TicketTypeCard/TicketTypeCard';
 
 const weekdayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+function capTicketSelections(tickets, maxTickets) {
+  let remaining = maxTickets;
+  const cappedTickets = {};
+
+  for (const [tierId, quantity] of Object.entries(tickets)) {
+    const cappedQuantity = Math.min(quantity, remaining);
+
+    if (cappedQuantity > 0) cappedTickets[tierId] = cappedQuantity;
+    remaining -= cappedQuantity;
+  }
+
+  return cappedTickets;
+}
 
 function createUpcomingDates() {
   const formatter = new Intl.DateTimeFormat('en-GB', {
@@ -103,6 +118,8 @@ function getInitialScreening(initialData, params) {
 }
 
 export function TicketSelection({ initialData = {}, onNext, onToast }) {
+  const { config } = useConfig();
+  const maxTickets = config.limits.maxTickets;
   const dates = useMemo(() => createUpcomingDates(), []);
   const params = useMemo(
     () => new URLSearchParams(typeof window === 'undefined' ? '' : window.location.search),
@@ -124,7 +141,11 @@ export function TicketSelection({ initialData = {}, onNext, onToast }) {
     initialData.selection ? selectionKey(initialData.selection) : ''
   ));
   const [selectedScreening, setSelectedScreening] = useState(() => getInitialScreening(initialData, params));
-  const [tickets, setTickets] = useState(() => initialData.tickets || {});
+  const [ticketSelections, setTicketSelections] = useState(() => initialData.tickets || {});
+  const tickets = useMemo(
+    () => capTicketSelections(ticketSelections, maxTickets),
+    [ticketSelections, maxTickets],
+  );
   const [showtimeState, setShowtimeState] = useState({
     requestKey: '', showtimesByDate: {}, availableSeatsByShowtimeId: {}, error: null,
   });
@@ -354,7 +375,7 @@ export function TicketSelection({ initialData = {}, onNext, onToast }) {
       .then((nextPricing) => {
         if (controller.signal.aborted) return;
         setPricingState({ requestKey, pricing: nextPricing, loading: false, error: null });
-        setTickets((current) => {
+        setTicketSelections((current) => {
           const tierIds = new Set(nextPricing.ticketTiers.map((tier) => String(tier.id)));
           return Object.fromEntries(
             Object.entries(current).filter(([tierId]) => tierIds.has(tierId)),
@@ -412,7 +433,7 @@ export function TicketSelection({ initialData = {}, onNext, onToast }) {
     setSelectedScreening(autoSelectedShowtime
       ? { date: firstAvailableDate, showtimeId: autoSelectedShowtime.showtimeId }
       : null);
-    setTickets({});
+    setTicketSelections({});
     setPricingState({ requestKey: '', pricing: null, loading: false, error: null });
     setValidationState({ requestKey: '', quote: null, loading: false, error: null });
   }
@@ -428,7 +449,7 @@ export function TicketSelection({ initialData = {}, onNext, onToast }) {
       : null;
     pendingShowtimeAutoSelectDateRef.current = selectedSelection && !cachedAvailability ? isoDate : '';
     dateOverrideRef.current = isoDate;
-    setTickets({});
+    setTicketSelections({});
     setDateOverride(isoDate);
     setSelectedScreening(availableShowtime
       ? { date: isoDate, showtimeId: availableShowtime.showtimeId }
@@ -442,22 +463,22 @@ export function TicketSelection({ initialData = {}, onNext, onToast }) {
 
     pendingShowtimeAutoSelectDateRef.current = '';
     setSelectedScreening({ date, showtimeId: showtime.showtimeId });
-    setTickets({});
+    setTicketSelections({});
     setPricingState({ requestKey: '', pricing: null, loading: false, error: null });
     setValidationState({ requestKey: '', quote: null, loading: false, error: null });
   }
 
   function changeTicketCount(tierId, amount) {
-    if (amount > 0 && totalTickets >= 50) {
-      onToast('Maximum of 50 tickets allowed.');
+    if (amount > 0 && totalTickets >= maxTickets) {
+      onToast(`Maximum of ${maxTickets} tickets allowed.`);
       return;
     }
     if (amount < 0 && !tickets[tierId]) return;
 
-    setTickets((current) => ({
-      ...current,
-      [tierId]: Math.max(0, (current[tierId] || 0) + amount),
-    }));
+    setTicketSelections({
+      ...tickets,
+      [tierId]: Math.max(0, (tickets[tierId] || 0) + amount),
+    });
     setValidationState({ requestKey: '', quote: null, loading: false, error: null });
   }
 
@@ -681,6 +702,7 @@ export function TicketSelection({ initialData = {}, onNext, onToast }) {
               currencySymbol={getCurrencySymbol(tier.currency)}
               description={tier.description}
               quantity={tickets[tier.id] || 0}
+              max={(tickets[tier.id] || 0) + maxTickets - totalTickets}
               onIncrement={(id) => changeTicketCount(id, 1)}
               onDecrement={(id) => changeTicketCount(id, -1)}
             />
