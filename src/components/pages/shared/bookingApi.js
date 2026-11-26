@@ -190,7 +190,7 @@ export async function getAccountBookings(signal, accessTokenOverride) {
 }
 
 export function createGuestBookingPayload({
-  showtimeId, date, seats, email, customerName, tickets, offerId,
+  showtimeId, date, seats, email, customerName, tickets, offerId, maxTickets = 10,
 }) {
   if (!isShowtimeIdForDate(showtimeId, date)) {
     throw new Error('Choose a valid screening with a showtime ID for the selected date.');
@@ -198,7 +198,7 @@ export function createGuestBookingPayload({
   if (!Array.isArray(seats) || seats.length === 0 || seats.length > 30
     || new Set(seats).size !== seats.length
     || seats.some((seat) => typeof seat !== 'string' || !/^[A-G](?:[1-9]|1[01])$/.test(seat))) {
-    throw new Error('Select between 1 and 10 unique valid seats before completing your booking.');
+    throw new Error('Select between 1 and 30 unique valid seats before completing your booking.');
   }
   if (typeof email !== 'string' || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
     throw new Error('Enter a valid email address before completing your booking.');
@@ -213,6 +213,13 @@ export function createGuestBookingPayload({
     || ticket.quantity < 1
   )) || tickets.reduce((total, ticket) => total + ticket.quantity, 0) !== seats.length) {
     throw new Error('Ticket quantities must match the number of selected seats.');
+  }
+  if (!Number.isSafeInteger(maxTickets) || maxTickets < 1) {
+    throw new Error('The maximum ticket count must be a positive integer.');
+  }
+  const ticketCount = tickets.reduce((total, ticket) => total + ticket.quantity, 0);
+  if (ticketCount > maxTickets) {
+    throw new Error(`A maximum of ${maxTickets} tickets can be booked at once.`);
   }
 
   const payload = {

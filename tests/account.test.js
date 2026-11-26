@@ -24,6 +24,7 @@ const vite = await createServer({
   logLevel: 'silent',
 });
 const { Account } = await vite.ssrLoadModule('/src/components/pages/account/Account.jsx');
+const { ConfigProvider } = await vite.ssrLoadModule('/src/context/ConfigContext.jsx');
 const { TicketDownloadButton } = await vite.ssrLoadModule('/src/components/shared/TicketDownloadButton/TicketDownloadButton.jsx');
 const { Header } = await vite.ssrLoadModule('/src/components/shared/Header/Header.jsx');
 const { UserAvatar } = await vite.ssrLoadModule('/src/components/shared/UserAvatar/UserAvatar.jsx');
@@ -55,7 +56,11 @@ async function render(component, props, initialEntries = ['/account']) {
   document.body.append(container);
   const root = createRoot(container);
   await act(async () => {
-    root.render(createElement(MemoryRouter, { initialEntries }, createElement(component, props)));
+    root.render(createElement(
+      ConfigProvider,
+      null,
+      createElement(MemoryRouter, { initialEntries }, createElement(component, props)),
+    ));
     await new Promise((resolve) => setTimeout(resolve, 0));
   });
   return {
@@ -73,13 +78,17 @@ async function renderWithLocation(component, props, initialEntries) {
   const root = createRoot(container);
   await act(async () => {
     root.render(createElement(
-      MemoryRouter,
-      { initialEntries },
+      ConfigProvider,
+      null,
       createElement(
-        Routes,
-        null,
-        createElement(Route, { path: '/account', element: createElement(component, props) }),
-        createElement(Route, { path: '/login', element: createElement('span', { 'data-login-route': true }) }),
+        MemoryRouter,
+        { initialEntries },
+        createElement(
+          Routes,
+          null,
+          createElement(Route, { path: '/account', element: createElement(component, props) }),
+          createElement(Route, { path: '/login', element: createElement('span', { 'data-login-route': true }) }),
+        ),
       ),
     ));
     await new Promise((resolve) => setTimeout(resolve, 0));

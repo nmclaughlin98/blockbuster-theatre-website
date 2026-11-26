@@ -6,20 +6,12 @@ import {
     useMemo,
     useState,
 } from 'react';
-
-const DEFAULT_CONFIG = {
-    maintenanceMode: false,
-    maintenanceMessage: "We're updating our cinema listings. Back shortly!",
-    features: {
-        loginEnabled: true,
-        bookingEnabled: true,
-    },
-};
+import { DEFAULT_RUNTIME_CONFIG, normalizeRuntimeConfig } from './runtime-config.js';
 
 const ConfigContext = createContext(undefined);
 
 export function ConfigProvider({ children }) {
-    const [config, setConfig] = useState(DEFAULT_CONFIG);
+    const [config, setConfig] = useState(DEFAULT_RUNTIME_CONFIG);
     const [isConfigLoading, setIsConfigLoading] = useState(true);
     const [isOffline, setIsOffline] = useState(() => !navigator.onLine);
 
@@ -41,21 +33,10 @@ export function ConfigProvider({ children }) {
 
             const data = await response.json();
 
-            setConfig({
-                maintenanceMode: data.maintenanceMode ?? DEFAULT_CONFIG.maintenanceMode,
-                maintenanceMessage:
-                    data.maintenanceMessage ?? DEFAULT_CONFIG.maintenanceMessage,
-                features: {
-                    loginEnabled:
-                        data.features?.loginEnabled ?? DEFAULT_CONFIG.features.loginEnabled,
-                    bookingEnabled:
-                        data.features?.bookingEnabled ??
-                        DEFAULT_CONFIG.features.bookingEnabled,
-                },
-            });
+            setConfig(normalizeRuntimeConfig(data));
         } catch (error) {
             console.error('Failed to load remote config, using defaults:', error);
-            setConfig(DEFAULT_CONFIG);
+            setConfig(DEFAULT_RUNTIME_CONFIG);
         } finally {
             setIsConfigLoading(false);
         }

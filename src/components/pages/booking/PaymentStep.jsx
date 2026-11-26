@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react';
+import { useConfig } from '../../../context/ConfigContext';
 import {
   createBooking,
   createGuestBookingPayload,
@@ -27,6 +28,7 @@ function formatScreeningDate(date, time) {
 export function PaymentStep({
   initialData, onBack, onNext, onSeatConflict, onTicketIssue, onToast, skipGuestInfo = false,
 }) {
+  const { config } = useConfig();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submissionStatus, setSubmissionStatus] = useState('');
   const submittingRef = useRef(false);
@@ -78,6 +80,7 @@ export function PaymentStep({
         email: customer.email,
         customerName: `${customer.firstName} ${customer.surname}`,
         tickets,
+        maxTickets: config.limits.maxTickets,
         ...(initialData.selection.type === 'offer'
           ? { offerId: initialData.selection.offerId }
           : {}),
