@@ -28,3 +28,4 @@ dist-ssr
 src/config.js
 node_modules/
 .vite
+.env-local
