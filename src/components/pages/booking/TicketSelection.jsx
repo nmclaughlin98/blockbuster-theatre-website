@@ -119,7 +119,9 @@ function getInitialScreening(initialData, params) {
 
 export function TicketSelection({ initialData = {}, onNext, onToast }) {
   const { config } = useConfig();
-  const maxTickets = config.limits.maxTickets;
+  const maxTickets = Number.isInteger(config?.maxTickets) && config.maxTickets > 0
+    ? config.maxTickets
+    : 10;
   const dates = useMemo(() => createUpcomingDates(), []);
   const params = useMemo(
     () => new URLSearchParams(typeof window === 'undefined' ? '' : window.location.search),
