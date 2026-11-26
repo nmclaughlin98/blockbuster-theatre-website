@@ -1,33 +1,35 @@
-export const DEFAULT_RUNTIME_CONFIG = Object.freeze({
+export const DEFAULT_RUNTIME_CONFIG = {
   maintenanceMode: false,
   maintenanceMessage: "We're updating our cinema listings. Back shortly!",
-  features: Object.freeze({
+  features: {
     loginEnabled: true,
     bookingEnabled: true,
-    allowLinkBookings: false,
-  }),
-  limits: Object.freeze({
-    maxTickets: 10,
-  }),
-});
+    allowLinkBookings: true,
+  },
+  maxTickets: 10,
+};
 
-function isRecord(value) {
-  return typeof value === 'object' && value !== null && !Array.isArray(value);
-}
+export function normalizeRuntimeConfig(raw = {}) {
+  const source = raw && typeof raw === 'object' ? raw : {};
+  const features = source.features && typeof source.features === 'object' ? source.features : {};
 
-export function normalizeRuntimeConfig(value) {
-  const config = isRecord(value) ? value : {};
-  const features = isRecord(config.features) ? config.features : {};
-  const limits = isRecord(config.limits) ? config.limits : {};
-  const allowLinkBookings = features.allowLinkBookings ?? config.allowLinkBookings;
-  const maxTickets = limits.maxTickets ?? config.maxTickets;
+  const parsedMaxTickets = Number(source.maxTickets ?? source.limits?.maxTickets);
+  const maxTickets = Number.isInteger(parsedMaxTickets) && parsedMaxTickets > 0
+    ? parsedMaxTickets
+    : DEFAULT_RUNTIME_CONFIG.maxTickets;
+
+  const allowLinkBookings = typeof source.allowLinkBookings === 'boolean'
+    ? source.allowLinkBookings
+    : typeof features.allowLinkBookings === 'boolean'
+      ? features.allowLinkBookings
+      : DEFAULT_RUNTIME_CONFIG.features.allowLinkBookings;
 
   return {
-    maintenanceMode: typeof config.maintenanceMode === 'boolean'
-      ? config.maintenanceMode
+    maintenanceMode: typeof source.maintenanceMode === 'boolean'
+      ? source.maintenanceMode
       : DEFAULT_RUNTIME_CONFIG.maintenanceMode,
-    maintenanceMessage: typeof config.maintenanceMessage === 'string'
-      ? config.maintenanceMessage
+    maintenanceMessage: typeof source.maintenanceMessage === 'string' && source.maintenanceMessage.trim()
+      ? source.maintenanceMessage
       : DEFAULT_RUNTIME_CONFIG.maintenanceMessage,
     features: {
       loginEnabled: typeof features.loginEnabled === 'boolean'
@@ -36,14 +38,9 @@ export function normalizeRuntimeConfig(value) {
       bookingEnabled: typeof features.bookingEnabled === 'boolean'
         ? features.bookingEnabled
         : DEFAULT_RUNTIME_CONFIG.features.bookingEnabled,
-      allowLinkBookings: typeof allowLinkBookings === 'boolean'
-        ? allowLinkBookings
-        : DEFAULT_RUNTIME_CONFIG.features.allowLinkBookings,
+      allowLinkBookings,
     },
-    limits: {
-      maxTickets: Number.isSafeInteger(maxTickets) && maxTickets > 0
-        ? maxTickets
-        : DEFAULT_RUNTIME_CONFIG.limits.maxTickets,
-    },
+    allowLinkBookings,
+    maxTickets,
   };
 }
