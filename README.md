@@ -28,11 +28,10 @@ Blockbuster Theatre is a responsive cinema website built with React and Vite. It
 From the repository root:
 
 ```bash
-cd react-website
 npm install
 ```
 
-Copy `.env.example` to `.env.local` in `react-website`, then configure:
+Copy `.env.example` to `.env.local`, then configure:
 
 - `VITE_MOVIES_API_URL`: the absolute HTTP(S) API base URL, including a stage path if needed. Do not append a route such as `/movies`.
 - `VITE_COGNITO_REGION`: the backend region (currently `eu-west-2`).
