@@ -41,7 +41,7 @@ jobs:
         with:
           node-version: 22
           cache: npm
-          cache-dependency-path: react-website/package-lock.json
+          cache-dependency-path: package-lock.json
       - name: Install dependencies
         working-directory: react-website
         run: npm ci
@@ -85,7 +85,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v5
         with:
-          path: ./react-website/dist
+          path: ./dist
 
   # Deployment job
   deploy:
