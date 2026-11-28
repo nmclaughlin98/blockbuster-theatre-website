@@ -10,11 +10,11 @@
 }
 
 .card {
-    width: min(100%, 30rem);
+    width: min(100%, 28rem);
     padding: clamp(1.35rem, 4vw, 2rem);
+    background: var(--bg-surface);
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-lg);
-    background: var(--bg-surface);
     box-shadow: var(--shadow-md);
 }
 
@@ -39,15 +39,8 @@
     gap: 0.95rem;
 }
 
-.nameFields {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 0.75rem;
-}
-
 .field {
     display: grid;
-    min-width: 0;
     gap: 0.4rem;
     color: var(--text-secondary);
     font-size: 0.85rem;
@@ -137,9 +130,6 @@
 }
 
 .submit {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
     width: 100%;
     min-height: 2.85rem;
     margin-top: 0.85rem;
@@ -152,7 +142,6 @@
     font-size: 1rem;
     font-weight: 700;
     letter-spacing: 0.04em;
-    text-decoration: none;
     text-transform: uppercase;
     cursor: pointer;
     transition: background-color var(--transition), transform var(--transition);
@@ -163,20 +152,17 @@
 @media (hover: hover) and (pointer: fine) {
     .submit:hover {
         background: var(--accent-red-hover);
-        color: #fff;
         transform: translateY(-2px);
     }
 }
 
 .submit:active {
     background: var(--accent-red-hover);
-    color: #fff;
     transform: translateY(-2px);
     transition-duration: 0.2s;
 }
 
-.submit:focus-visible,
-.loginLink:focus-visible {
+.submit:focus-visible {
     outline: 2px solid var(--text-primary);
     outline-offset: 3px;
 }
@@ -190,13 +176,13 @@
 }
 
 .footerText {
-    margin: 1.15rem 0 0;
+    margin: 0.35rem 0 0;
     color: var(--text-secondary);
     font-size: 0.9rem;
     text-align: center;
 }
 
-.loginLink {
+.signupLink {
     color: var(--accent-red);
     font-weight: 600;
     text-decoration: underline;
@@ -205,25 +191,31 @@
 }
 
 @media (hover: hover) and (pointer: fine) {
-    .loginLink:hover {
+    .signupLink:hover {
         color: var(--accent-red-hover);
     }
 }
 
-.loginLink:active {
+.signupLink:active {
     color: var(--accent-red-hover);
+}
+
+.signupLink:focus-visible {
+    border-radius: var(--radius-sm);
+    outline: 2px solid var(--accent-red);
+    outline-offset: 4px;
+}
+
+.notice {
+    margin: 1rem 0 0;
+    color: var(--text-muted);
+    font-size: 0.875rem;
+    text-align: center;
 }
 
 @media (max-width: 600px) {
     .page {
         align-content: start;
         padding-top: clamp(1.25rem, 4vh, 2rem);
-    }
-}
-
-@media (max-width: 350px) {
-    .nameFields {
-        grid-template-columns: minmax(0, 1fr);
-        gap: 0.95rem;
     }
 }
