@@ -36,6 +36,7 @@ function PasswordField({
   id,
   label,
   name,
+  placeholder,
   isVisible,
   onToggleVisibility,
   disabled,
@@ -50,13 +51,14 @@ function PasswordField({
           type={isVisible ? 'text' : 'password'}
           name={name}
           autoComplete="new-password"
+          placeholder={placeholder}
           required
           disabled={disabled}
         />
         <button
           className={styles.passwordToggle}
           type="button"
-          aria-label={isVisible ? 'Hide passwords' : 'Show passwords'}
+          aria-label={isVisible ? 'Hide password' : 'Show password'}
           aria-pressed={isVisible}
           disabled={disabled}
           onClick={onToggleVisibility}
@@ -79,7 +81,7 @@ export function Signup({ authClient = cognitoAuth } = {}) {
   const [isConfirmationRequired, setIsConfirmationRequired] = useState(false);
   const [isComplete, setIsComplete] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [statusMessage, setStatusMessage] = useState('Create a Blockbuster Theatre account.');
+  const [statusMessage, setStatusMessage] = useState('');
 
   useEffect(() => {
     document.title = 'Blockbuster Theatre - Sign Up';
@@ -101,15 +103,9 @@ export function Signup({ authClient = cognitoAuth } = {}) {
     const lastName = String(formData.get('lastName') ?? '').trim();
     const username = String(formData.get('email') ?? '').trim();
     const password = String(formData.get('password') ?? '');
-    const confirmPassword = String(formData.get('confirmPassword') ?? '');
 
-    if (!firstName || !lastName || !username || !password || !confirmPassword) {
+    if (!firstName || !lastName || !username || !password) {
       setToastMessage('Please complete all fields before creating your account.', 'warning');
-      return;
-    }
-
-    if (password !== confirmPassword) {
-      setToastMessage('Passwords do not match. Please check both fields and try again.', 'warning');
       return;
     }
 
@@ -133,7 +129,7 @@ export function Signup({ authClient = cognitoAuth } = {}) {
       } else if (result.nextStep?.signUpStep === 'CONFIRM_SIGN_UP') {
         setEmail(username);
         setIsConfirmationRequired(true);
-        setStatusMessage('Enter the confirmation code sent to your email address.');
+        setStatusMessage(`We sent a confirmation code to ${username}.`);
         setToastMessage('A confirmation code has been sent to your email.', 'success');
       } else {
         const message = 'Your sign-up needs another step that is not available here. Please contact the theatre.';
@@ -183,19 +179,15 @@ export function Signup({ authClient = cognitoAuth } = {}) {
         <div className={styles.card}>
           <h1 className={styles.title} id="signup-heading">Create your account</h1>
           <p className={styles.description}>
-            {isConfirmationRequired
-              ? `We sent a confirmation code to ${email}.`
-              : isComplete
-                ? 'Your account has been created.'
-                : 'Sign up for your Blockbuster Theatre account.'}
+            {statusMessage || 'Sign up for your Blockbuster Theatre account.'}
           </p>
 
           {isComplete ? (
             <Link className={styles.submit} to="/login">Go to Log In</Link>
           ) : isConfirmationRequired ? (
             <form className={styles.form} onSubmit={handleConfirmation} aria-busy={isLoading}>
-              <label className={styles.field} htmlFor="signup-confirmation-code">
-                Confirmation code
+              <div className={styles.field}>
+                <label htmlFor="signup-confirmation-code">Confirmation code</label>
                 <input
                   className={styles.input}
                   id="signup-confirmation-code"
@@ -203,10 +195,11 @@ export function Signup({ authClient = cognitoAuth } = {}) {
                   name="confirmationCode"
                   autoComplete="one-time-code"
                   inputMode="numeric"
+                  placeholder="123456"
                   required
                   disabled={isLoading}
                 />
-              </label>
+              </div>
               <button className={styles.submit} type="submit" disabled={isLoading}>
                 {isLoading ? 'Confirming...' : 'Confirm email'}
               </button>
@@ -214,55 +207,51 @@ export function Signup({ authClient = cognitoAuth } = {}) {
           ) : (
             <form className={styles.form} autoComplete="on" onSubmit={handleSignup} aria-busy={isLoading}>
               <div className={styles.nameFields}>
-                <label className={styles.field} htmlFor="signup-first-name">
-                  First name
+                <div className={styles.field}>
+                  <label htmlFor="signup-first-name">First name</label>
                   <input
                     className={styles.input}
                     id="signup-first-name"
                     type="text"
                     name="firstName"
                     autoComplete="given-name"
+                    placeholder="John"
                     required
                     disabled={isLoading}
                   />
-                </label>
-                <label className={styles.field} htmlFor="signup-last-name">
-                  Last name
+                </div>
+                <div className={styles.field}>
+                  <label htmlFor="signup-last-name">Last name</label>
                   <input
                     className={styles.input}
                     id="signup-last-name"
                     type="text"
                     name="lastName"
                     autoComplete="family-name"
+                    placeholder="Doe"
                     required
                     disabled={isLoading}
                   />
-                </label>
+                </div>
               </div>
-              <label className={styles.field} htmlFor="signup-email">
-                Email address
+              <div className={styles.field}>
+                <label htmlFor="signup-email">Email address</label>
                 <input
                   className={styles.input}
                   id="signup-email"
                   type="email"
                   name="email"
                   autoComplete="email"
+                  placeholder="john@example.com"
                   required
                   disabled={isLoading}
                 />
-              </label>
+              </div>
               <PasswordField
                 id="signup-password"
                 label="Password"
                 name="password"
-                isVisible={isPasswordVisible}
-                onToggleVisibility={togglePasswordVisibility}
-                disabled={isLoading}
-              />
-              <PasswordField
-                id="signup-confirm-password"
-                label="Confirm password"
-                name="confirmPassword"
+                placeholder="12+ chars, upper, lower, number & symbol"
                 isVisible={isPasswordVisible}
                 onToggleVisibility={togglePasswordVisibility}
                 disabled={isLoading}
@@ -273,9 +262,11 @@ export function Signup({ authClient = cognitoAuth } = {}) {
             </form>
           )}
 
-          <p className={styles.status} role="status">{statusMessage}</p>
           {!isComplete && (
-            <Link className={styles.loginLink} to="/login">Already have an account? Log in</Link>
+            <p className={styles.footerText}>
+              Already have an account?{' '}
+              <Link className={styles.loginLink} to="/login">Log in</Link>
+            </p>
           )}
         </div>
         <Toast
