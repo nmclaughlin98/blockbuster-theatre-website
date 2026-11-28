@@ -133,7 +133,7 @@ header {
     color: var(--text-primary);
     background: var(--accent-hover-grey);
     transform: translateY(-2px) !important;
-    transition-duration: 0.1s;
+    transition-duration: 0.2s;
 }
 
 .primary-nav .menu>li>a.current {
@@ -145,7 +145,7 @@ header {
 
 .primary-nav .menu>li>a.current:active {
     background: var(--accent-red-hover);
-    transition-duration: 0.1s;
+    transition-duration: 0.2s;
 }
 
 .primary-nav .menu>li>.nav-account-cta-btn {
@@ -198,7 +198,7 @@ header {
     background: var(--accent-red-hover-transparent);
     color: #fff;
     transform: translateY(-2px);
-    transition-duration: 0.1s;
+    transition-duration: 0.2s;
 }
 
 .primary-nav .menu>li>.nav-account-cta-btn.current {
@@ -236,7 +236,7 @@ header {
 
 .hamburger:active {
     background: rgba(255, 255, 255, 0.1);
-    transition-duration: 0.1s;
+    transition-duration: 0.2s;
 }
 
 .hamburger .line {
