@@ -1,14 +1,19 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { movieId, movieSlug } from '../../../components/movies';
-import { DirectionalButton, TrailerModal } from '../../../components/shared';
+import { movieId, movieSlug } from '../../components/movies';
+import { DirectionalButton, TrailerModal } from '../../components/shared';
 import styles from './HeroCarousel.module.css';
+
+const canHover = () =>
+    typeof window !== 'undefined'
+    && window.matchMedia('(hover: hover) and (pointer: fine)').matches;
 
 export function HeroCarousel({ movies }) {
     const [index, setIndex] = useState(0);
     const [previousIndex, setPreviousIndex] = useState(null);
     const [slideDirection, setSlideDirection] = useState('right');
-    const [isPaused, setIsPaused] = useState(false);
+    const [isHoverPaused, setIsHoverPaused] = useState(false);
+    const [isTouchPaused, setIsTouchPaused] = useState(false);
     const [trailerUrl, setTrailerUrl] = useState('');
     const [isReady, setIsReady] = useState(false);
     const swipeStart = useRef(null);
@@ -28,6 +33,7 @@ export function HeroCarousel({ movies }) {
         setPreviousIndex(index);
         setSlideDirection(direction);
         setIndex(nextIndex);
+        setIsTouchPaused(false);
     }, [index]);
 
     function handleSwipeStart(event) {
@@ -46,6 +52,13 @@ export function HeroCarousel({ movies }) {
 
         const deltaX = event.clientX - start.x;
         const deltaY = event.clientY - start.y;
+
+        // Clean tap (no swipe) toggles pause on touch devices
+        if (Math.abs(deltaX) < 10 && Math.abs(deltaY) < 10) {
+            setIsTouchPaused((prev) => !prev);
+            return;
+        }
+
         if (Math.abs(deltaX) < 50 || Math.abs(deltaX) <= Math.abs(deltaY)) return;
 
         const direction = deltaX < 0 ? 'right' : 'left';
@@ -58,7 +71,7 @@ export function HeroCarousel({ movies }) {
     if (!movies.length) return null;
 
     const activeMovie = movies[index];
-    const paused = isPaused || Boolean(trailerUrl);
+    const paused = isHoverPaused || isTouchPaused || Boolean(trailerUrl);
 
     return (
         <>
@@ -77,8 +90,8 @@ export function HeroCarousel({ movies }) {
                                     isActive && paused && styles.pausedIndicator,
                                 ].filter(Boolean).join(' ')}
                                 onClick={(e) => handleBlurClick(e, () => changeSlide(itemIndex, itemIndex > index ? 'right' : 'left'))}
-                                onAnimationEnd={(e) => {
-                                    if (isActive && e.target === e.currentTarget) {
+                                onAnimationEnd={() => {
+                                    if (isActive) {
                                         changeSlide((index + 1) % movies.length, 'right');
                                     }
                                 }}
@@ -89,8 +102,8 @@ export function HeroCarousel({ movies }) {
                 <div
                     className={`${styles.inner}${isReady ? ` ${styles.isReady}` : ''}`}
                     role="listbox"
-                    onMouseEnter={() => setIsPaused(true)}
-                    onMouseLeave={() => setIsPaused(false)}
+                    onMouseEnter={() => { if (canHover()) setIsHoverPaused(true); }}
+                    onMouseLeave={() => { if (canHover()) setIsHoverPaused(false); }}
                     onPointerDown={handleSwipeStart}
                     onPointerUp={handleSwipeEnd}
                     onPointerCancel={() => { swipeStart.current = null; }}
