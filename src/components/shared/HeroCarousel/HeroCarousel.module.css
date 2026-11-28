@@ -191,7 +191,7 @@
 
 .caption h2 {
     font-family: var(--font-display);
-    font-size: clamp(1.75rem, 8vw, 4.5rem);
+    font-size: clamp(1.75rem, 7vw, 4.5rem);
     letter-spacing: 0.03em;
     color: #fff;
     margin-bottom: 12px;
@@ -208,7 +208,7 @@
     overflow: hidden;
     font-family: var(--font-display);
     font-style: italic;
-    font-size: clamp(1rem, 5vw, 1.8rem);
+    font-size: clamp(1rem, 4.5vw, 1.8rem);
     font-weight: 400;
     letter-spacing: 0.07em;
     color: var(--text-secondary);
