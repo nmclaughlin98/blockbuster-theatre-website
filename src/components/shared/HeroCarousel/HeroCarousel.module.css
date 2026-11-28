@@ -154,7 +154,7 @@
     object-fit: cover;
     object-position: center 50%;
     clip-path: inset(0 0 2% 0);
-    transform: scale(1.04) translateZ(0);
+    transform: scale(1.04);
     backface-visibility: hidden;
     transition: transform 6s ease-out;
 }
