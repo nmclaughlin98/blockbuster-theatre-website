@@ -1,4 +1,4 @@
-Header {
+header {
     background: var(--glass-bg);
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
     position: fixed;
@@ -52,10 +52,12 @@ Header {
 
 .header-box:active .logo {
     transform: scale(1.1) rotate(-6deg);
+    transition-duration: 0.1s;
 }
 
 .header-box:active .header-text::after {
     opacity: 1;
+    transition-duration: 0.1s;
 }
 
 .header-text {
@@ -131,6 +133,7 @@ Header {
     color: var(--text-primary);
     background: var(--accent-hover-grey);
     transform: translateY(-2px) !important;
+    transition-duration: 0.1s;
 }
 
 .primary-nav .menu>li>a.current {
@@ -142,6 +145,7 @@ Header {
 
 .primary-nav .menu>li>a.current:active {
     background: var(--accent-red-hover);
+    transition-duration: 0.1s;
 }
 
 .primary-nav .menu>li>.nav-account-cta-btn {
@@ -194,6 +198,7 @@ Header {
     background: var(--accent-red-hover-transparent);
     color: #fff;
     transform: translateY(-2px);
+    transition-duration: 0.1s;
 }
 
 .primary-nav .menu>li>.nav-account-cta-btn.current {
@@ -231,6 +236,7 @@ Header {
 
 .hamburger:active {
     background: rgba(255, 255, 255, 0.1);
+    transition-duration: 0.1s;
 }
 
 .hamburger .line {
@@ -397,6 +403,13 @@ Header {
         text-align: center;
         text-decoration: none;
         -webkit-tap-highlight-color: transparent;
+    }
+
+    .nav-mobile-auth .nav-account-cta-btn:active {
+        background: var(--accent-red-hover-transparent);
+        color: #fff;
+        transform: translateY(-2px);
+        transition-duration: 0.1s;
     }
 
     .nav-mobile-profile {
