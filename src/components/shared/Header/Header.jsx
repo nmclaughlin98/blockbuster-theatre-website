@@ -18,7 +18,7 @@ const links = [
     ['About', '/about', 'about'],
 ];
 
-// Helper to blur element on tap/click to strip sticky hover states on mobile
+// Helper to blur element on tap/click to clear focus states after navigation
 function handleBlurClick(e, callback) {
     e.currentTarget.blur();
     if (callback) callback(e);
@@ -54,7 +54,11 @@ function SignInIcon() {
 
 function SignInLink({ className = '', onClick }) {
     return (
-        <Link className={`${styles['nav-account-cta-btn']} ${className}`} to="/login" onClick={onClick}>
+        <Link
+            className={`${styles['nav-account-cta-btn']} ${className}`}
+            to="/login"
+            onClick={(e) => handleBlurClick(e, onClick)}
+        >
             <SignInIcon />
             <span>SIGN IN</span>
         </Link>
@@ -85,9 +89,7 @@ function Navigation({ current, open, onNavigate, account, authClient, loginEnabl
                         {isAuthenticated ? (
                             <UserDropdown account={account} authClient={authClient} />
                         ) : (
-                            <SignInLink
-                                onClick={(e) => handleBlurClick(e, onNavigate)}
-                            />
+                            <SignInLink onClick={onNavigate} />
                         )}
                     </li>
                 )}
@@ -108,7 +110,7 @@ function Navigation({ current, open, onNavigate, account, authClient, loginEnabl
                             </span>
                         </Link>
                     ) : (
-                        <SignInLink onClick={(e) => handleBlurClick(e, onNavigate)} />
+                        <SignInLink onClick={onNavigate} />
                     )}
                 </div>
             )}
