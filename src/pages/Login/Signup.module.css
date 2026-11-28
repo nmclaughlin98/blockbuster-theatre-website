@@ -216,8 +216,10 @@
 
 @media (max-width: 600px) {
     .page {
+        min-height: 0;
         align-content: start;
-        padding-top: clamp(1.25rem, 4vh, 2rem);
+        padding-top: clamp(2rem, 6vh, 3rem);
+        padding-bottom: 1.5rem;
     }
 }
 
