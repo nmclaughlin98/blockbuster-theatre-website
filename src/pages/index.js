@@ -2,7 +2,7 @@ export { About } from './About/About';
 export { Booking } from './Booking/BookingPage';
 export { CollectionDetail } from './CollectionDetail/CollectionDetail';
 export { ComingSoon } from './Coming-Soon/ComingSoon';
-export { Detail } from './Movie-Detail/Detail';
+export { Detail } from './MovieDetail/Detail';
 export { Home } from './Home/Home';
 export { Login } from './Login/Login';
 export { NowShowing } from './NowShowing/NowShowing';
