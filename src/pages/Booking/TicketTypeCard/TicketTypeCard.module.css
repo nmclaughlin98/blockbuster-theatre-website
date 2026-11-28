@@ -49,6 +49,9 @@
     font-size: clamp(1.6rem, 4vw, 2rem);
     font-variant-numeric: tabular-nums;
     color: var(--ticket-price-accent);
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
 }
 
 .priceAmount {
@@ -87,6 +90,9 @@
     background: rgba(12, 14, 21, 0.5);
     border: 1px solid #363d4e;
     border-radius: 999px;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
 }
 
 .stepperButton {
@@ -105,16 +111,25 @@
     cursor: pointer;
     touch-action: manipulation;
     transition: background-color 160ms ease, border-color 160ms ease, color 160ms ease;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
 }
 
 .stepperButton:hover:not(:disabled) {
     background: rgba(255, 255, 255, 0.2);
     border-color: #596174;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
 }
 
 .stepperButton:focus-visible {
     outline: 2px solid #ff4968;
     outline-offset: 2px;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
 }
 
 .stepperButton:disabled {
