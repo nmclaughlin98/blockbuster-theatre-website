@@ -1,0 +1,171 @@
+.root {
+    min-height: 100%;
+}
+
+.page {
+    display: grid;
+    place-items: center;
+    align-items: center;
+    /* padding: clamp(10rem, 6vw, 4rem) var(--page-gutter); */
+    padding-top: 50px;
+}
+
+.card {
+    width: min(100%, 28rem);
+    padding: clamp(1.5rem, 5vw, 2.5rem);
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+}
+
+.title {
+    margin: 0;
+    color: var(--text-primary);
+    font-family: var(--font-heading);
+    font-size: clamp(2rem, 5vw, 2.5rem);
+    line-height: 1.1;
+    text-align: center;
+}
+
+.description {
+    margin: 0.75rem 0 2rem;
+    color: var(--text-secondary);
+    text-align: center;
+}
+
+.form {
+    display: grid;
+    gap: 1.25rem;
+}
+
+.field {
+    display: grid;
+    gap: 0.5rem;
+    font-weight: 600;
+    font-size: clamp(0.85rem, 2vw, 1rem);
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.input {
+    width: 100%;
+    padding: 0.85rem 1rem;
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    background: var(--bg-surface-elevated);
+    color: var(--text-primary);
+    font: inherit;
+    font-weight: 400;
+}
+
+.input:focus-visible {
+    border-color: var(--accent-red);
+    box-shadow: 0 0 16px var(--accent-glow);
+}
+
+.passwordInput {
+    position: relative;
+}
+
+.passwordInput .input {
+    padding-right: 3.25rem;
+}
+
+.passwordToggle {
+    position: absolute;
+    top: 50%;
+    right: 0.75rem;
+    display: grid;
+    place-items: center;
+    padding: 0.25rem;
+    border: 0;
+    background: transparent;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transform: translateY(-50%);
+}
+
+.passwordToggle:hover {
+    color: var(--text-primary);
+}
+
+.passwordToggle:focus-visible {
+    border-radius: var(--radius-sm);
+    outline: 2px solid var(--accent-red);
+    outline-offset: 2px;
+}
+
+.passwordToggle:disabled {
+    cursor: wait;
+}
+
+.passwordToggle svg {
+    width: 1.25rem;
+    height: 1.25rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.75;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.submit {
+    width: 100%;
+    min-height: 3rem;
+    padding: 0.75rem 1rem;
+    border: 0;
+    border-radius: var(--radius-full);
+    background: var(--accent-red);
+    color: #fff;
+    font-family: var(--font-heading);
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background-color 160ms ease, transform 160ms ease;
+}
+
+.submit:hover {
+    background: var(--accent-red-hover);
+    transform: translateY(-2px);
+}
+
+.submit:focus-visible {
+    outline: 2px solid var(--text-primary);
+    outline-offset: 3px;
+}
+
+.submit:disabled,
+.submit:disabled:hover {
+    opacity: 0.65;
+    cursor: wait;
+    transform: none;
+}
+
+.signupLink {
+    justify-self: center;
+    color: var(--accent-red);
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+}
+
+.signupLink:hover {
+    color: var(--accent-red-hover);
+}
+
+.signupLink:focus-visible {
+    border-radius: var(--radius-sm);
+    outline: 2px solid var(--accent-red);
+    outline-offset: 4px;
+}
+
+.notice {
+    margin: 1rem 0 0;
+    color: var(--text-muted);
+    font-size: 0.875rem;
+    text-align: center;
+}
