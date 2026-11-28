@@ -1,5 +1,5 @@
 # Sample workflow for building and deploying a static site to GitHub Pages
-name: Deploy react-website
+name: 1. Deploy react-website
 
 on:
   # Listens for the completion of the TMDB update workflow
