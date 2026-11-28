@@ -135,7 +135,7 @@ export function Login({
 } = {}) {
   const navigate = useNavigate();
   const { toast, setToastMessage } = useToast();
-  const [statusMessage, setStatusMessage] = useState('Sign in with your existing account.');
+  const [statusMessage, setStatusMessage] = useState('');
   const [challenge, setChallenge] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isRedirecting, setIsRedirecting] = useState(false);
@@ -232,7 +232,9 @@ export function Login({
       <section className={styles.page} aria-labelledby="login-heading">
         <div className={styles.card}>
           <h1 className={styles.title} id="login-heading">Log In</h1>
-          <p className={styles.description}>Sign in to your Blockbuster Theatre account.</p>
+          <p className={styles.description}>
+            {statusMessage || 'Sign in to your Blockbuster Theatre account.'}
+          </p>
           {isRedirecting ? (
             <p className={styles.notice} role="status">Redirecting to your account...</p>
           ) : isSessionChecking ? (
@@ -267,13 +269,15 @@ export function Login({
                   : challenge?.kind === 'new-password' ? 'Set password' : 'Login'}
               </button>
               {!challenge && (
-                <Link className={styles.signupLink} to="/signup">
-                  Sign up
-                </Link>
+                <p className={styles.footerText}>
+                  Don&apos;t have an account?{' '}
+                  <Link className={styles.signupLink} to="/signup">
+                    Sign up
+                  </Link>
+                </p>
               )}
             </form>
           )}
-          {!isSessionChecking && !isRedirecting && <p className={styles.notice} role="status">{statusMessage}</p>}
         </div>
         <Toast
           message={toast.message}
