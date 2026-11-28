@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { movieId, movieSlug } from '../../components/movies';
-import { DirectionalButton, TrailerModal } from '../../components/shared';
+import { movieId, movieSlug } from '../../../components/movies';
+import { DirectionalButton, TrailerModal } from '../../../components/shared';
 import styles from './HeroCarousel.module.css';
 
 const canHover = () =>
