@@ -2,12 +2,12 @@ import styles from './Detail.module.css';
 import { useEffect, useState } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { Countdown, movieSlug } from '../../components/movies/index.js';
-import { asset, Layout, ShowtimeChip, TrailerModal } from '../../components/shared/index.js';
-import { createBookingHref } from '../shared/showtimeNavigation.js';
-import { getUpcomingScreeningDates } from '../shared/bookingApi.js';
-import { useMovieDetail } from './useMovieDetail.js';
-import { DetailSkeleton } from './DetailSkeleton.jsx';
-import { useConfig } from '../../context/ConfigContext.js';
+import { asset, Layout, ShowtimeChip, TrailerModal } from '../../components/shared';
+import { createBookingHref } from '../shared/showtimeNavigation';
+import { getUpcomingScreeningDates } from '../shared/bookingApi';
+import { useMovieDetail } from './useMovieDetail';
+import { DetailSkeleton } from './DetailSkeleton';
+import { useConfig } from '../../context/ConfigContext';
 
 function formatPeople(people) {
     if (Array.isArray(people))
