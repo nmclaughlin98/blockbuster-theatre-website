@@ -2,11 +2,11 @@ import styles from './Home.module.css';
 import { useEffect } from 'react';
 import { Layout } from '../../components/shared';
 import { useMovies } from '../shared/useMovies';
-import { HeroCarousel } from './HeroCarousel';
+import { HeroCarousel } from '../../components/shared/HeroCarousel/HeroCarousel';
 import { HomeSkeleton } from './HomeSkeleton';
 import { MovieSection } from './MovieSection';
 import { Offers } from './Offers';
-import { useAdditionalCollections } from '../collections/useAdditionalCollections';
+import { useAdditionalCollections } from '../Collections/useAdditionalCollections';
 
 const ADDITIONAL_COLLECTION_IDS = ['8706566', '8706524'];
 

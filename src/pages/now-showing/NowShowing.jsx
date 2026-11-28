@@ -3,10 +3,10 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { MovieGrid } from '../../components/movies';
 import { DirectionalButton, Layout, SectionHeader } from '../../components/shared';
-import { CollectionsView } from '../collections/Collections';
+import { CollectionsView } from '../Collections/Collections';
 import { NowShowingSkeleton } from './NowShowingSkeleton';
 import { NowShowingSwitch } from './NowShowingSwitch';
-import { useCollections } from '../collections/useCollections';
+import { useCollections } from '../Collections/useCollections';
 import { useMovies } from '../shared/useMovies';
 
 function getMovieGenres(movie) {

@@ -1,5 +1,5 @@
 /* Now Showing page styles, scoped to this page. */
-@keyframes now-showing-enter-left{
+@keyframes now-showing-enter-left {
     from {
         opacity: 0;
         transform: translateX(-0.75rem);
@@ -11,7 +11,7 @@
     }
 }
 
-@keyframes now-showing-enter-right{
+@keyframes now-showing-enter-right {
     from {
         opacity: 0;
         transform: translateX(0.75rem);
@@ -23,7 +23,7 @@
     }
 }
 
-.root :global(.genre)>h1{
+.root :global(.genre)>h1 {
     font-family: var(--font-display);
     font-size: clamp(2rem, 3.5vw, 2.7rem);
     text-transform: uppercase;
@@ -34,7 +34,7 @@
     gap: 12px;
 }
 
-.root :global(.genre)>h1::before{
+.root :global(.genre)>h1::before {
     content: '';
     display: inline-block;
     width: 6px;
@@ -43,7 +43,7 @@
     border-radius: var(--radius-full);
 }
 
-.root :global(.genre-filter-container){
+.root :global(.genre-filter-container) {
     margin: 24px 0 36px 0;
     display: flex;
     flex-direction: column;
@@ -52,7 +52,7 @@
     max-width: 100%;
 }
 
-.root :global(.movie-filter-controls){
+.root :global(.movie-filter-controls) {
     display: flex;
     align-items: flex-end;
     gap: 20px;
@@ -60,14 +60,14 @@
     min-width: 0;
 }
 
-.root :global(.search-wrapper){
+.root :global(.search-wrapper) {
     position: relative;
     flex: 1;
     width: 100%;
     min-width: 0;
 }
 
-.root :global(.genre-tabs){
+.root :global(.genre-tabs) {
     display: flex;
     align-items: center;
     gap: 10px;
@@ -84,11 +84,11 @@
     scrollbar-width: none;
 }
 
-.root :global(.genre-tabs)::-webkit-scrollbar{
+.root :global(.genre-tabs)::-webkit-scrollbar {
     display: none;
 }
 
-.root :global(.genre-chip){
+.root :global(.genre-chip) {
     flex: 0 0 auto;
     white-space: nowrap;
     padding: 8px 20px;
@@ -105,31 +105,31 @@
 }
 
 .root :global(.genre-chip):hover,
-.root :global(.genre-chip):global(.active){
+.root :global(.genre-chip):global(.active) {
     color: #fff;
     background: var(--accent-red);
     border-color: var(--accent-red);
     box-shadow: 0 4px 15px var(--accent-glow);
 }
 
-.root :global(.now-showing-view)[data-view='movies']{
+.root :global(.now-showing-view)[data-view='movies'] {
     animation: now-showing-enter-left 0.28s ease-out both;
 }
 
-.root :global(.now-showing-view)[data-view='collections']{
+.root :global(.now-showing-view)[data-view='collections'] {
     animation: now-showing-enter-right 0.28s ease-out both;
 }
 
-@media (prefers-reduced-motion: reduce){
+@media (prefers-reduced-motion: reduce) {
 
-.root :global(.now-showing-view){
+    .root :global(.now-showing-view) {
         animation: none;
         transition: none;
     }
 
 }
 
-.root :global(.sort-wrapper){
+.root :global(.sort-wrapper) {
     position: relative;
     display: flex;
     flex-direction: column;
@@ -139,7 +139,7 @@
 }
 
 .root :global(.search-wrapper) label,
-.root :global(.sort-wrapper) label{
+.root :global(.sort-wrapper) label {
     font-family: var(--font-body);
     font-size: clamp(0.7rem, 1vw, 0.9rem);
     letter-spacing: 0.08em;
@@ -149,7 +149,7 @@
     margin-left: 5px;
 }
 
-.root :global(.sort-select){
+.root :global(.sort-select) {
     appearance: none;
     -webkit-appearance: none;
     -moz-appearance: none;
@@ -167,16 +167,16 @@
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
 }
 
-.root :global(.sort-select):hover{
+.root :global(.sort-select):hover {
     border-color: rgba(255, 255, 255, 0.2);
 }
 
-.root :global(.sort-select):focus{
+.root :global(.sort-select):focus {
     border-color: var(--accent-red);
     box-shadow: 0 0 0 3px rgba(255, 51, 75, 0.16), 0 0 18px rgba(255, 51, 75, 0.12);
 }
 
-.root :global(.sort-wrapper)::after{
+.root :global(.sort-wrapper)::after {
     content: "▾";
     position: absolute;
     right: 20px;
@@ -186,18 +186,18 @@
     pointer-events: none;
 }
 
-@media (max-width: 530px){
+@media (max-width: 530px) {
 
-.root :global(.genre)>h1{
+    .root :global(.genre)>h1 {
         line-height: 1.0;
         font-size: clamp(1.2rem, 6.7vw, 2rem);
     }
 
 }
 
-@media (max-width: 768px){
+@media (max-width: 768px) {
 
-.root :global(.genre-filter-container){
+    .root :global(.genre-filter-container) {
         display: flex;
         flex-direction: column;
         flex-wrap: nowrap;
@@ -205,7 +205,7 @@
         gap: 12px;
     }
 
-.root :global(.movie-filter-controls){
+    .root :global(.movie-filter-controls) {
         flex-direction: column;
         align-items: stretch;
         gap: 12px;

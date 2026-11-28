@@ -9,6 +9,7 @@ import { useConfig } from '../../../context/ConfigContext';
 import { asset } from '../asset/asset';
 import { UserAvatar } from '../UserAvatar/UserAvatar';
 import { UserDropdown } from './UserDropdown';
+import styles from './Header.module.css';
 
 const links = [
     ['Home', '/', 'home'],
@@ -26,7 +27,7 @@ function handleBlurClick(e, callback) {
 function Brand({ onClick }) {
     return (
         <Link
-            className="header-box"
+            className={styles['header-box']}
             to="/"
             onClick={(e) => handleBlurClick(e, onClick)}
         >
@@ -35,16 +36,16 @@ function Brand({ onClick }) {
                     srcSet={`${asset('assets/images/logo/logo-60.webp')} 1x, ${asset('assets/images/logo/logo-120.webp')} 2x, ${asset('assets/images/logo/logo-180.webp')} 3x`}
                     type="image/webp"
                 />
-                <img src={asset('assets/images/logo/png/logo-120.png')} alt="Blockbuster Theatre" className="logo" />
+                <img src={asset('assets/images/logo/png/logo-120.png')} alt="Blockbuster Theatre" className={styles.logo} />
             </picture>
-            <span className="header-text">BLOCKBUSTER<br />THEATRE</span>
+            <span className={styles['header-text']}>BLOCKBUSTER<br />THEATRE</span>
         </Link>
     );
 }
 
 function SignInIcon() {
     return (
-        <svg className="nav-account-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
+        <svg className={styles['nav-account-icon']} viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
             <circle cx="12" cy="8" r="3.5" />
             <path d="M5 20c0-3.9 3.1-7 7-7s7 3.1 7 7" />
         </svg>
@@ -53,7 +54,7 @@ function SignInIcon() {
 
 function SignInLink({ className = '', onClick }) {
     return (
-        <Link className={`nav-account-cta-btn ${className}`} to="/login" onClick={onClick}>
+        <Link className={`${styles['nav-account-cta-btn']} ${className}`} to="/login" onClick={onClick}>
             <SignInIcon />
             <span>SIGN IN</span>
         </Link>
@@ -66,12 +67,12 @@ function Navigation({ current, open, onNavigate, account, authClient, loginEnabl
     const showAuthControls = loginEnabled && !isLoading;
 
     return (
-        <nav className={`nav primary-nav ${open ? 'open' : ''}`}>
-            <ul className="menu">
+        <nav className={`nav ${styles['primary-nav']} ${open ? 'open' : ''}`}>
+            <ul className={styles.menu}>
                 {links.map(([label, href, key]) => (
                     <li key={key}>
                         <Link
-                            className={current === key ? 'current' : ''}
+                            className={styles[current === key ? 'current' : '']}
                             to={href}
                             onClick={(e) => handleBlurClick(e, onNavigate)}
                         >
@@ -80,7 +81,7 @@ function Navigation({ current, open, onNavigate, account, authClient, loginEnabl
                     </li>
                 ))}
                 {showAuthControls && (
-                    <li className="nav-desktop-auth">
+                    <li className={styles['nav-desktop-auth']}>
                         {isAuthenticated ? (
                             <UserDropdown account={account} authClient={authClient} />
                         ) : (
@@ -92,16 +93,16 @@ function Navigation({ current, open, onNavigate, account, authClient, loginEnabl
                 )}
             </ul>
             {showAuthControls && (
-                <div className="nav-mobile-auth">
-                    <div className="nav-auth-divider" />
+                <div className={styles['nav-mobile-auth']}>
+                    <div className={styles['nav-auth-divider']} />
                     {isAuthenticated ? (
                         <Link
-                            className="nav-mobile-profile"
+                            className={styles['nav-mobile-profile']}
                             to="/account"
                             onClick={(e) => handleBlurClick(e, onNavigate)}
                         >
                             <UserAvatar name={account.displayName} imageUrl={account.imageUrl} size="mobile" />
-                            <span className="nav-mobile-profile-text">
+                            <span className={styles['nav-mobile-profile-text']}>
                                 <strong>{account.displayName || 'Name unavailable'}</strong>
                                 <span>View Profile</span>
                             </span>
@@ -118,15 +119,15 @@ function Navigation({ current, open, onNavigate, account, authClient, loginEnabl
 function MenuButton({ open, onClick }) {
     return (
         <button
-            className="hamburger"
+            className={styles.hamburger}
             type="button"
             aria-label={open ? 'Close navigation' : 'Open navigation'}
             aria-expanded={open}
             onClick={(e) => handleBlurClick(e, onClick)}
         >
-            <span className={`line ${open ? 'transition' : ''}`} />
-            <span className={`line ${open ? 'transition' : ''}`} />
-            <span className={`line ${open ? 'transition' : ''}`} />
+            <span className={`${styles.line} ${open ? styles.transition : ''}`} />
+            <span className={`${styles.line} ${open ? styles.transition : ''}`} />
+            <span className={`${styles.line} ${open ? styles.transition : ''}`} />
         </button>
     );
 }
@@ -195,9 +196,9 @@ export function Header({ current, authClient = cognitoAuth }) {
         if (!open) return undefined;
 
         const root = document.documentElement;
-        root.classList.add('nav-menu-open');
+        root.classList.add(styles['nav-menu-open']);
         return () => {
-            root.classList.remove('nav-menu-open');
+            root.classList.remove(styles['nav-menu-open']);
         };
     }, [open]);
 
@@ -216,7 +217,7 @@ export function Header({ current, authClient = cognitoAuth }) {
                 <MenuButton open={open} onClick={() => setOpen((value) => !value)} />
             </header>
             <div
-                className={`ham-overlay ${open ? 'show' : ''}`}
+                className={`${styles['ham-overlay']} ${open ? styles['show'] : ''}`}
                 onClick={closeMenu}
             />
         </>

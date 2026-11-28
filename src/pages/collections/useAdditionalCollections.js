@@ -1,10 +1,17 @@
 import { useEffect, useState } from 'react';
-import { getCollection } from './collectionApi.js';
+import { getCollection, getCollections } from './collectionApi.js';
 
 const MAX_ADDITIONAL_COLLECTIONS = 3;
 
 export async function loadAdditionalCollections(collectionIds, signal) {
-  const results = await Promise.all(collectionIds.map(async (collectionId) => {
+  // 1. Fetch valid collections first so we don't request missing IDs
+  const availableCollections = await getCollections(signal);
+  const availableIds = new Set(availableCollections.map((c) => c.collectionId));
+
+  // 2. Only fetch details for hardcoded IDs that exist in this environment
+  const validIdsToFetch = collectionIds.filter((id) => availableIds.has(id));
+
+  const results = await Promise.all(validIdsToFetch.map(async (collectionId) => {
     try {
       return { collectionId, result: await getCollection(collectionId, signal) };
     } catch (error) {
@@ -12,13 +19,10 @@ export async function loadAdditionalCollections(collectionIds, signal) {
       return { collectionId, error };
     }
   }));
-  const collections = [];
 
+  const collections = [];
   for (const item of results) {
-    if ('error' in item) {
-      // Silently ignore collections that cannot be loaded
-      continue;
-    }
+    if ('error' in item) continue;
 
     if (
       item.result.collection.isActive !== false
@@ -28,10 +32,7 @@ export async function loadAdditionalCollections(collectionIds, signal) {
     }
   }
 
-  return {
-    collections,
-    error: null,
-  };
+  return { collections, error: null };
 }
 
 export function useAdditionalCollections(collectionIds) {

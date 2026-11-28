@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNetworkSpeed } from '../../utils/useNetworkSpeed';
 import { getFilmSelections } from '../shared/bookingApi';
 import { SectionHeader } from '../../components/shared';
-import { OfferCard } from './OfferCard';
+import { OfferCard } from '../../components/shared/OfferCard/OfferCard';
 
 export function Offers({ movies = [] }) {
   const isSlowConnection = useNetworkSpeed();

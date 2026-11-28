@@ -3,9 +3,9 @@ import { useEffect, useMemo } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { MovieGrid } from '../../components/movies';
 import { DirectionalButton, Layout, SectionHeader } from '../../components/shared';
-import { CollectionArtwork } from '../collections/CollectionArtwork';
-import { sortMoviesByReleaseDate } from '../collections/collectionSort';
-import { useCollection } from '../collections/useCollection';
+import { CollectionArtwork } from '../Collections/CollectionArtwork';
+import { sortMoviesByReleaseDate } from '../Collections/collectionSort';
+import { useCollection } from '../Collections/useCollection';
 import { CollectionDetailSkeleton } from './CollectionDetailSkeleton';
 
 export function CollectionDetail() {

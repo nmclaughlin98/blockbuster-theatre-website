@@ -104,10 +104,10 @@ export default function App() {
     };
   }, [setToastMessage]);
 
-  // 1. Wait for S3 config before mounting routes so disabled UI never flashes
-  if (isConfigLoading) {
-    return <StatusScreen mode="loading" />;
-  }
+  // // 1. Wait for S3 config before mounting routes so disabled UI never flashes
+  // if (isConfigLoading) {
+  //   return <StatusScreen mode="loading" />;
+  // }
 
   // 2. Full-site lockdown when maintenance mode is active or browser is offline
   if (config.maintenanceMode) {

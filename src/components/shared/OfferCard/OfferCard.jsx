@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { asset } from '../../components/shared';
-import { getPosterSrc, getPosterSrcSet } from '../../utils/posterImages';
+import { asset } from '..';
+import { getPosterSrc, getPosterSrcSet } from '../../../utils/posterImages';
 import styles from './OfferCard.module.css';
 
 export function OfferCard({ offer, featuredMovie, isSlowConnection }) {
