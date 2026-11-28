@@ -71,19 +71,21 @@ function Profile({ profile }) {
       <div className={styles.profileFields}>
         <div className={styles.field}>
           <span>Full name</span>
-          <p>{profile.name || 'Not available'}</p>
+          <strong>{profile.name || 'Not available'}</strong>
         </div>
         <div className={styles.field}>
           <span>Email address</span>
-          <p>{profile.email || 'Not available'}</p>
+          <strong>{profile.email || 'Not available'}</strong>
         </div>
-        <div className={styles.field}>
-          <span>Phone number</span>
-          <p>{profile.phone || 'Not available'}</p>
-        </div>
+        {profile.phone && (
+          <div className={styles.field}>
+            <span>Phone number</span>
+            <strong>{profile.phone}</strong>
+          </div>
+        )}
         <div className={styles.field}>
           <span>Member since</span>
-          <p>{formatMemberSince(profile.memberSince)}</p>
+          <strong>{formatMemberSince(profile.memberSince)}</strong>
         </div>
       </div>
     </section>
