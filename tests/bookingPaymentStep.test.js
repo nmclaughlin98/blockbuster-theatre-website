@@ -15,7 +15,7 @@ test('formats the screening date and sorts selected seats on review', async () =
 
   try {
     const { PaymentStep } = await vite.ssrLoadModule(
-      '/src/components/pages/booking/PaymentStep.jsx',
+      '/src/pages/booking/PaymentStep.jsx',
     );
     const { ConfigProvider } = await vite.ssrLoadModule('/src/context/ConfigContext.jsx');
     const markup = renderToStaticMarkup(createElement(
@@ -35,11 +35,11 @@ test('formats the screening date and sorts selected seats on review', async () =
           seats: ['D2', 'D1'],
           customer: { firstName: 'Niall', surname: 'McLaughlin', email: 'customer@example.com' },
         },
-        onBack: () => {},
-        onNext: () => {},
-        onSeatConflict: () => {},
-        onTicketIssue: () => {},
-        onToast: () => {},
+        onBack: () => { },
+        onNext: () => { },
+        onSeatConflict: () => { },
+        onTicketIssue: () => { },
+        onToast: () => { },
       }),
     ));
 

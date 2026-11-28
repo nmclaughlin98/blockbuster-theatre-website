@@ -21,8 +21,8 @@ A standard HTML button element wrapper.
 **Examples:**
 
 ```jsx
-import { Button } from '../../shared';
-import { EyeIcon, DownloadIcon, ChevronRightIcon } from '../../shared/Button/icons';
+import { Button } from '../../components/shared';
+import { EyeIcon, DownloadIcon, ChevronRightIcon } from '../../components/shared/Button/icons';
 
 // Primary button with leading icon
 <Button leftIcon={<EyeIcon />}>
@@ -56,8 +56,8 @@ A link-variant of Button for use with React Router `<Link>` or standard `<a>` el
 **Examples:**
 
 ```jsx
-import { ButtonLink } from '../../shared';
-import { ChevronRightIcon } from '../../shared/Button/icons';
+import { ButtonLink } from '../../components/shared';
+import { ChevronRightIcon } from '../../components/shared/Button/icons';
 
 // Standard anchor link
 <ButtonLink href="/now-showing" rightIcon={<ChevronRightIcon />}>
@@ -117,7 +117,7 @@ All styling is scoped to the Button component module and does not conflict with 
 
 The following components have been updated to use the new Button component:
 
-### Account Page (`src/components/pages/account/Account.jsx`)
+### Account Page (`src/pages/account/Account.jsx`)
 - **Log out button** → `<Button variant="secondary" shape="pill">Log out</Button>`
 - **Save changes** → `<Button variant="secondary" shape="pill" disabled>Save changes</Button>`
 - **Change password** → `<Button variant="secondary" shape="pill" disabled>Change password</Button>`
@@ -128,7 +128,7 @@ The following components have been updated to use the new Button component:
 - Refactored to use `<Button>` with download icon
 - Maintains all existing functionality and error handling
 
-### MovieSection (`src/components/pages/home/MovieSection.jsx`)
+### MovieSection (`src/pages/home/MovieSection.jsx`)
 - **View All Movies** → `<ButtonLink variant="glass" rightIcon={<ChevronRightIcon />}>View All Movies</ButtonLink>`
 
 ## Design System Alignment
@@ -149,7 +149,7 @@ The following components have been updated to use the new Button component:
 
 To migrate an existing button to the new component:
 
-1. Import `Button` (or `ButtonLink`) from `'../../shared'`
+1. Import `Button` (or `ButtonLink`) from `'../../components/shared'`
 2. Identify the intended variant and shape:
    - Red fill → `variant="primary"`
    - Dark charcoal → `variant="secondary"`

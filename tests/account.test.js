@@ -23,13 +23,13 @@ const vite = await createServer({
   appType: 'custom',
   logLevel: 'silent',
 });
-const { Account } = await vite.ssrLoadModule('/src/components/pages/account/Account.jsx');
+const { Account } = await vite.ssrLoadModule('/src/pages/account/Account.jsx');
 const { ConfigProvider } = await vite.ssrLoadModule('/src/context/ConfigContext.jsx');
 const { TicketDownloadButton } = await vite.ssrLoadModule('/src/components/shared/TicketDownloadButton/TicketDownloadButton.jsx');
 const { Header } = await vite.ssrLoadModule('/src/components/shared/Header/Header.jsx');
 const { UserAvatar } = await vite.ssrLoadModule('/src/components/shared/UserAvatar/UserAvatar.jsx');
-const { getAccountBookings } = await vite.ssrLoadModule('/src/components/pages/shared/bookingApi.js');
-const { getAccountBookingHistory } = await vite.ssrLoadModule('/src/components/pages/shared/bookingApi.js');
+const { getAccountBookings } = await vite.ssrLoadModule('/src/pages/shared/bookingApi.js');
+const { getAccountBookingHistory } = await vite.ssrLoadModule('/src/pages/shared/bookingApi.js');
 const { COGNITO_AUTH_STATE_CHANGE_EVENT } = await vite.ssrLoadModule('/src/auth/cognitoAuth.js');
 after(() => vite.close());
 
@@ -708,7 +708,7 @@ test('announces successful logout from the account page', async (t) => {
       signOut: async () => { signedIn = false; },
     },
     loadBookings: async () => [],
-    onSignedOut: () => {},
+    onSignedOut: () => { },
   });
   try {
     await act(async () => {
@@ -764,7 +764,7 @@ test('booking history retrieves the current access token and requires sign-in', 
   const controller = new AbortController();
   try {
     const { getAccountBookingHistory: loadHistory } = await testVite.ssrLoadModule(
-      '/src/components/pages/shared/bookingApi.js',
+      '/src/pages/shared/bookingApi.js',
     );
     globalThis.testAccessToken = 'current-access-token';
     globalThis.fetch = async (url, options) => {

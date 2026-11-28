@@ -19,7 +19,7 @@ import {
   NowShowing,
   Signup,
   Timetable,
-} from './components/pages';
+} from './pages';
 import { COGNITO_AUTH_STATE_CHANGE_EVENT } from './auth/cognitoAuth';
 import { Toast } from './components/shared/Toast/Toast';
 import { useToast } from './components/shared/Toast/useToast';

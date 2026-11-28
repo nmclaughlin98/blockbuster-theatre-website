@@ -14,12 +14,12 @@ test('preserves selected seats while loading and reports the selection count', a
   });
 
   try {
-    const { SeatSelection } = await vite.ssrLoadModule('/src/components/pages/booking/SeatSelection.jsx');
+    const { SeatSelection } = await vite.ssrLoadModule('/src/pages/booking/SeatSelection.jsx');
     const renderSeatSelection = (initialData) => renderToStaticMarkup(createElement(SeatSelection, {
       initialData,
-      onBack: () => {},
-      onNext: () => {},
-      onToast: () => {},
+      onBack: () => { },
+      onNext: () => { },
+      onToast: () => { },
     }));
     const markup = renderSeatSelection({
       seats: ['A2'],

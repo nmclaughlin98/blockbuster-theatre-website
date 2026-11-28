@@ -29,7 +29,7 @@ import {
   selectionKey,
   sortSeatIds,
   validateCheckout,
-} from '../src/components/pages/shared/bookingApi.js';
+} from '../src/pages/shared/bookingApi.js';
 
 const movie = {
   type: 'movie',
@@ -626,14 +626,16 @@ test('converts a guest using only the conversion token and password', async () =
 });
 
 test('uses non-empty offer overrides authoritatively without falling back on missing dates', () => {
-  const movieDetail = { showtimes: {
-    '2026-10-27': [{
-      date: '2026-10-27', showtimeId: '559924_2026-10-27_1100', time: '11:00', screen: '1',
-    }],
-    '2026-10-28': [{
-      date: '2026-10-28', showtimeId: '559924_2026-10-28_1500', time: '15:00', screen: '3',
-    }],
-  } };
+  const movieDetail = {
+    showtimes: {
+      '2026-10-27': [{
+        date: '2026-10-27', showtimeId: '559924_2026-10-27_1100', time: '11:00', screen: '1',
+      }],
+      '2026-10-28': [{
+        date: '2026-10-28', showtimeId: '559924_2026-10-28_1500', time: '15:00', screen: '3',
+      }],
+    }
+  };
   const offerWithOverrides = {
     ...offer,
     overrideShowtimes: {
@@ -682,10 +684,14 @@ test('lists only dates with showtimes for the selected movie or offer', () => {
 });
 
 test('uses featured movie showtimes when an offer override is empty or missing', () => {
-  const movieDetail = { showtimes: { '2026-10-27': [
-    { date: '2026-10-27', showtimeId: '559924_2026-10-27_1100', time: '11:00', screen: '1' },
-    { date: '2026-10-27', showtimeId: '559924_2026-10-27_1900', time: '19:00', screen: '2' },
-  ] } };
+  const movieDetail = {
+    showtimes: {
+      '2026-10-27': [
+        { date: '2026-10-27', showtimeId: '559924_2026-10-27_1100', time: '11:00', screen: '1' },
+        { date: '2026-10-27', showtimeId: '559924_2026-10-27_1900', time: '19:00', screen: '2' },
+      ]
+    }
+  };
   const offerWithEmptyOverrides = { ...offer, overrideShowtimes: {} };
   const offerWithoutOverrides = { ...offer, overrideShowtimes: undefined };
 

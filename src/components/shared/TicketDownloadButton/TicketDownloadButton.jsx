@@ -6,7 +6,7 @@ import { MOVIES_API_URL } from '../../../config';
 
 async function downloadTicket(booking) {
   if (!booking.bookingId) throw new Error('A booking ID is required to download a ticket.');
-  
+
   const accessToken = await getCognitoAccessToken();
   if (!accessToken) {
     throw new Error('You must be logged in to download a ticket.');

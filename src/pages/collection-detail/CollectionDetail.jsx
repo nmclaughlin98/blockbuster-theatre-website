@@ -1,0 +1,85 @@
+import styles from './CollectionDetail.module.css';
+import { useEffect, useMemo } from 'react';
+import { Link, useParams } from 'react-router-dom';
+import { MovieGrid } from '../../components/movies';
+import { DirectionalButton, Layout, SectionHeader } from '../../components/shared';
+import { CollectionArtwork } from '../collections/CollectionArtwork';
+import { sortMoviesByReleaseDate } from '../collections/collectionSort';
+import { useCollection } from '../collections/useCollection';
+import { CollectionDetailSkeleton } from './CollectionDetailSkeleton';
+
+export function CollectionDetail() {
+  const { collectionId = '' } = useParams();
+  const { collection, movies, loading, error } = useCollection(collectionId);
+  const orderedMovies = useMemo(() => sortMoviesByReleaseDate(movies), [movies]);
+
+  useEffect(() => {
+    document.title = `Blockbuster Theatre - ${collection?.name || 'Collections'}`;
+  }, [collection?.name]);
+
+  if (loading) {
+    return (
+      <Layout className={styles.root} current="now" loading>
+        <CollectionDetailSkeleton />
+      </Layout>
+    );
+  }
+
+  return (
+    <Layout className={styles.root} current="now">
+      {!collectionId || error ? (
+        <section className="collection-empty-state">
+          <div className="collection-content">
+            <h1>{collectionId ? 'Collection unavailable' : 'No collection selected'}</h1>
+            <p role={error ? 'alert' : undefined}>
+              {error?.message || 'Choose a collection from the Collections tab in Now Showing.'}
+            </p>
+            <DirectionalButton as={Link} to="/now-showing?view=collections" className="button btn-glass" direction="previous" variant="glass">
+              Back to Collections
+            </DirectionalButton>
+          </div>
+        </section>
+      ) : (
+        <>
+          <section className="collection-detail-hero" aria-labelledby="collection-title">
+            <CollectionArtwork
+              collection={collection}
+              className="collection-detail-image"
+              alt={`${collection.name} collection artwork`}
+            />
+            <div className="collection-hero-content">
+              <p className="collection-eyebrow">Film Collection</p>
+              <h1 id="collection-title">{collection.name}</h1>
+              {collection.description && <p>{collection.description}</p>}
+            </div>
+          </section>
+          <section className="collection-movies">
+            <div className="collection-content">
+              <DirectionalButton
+                className="button btn-glass collection-back-button"
+                to="/now-showing?view=collections"
+                as={Link}
+                direction="previous"
+                variant="glass"
+              >
+                Back to Collections
+              </DirectionalButton>
+              <SectionHeader
+                title="Films in this collection"
+                description={`${movies.length} ${movies.length === 1 ? 'film' : 'films'} available`}
+                headingLevel={2}
+              />
+              {movies.length
+                ? <MovieGrid movies={orderedMovies} />
+                : <p className="collection-message">
+                  {collection.movieIds.length
+                    ? 'Movies in this collection are not yet available in the catalogue.'
+                    : 'This collection does not contain any movies.'}
+                </p>}
+            </div>
+          </section>
+        </>
+      )}
+    </Layout>
+  );
+}

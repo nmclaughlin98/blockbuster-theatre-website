@@ -26,7 +26,7 @@ const vite = await createServer({
   appType: 'custom',
   logLevel: 'silent',
 });
-const { Signup } = await vite.ssrLoadModule('/src/components/pages/login/Signup.jsx');
+const { Signup } = await vite.ssrLoadModule('/src/pages/login/Signup.jsx');
 after(() => vite.close());
 
 async function renderSignup(authClient) {

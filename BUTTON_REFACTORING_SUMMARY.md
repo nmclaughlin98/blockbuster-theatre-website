@@ -170,7 +170,7 @@ All icons:
 
 ### Basic Buttons
 ```jsx
-import { Button } from '../../shared';
+import { Button } from '../../components/shared';
 
 // Primary action
 <Button onClick={handleSubmit}>Book Now</Button>
@@ -187,8 +187,8 @@ import { Button } from '../../shared';
 
 ### With Icons
 ```jsx
-import { Button } from '../../shared';
-import { EyeIcon, DownloadIcon, ChevronRightIcon } from '../../shared/Button/icons';
+import { Button } from '../../components/shared';
+import { EyeIcon, DownloadIcon, ChevronRightIcon } from '../../components/shared/Button/icons';
 
 // Leading icon (semantic action)
 <Button leftIcon={<EyeIcon />}>View Details</Button>
@@ -200,7 +200,7 @@ import { EyeIcon, DownloadIcon, ChevronRightIcon } from '../../shared/Button/ico
 
 ### Links
 ```jsx
-import { ButtonLink } from '../../shared';
+import { ButtonLink } from '../../components/shared';
 import { Link } from 'react-router-dom';
 
 // Anchor link

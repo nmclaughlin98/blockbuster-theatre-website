@@ -7,7 +7,7 @@ import { createServer } from 'vite';
 import {
   getFirstAvailableDate,
   getSingleAvailableShowtime,
-} from '../src/components/pages/booking/bookingDates.js';
+} from '../src/pages/booking/bookingDates.js';
 
 test('finds the first available screening date', () => {
   const dates = [
@@ -50,7 +50,7 @@ test('keeps ticket selection visible with a subtle button loading state', async 
 
   try {
     const { TicketSelection } = await vite.ssrLoadModule(
-      '/src/components/pages/booking/TicketSelection.jsx',
+      '/src/pages/booking/TicketSelection.jsx',
     );
     const { ConfigProvider } = await vite.ssrLoadModule('/src/context/ConfigContext.jsx');
     const selection = {
@@ -69,8 +69,8 @@ test('keeps ticket selection visible with a subtle button loading state', async 
           date: '2026-10-25',
           tickets: {},
         },
-        onNext: () => {},
-        onToast: () => {},
+        onNext: () => { },
+        onToast: () => { },
       }),
     ));
 
@@ -101,7 +101,7 @@ test('renders ticket card metadata and disables decrement at its minimum', async
 
   try {
     const { TicketTypeCard } = await vite.ssrLoadModule(
-      '/src/components/pages/booking/TicketTypeCard/TicketTypeCard.jsx',
+      '/src/pages/booking/TicketTypeCard/TicketTypeCard.jsx',
     );
     const markup = renderToStaticMarkup(createElement(TicketTypeCard, {
       id: 'adult',
@@ -110,8 +110,8 @@ test('renders ticket card metadata and disables decrement at its minimum', async
       description: 'Off-peak adult admission',
       quantity: 0,
       max: 2,
-      onIncrement: () => {},
-      onDecrement: () => {},
+      onIncrement: () => { },
+      onDecrement: () => { },
     }));
 
     assert.match(markup, /<span[^>]*>£<\/span><span[^>]*>6<\/span><span[^>]*>\.50<\/span>/);
