@@ -26,7 +26,7 @@ const vite = await createServer({
   appType: 'custom',
   logLevel: 'silent',
 });
-const { Login } = await vite.ssrLoadModule('/src/components/pages/login/Login.jsx');
+const { Login } = await vite.ssrLoadModule('/src/pages/login/Login.jsx');
 const { Header } = await vite.ssrLoadModule('/src/components/shared/Header/Header.jsx');
 const { COGNITO_AUTH_STATE_CHANGE_EVENT } = await vite.ssrLoadModule('/src/auth/cognitoAuth.js');
 after(() => vite.close());

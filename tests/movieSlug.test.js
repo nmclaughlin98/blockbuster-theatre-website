@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { movieSlug } from '../src/components/movies/movieId.js';
-import { resolveMovieId } from '../src/components/pages/detail/useMovieDetail.js';
+import { resolveMovieId } from '../src/pages/detail/useMovieDetail.js';
 
 test('prefers the supplied movie slug for public URLs', () => {
   assert.equal(movieSlug({ movieId: 1468683, slug: 'the-fall-guy', title: 'The Fall Guy' }), 'the-fall-guy');

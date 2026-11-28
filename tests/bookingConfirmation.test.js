@@ -17,7 +17,7 @@ test('confirms the backend booking reference and total when confirmation email f
 
   try {
     const { BookingConfirmation } = await vite.ssrLoadModule(
-      '/src/components/pages/booking/BookingConfirmation.jsx',
+      '/src/pages/booking/BookingConfirmation.jsx',
     );
     const markup = renderToStaticMarkup(createElement(MemoryRouter, null, createElement(BookingConfirmation, {
       movie: { title: 'Inception' },
@@ -37,7 +37,7 @@ test('confirms the backend booking reference and total when confirmation email f
         customerEmail: 'customer@example.com',
         confirmationEmailSent: false,
       },
-      onToast: () => {},
+      onToast: () => { },
     })));
 
     assert.match(markup, /Your reservation succeeded, but we could not send the confirmation email/);

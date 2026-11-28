@@ -1,0 +1,282 @@
+import styles from './Detail.module.css';
+import { useEffect, useState } from 'react';
+import { Link, useParams, useSearchParams } from 'react-router-dom';
+import { Countdown, movieSlug } from '../../components/movies/index.js';
+import { asset, Layout, ShowtimeChip, TrailerModal } from '../../components/shared';
+import { createBookingHref } from '../shared/showtimeNavigation';
+import { getUpcomingScreeningDates } from '../shared/bookingApi';
+import { useMovieDetail } from './useMovieDetail';
+import { DetailSkeleton } from './DetailSkeleton';
+import { useConfig } from '../../context/ConfigContext';
+
+function formatPeople(people) {
+    if (Array.isArray(people))
+        return people.map((person) => String(person).trim()).filter(Boolean);
+    if (typeof people === 'string')
+        return people.split(',').map((person) => person.trim()).filter(Boolean);
+    return [];
+}
+
+function formatReleaseDate(value) {
+    if (!value) return 'Release date unavailable';
+
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return String(value);
+    return date.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' });
+}
+
+// Helper function to build TMDB URLs dynamically if using TMDB image paths
+const getTmdbUrl = (url, size) => {
+    if (!url) return '';
+    return url.replace(/\/w\d+\/|\/original\//, `/${size}/`);
+};
+
+function MovieHero({ movie }) {
+    const directors = formatPeople(movie.director);
+    const cast = formatPeople(movie.starring);
+    const rating = typeof movie.rating === 'string' ? movie.rating.toUpperCase() : '';
+
+    // Pick the primary image source
+    const heroImage = movie.still || movie.largeStill || movie.poster;
+
+    // Build the responsive srcset dynamically if it's a TMDB image URL
+    const isTmdb = heroImage?.includes('image.tmdb.org');
+    const srcSet = isTmdb
+        ? `${getTmdbUrl(heroImage, 'w780')} 780w,
+           ${getTmdbUrl(heroImage, 'w1280')} 1280w,
+           ${getTmdbUrl(heroImage, 'original')} 1920w`
+        : undefined;
+
+    return (
+        <section className="movie-still">
+            <img
+                className="still"
+                src={heroImage}
+                srcSet={srcSet}
+                sizes="(max-width: 768px) 100vw, 1200px"
+                alt={movie.title ? `${movie.title} Hero Still` : ''}
+            />
+            <div className="movie-detail-caption">
+                <h1>{movie.title}</h1>
+                <div className="rating-container">
+                    {rating && (
+                        <img className="rating-movies" src={asset(`assets/images/ratings/${rating}.svg`)}
+                            alt={`${rating} age rating`} />
+                    )}
+                    <div className="runtime-movies"><strong>Run
+                        Time:</strong> {movie.runtime ? `${movie.runtime} mins` : 'TBD'}</div>
+                </div>
+                <div className="movie-detail-meta">
+                    <p>
+                        <strong>{directors.length === 1 ? 'Director' : 'Directors'}:</strong> {directors.join(', ') || 'Unknown'}
+                    </p>
+                    {cast.length > 0 && <p><strong>Starring:</strong> {cast.join(', ')}</p>}
+                    <p><strong>Release Date:</strong> {formatReleaseDate(movie.releaseDate)}</p>
+                </div>
+            </div>
+        </section>
+    );
+}
+
+const WEEKDAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+// Orders showtime entries starting from today's weekday and wrapping through the rest of the week.
+function sortShowtimesFromToday(showtimes) {
+    const todayIndex = new Date().getDay();
+    return Object.entries(showtimes || {}).sort(([dayA], [dayB]) => {
+        const offsetA = (WEEKDAYS.indexOf(dayA) - todayIndex + 7) % 7;
+        const offsetB = (WEEKDAYS.indexOf(dayB) - todayIndex + 7) % 7;
+        return offsetA - offsetB;
+    });
+}
+
+function ShowtimeSchedule({ movie, selectedDay, selectedTime, onSelectTime, bookingHref }) {
+    const { config } = useConfig();
+    const { bookingEnabled } = config.features;
+    const showtimes = sortShowtimesFromToday(movie.showtimes)
+        .filter(([, slots]) => Array.isArray(slots) && slots.length > 0);
+
+    function handleDisabledBookingClick(event) {
+        event.preventDefault();
+        window.dispatchEvent(new CustomEvent('blockbuster:toast', {
+            detail: { message: 'Booking is currently disabled.', type: 'error' },
+        }));
+    }
+
+    return (
+        <aside className="col col-1-3 showtimes-schedule">
+            <h1>Show Times:</h1>
+            {showtimes.length > 0 ? showtimes.map(([day, times]) => (
+                <div className="showtime-day" key={day}>
+                    <h2 className="day-of-week">{day}</h2>
+                    <div className="show-time-list">
+                        {(Array.isArray(times) ? times : []).map((slot) => (
+                            <ShowtimeChip
+                                className="detail-showtime-chip"
+                                active={bookingEnabled && selectedDay === day && selectedTime === slot.time}
+                                key={`${slot.time}-${slot.screen}`}
+                                onClick={() => (
+                                    bookingEnabled
+                                        ? onSelectTime(day, slot.time, slot)
+                                        : window.dispatchEvent(new CustomEvent('blockbuster:toast', {
+                                            detail: { message: 'Booking is currently disabled.', type: 'error' },
+                                        }))
+                                )}
+                                time={slot.time}
+                                screen={slot.screen}
+                            />
+                        ))}
+                    </div>
+                </div>
+            )) : <p>No showtimes available.</p>}
+            <br />
+            <Link
+                className="form-button book-now-button"
+                to={bookingHref}
+                aria-disabled={!bookingEnabled}
+                onClick={!bookingEnabled ? handleDisabledBookingClick : undefined}
+            >
+                Book Now
+            </Link>
+        </aside>
+    );
+}
+
+function MovieContent({ movie, comingSoon }) {
+    const [query] = useSearchParams();
+    const [selectedDate, setSelectedDate] = useState(() => query.get('date') || '');
+    const [selectedShowtimeId, setSelectedShowtimeId] = useState(() => query.get('showtimeId') || '');
+    const [trailerUrl, setTrailerUrl] = useState('');
+    const [selectedTime, setSelectedTime] = useState(
+        () => query.get('time') || '',
+    );
+    const [selectedDay, setSelectedDay] = useState(() => {
+        const requestedDay = query.get('day');
+        if (WEEKDAYS.includes(requestedDay)) return requestedDay;
+
+        const requestedTime = query.get('time');
+        if (!requestedTime) return '';
+        return Object.entries(movie.showtimes || {}).find(([, times]) => (
+            Array.isArray(times) && times.some((slot) => slot.time === requestedTime)
+        ))?.[0] || '';
+    });
+    const movieIdentifier = movieSlug(movie);
+    const movieBookingUrl = `/book-now?movie=${encodeURIComponent(movieIdentifier)}`;
+    const selectedShowtime = Object.entries(movie.showtimes || {}).flatMap(([day, slots]) => (
+        (Array.isArray(slots) ? slots : []).map((slot) => ({ ...slot, day }))
+    )).find((slot) => (
+        selectedShowtimeId
+            ? slot.showtimeId === selectedShowtimeId
+            : slot.time === selectedTime
+            && slot.day === selectedDay
+            && (!selectedDate || slot.date === selectedDate)
+    ));
+    const bookingHref = selectedShowtime
+        ? createBookingHref(
+            '/book-now',
+            movieIdentifier,
+            selectedShowtime.date,
+            selectedShowtime,
+        )
+        : movieBookingUrl;
+    const synopsis = typeof movie.synopsis === 'string' ? movie.synopsis.split('\n').filter(Boolean) : [];
+
+    useEffect(() => {
+        document.title = `Blockbuster Theatre - ${movie.title}`;
+    }, [movie.title]);
+
+    function selectTime(day, time, showtime) {
+        setSelectedDay(day);
+        setSelectedTime(time);
+        setSelectedDate(showtime.date);
+        setSelectedShowtimeId(showtime.showtimeId);
+    }
+
+    return (
+        <>
+            <MovieHero movie={movie} />
+            <section className="movie-page">
+                <div className="col-no-border col-2-3">
+                    <h2>Synopsis</h2>
+                    <div id="movie-synopsis">
+                        {synopsis.length > 0
+                            ? synopsis.map((paragraph, index) => <p
+                                key={`${index}-${paragraph}`}>{paragraph}</p>)
+                            : <p>Synopsis unavailable.</p>}
+                    </div>
+                    <div className="move-trailer"
+                        aria-label={`${movie.title} ${movie.trailer ? 'trailer' : 'still'}`}>
+                        {movie.trailer ? (
+                            <div className={styles.trailerLauncher}>
+                                <iframe
+                                    className="trailer-media"
+                                    src={movie.trailer}
+                                    title={`${movie.title} trailer preview`}
+                                    aria-hidden="true"
+                                    tabIndex="-1"
+                                    referrerPolicy="strict-origin-when-cross-origin"
+                                    allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
+                                    allowFullScreen
+                                />
+                                <button
+                                    className={styles.trailerLaunchButton}
+                                    type="button"
+                                    aria-label={`Watch ${movie.title} trailer`}
+                                    onClick={() => setTrailerUrl(movie.trailer)}
+                                >
+                                </button>
+                            </div>
+                        ) : (
+                            <img
+                                className="trailer-media trailer-still"
+                                src={movie.still || movie.largeStill || movie.poster || asset('assets/images/logo/png/logo-full.png')}
+                                alt={`${movie.title} still`}
+                            />
+                        )}
+                    </div>
+                </div>
+                {comingSoon ? (
+                    <aside className="col col-1-3">
+                        <h1>Coming Soon:</h1>
+                        <Countdown movie={movie} className="detail-countdown" />
+                    </aside>
+                ) : (
+                    <ShowtimeSchedule
+                        movie={movie}
+                        selectedDay={selectedDay}
+                        selectedTime={selectedTime}
+                        onSelectTime={selectTime}
+                        bookingHref={bookingHref}
+                    />
+                )}
+            </section>
+            <TrailerModal
+                url={trailerUrl}
+                onClose={() => setTrailerUrl('')}
+                title={`${movie.title} trailer`}
+            />
+        </>
+    );
+}
+
+export function Detail({ comingSoon = false }) {
+    const { slug = '' } = useParams();
+    const [screeningDates] = useState(() => getUpcomingScreeningDates());
+    const { movie, loading, error } = useMovieDetail(slug, screeningDates);
+
+    if (loading) {
+        return (
+            <Layout className={styles.root} loading>
+                <DetailSkeleton comingSoon={comingSoon} />
+            </Layout>
+        );
+    }
+
+    return (
+        <Layout className={styles.root}>
+            {error || !movie
+                ? <p role="alert">Movie details are temporarily unavailable.</p>
+                : <MovieContent movie={movie} comingSoon={comingSoon} />}
+        </Layout>
+    );
+}

@@ -27,7 +27,7 @@ const vite = await createServer({
   appType: 'custom',
   logLevel: 'silent',
 });
-const { Home } = await vite.ssrLoadModule('/src/components/pages/home/Home.jsx');
+const { Home } = await vite.ssrLoadModule('/src/pages/home/Home.jsx');
 after(() => vite.close());
 
 test('shares the Home movie request with Offers and starts collections in parallel', async () => {

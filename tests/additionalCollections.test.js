@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { loadAdditionalCollections } from '../src/components/pages/collections/useAdditionalCollections.js';
+import { loadAdditionalCollections } from '../src/pages/collections/useAdditionalCollections.js';
 
 function collectionResponse(collectionId, isActive) {
   return {

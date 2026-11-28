@@ -25,7 +25,7 @@ const vite = await createServer({
   appType: 'custom',
   logLevel: 'silent',
 });
-const { Offers } = await vite.ssrLoadModule('/src/components/pages/home/Offers.jsx');
+const { Offers } = await vite.ssrLoadModule('/src/pages/home/Offers.jsx');
 after(() => vite.close());
 
 function filmSelectionsResponse(selections) {

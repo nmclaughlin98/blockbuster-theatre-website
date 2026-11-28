@@ -1,0 +1,233 @@
+.root {
+    min-height: 100%;
+}
+
+.page {
+    display: grid;
+    place-items: center;
+    min-height: calc(100dvh - var(--header-height));
+    padding: clamp(1rem, 3vw, 2rem) var(--page-gutter);
+}
+
+.card {
+    width: min(100%, 30rem);
+    padding: clamp(1.35rem, 4vw, 2rem);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    background: var(--bg-surface);
+    box-shadow: var(--shadow-md);
+}
+
+.title {
+    margin: 0;
+    color: var(--text-primary);
+    font-family: var(--font-heading);
+    font-size: clamp(1.75rem, 4.5vw, 2.25rem);
+    line-height: 1.1;
+    text-align: center;
+}
+
+.description {
+    margin: 0.5rem 0 1.25rem;
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    text-align: center;
+}
+
+.form {
+    display: grid;
+    gap: 0.95rem;
+}
+
+.nameFields {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem;
+}
+
+.field {
+    display: grid;
+    min-width: 0;
+    gap: 0.4rem;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+}
+
+.input {
+    width: 100%;
+    max-width: 100%;
+    height: 2.875rem;
+    padding: 0 16px;
+    background: var(--bg-surface-elevated);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    color: var(--text-primary);
+    font-family: inherit;
+    font-size: max(16px, 1rem);
+    font-weight: 400;
+    line-height: 1.2;
+    outline: none;
+    transition: border-color var(--transition), box-shadow var(--transition);
+    touch-action: manipulation;
+}
+
+.input::placeholder {
+    color: var(--text-muted);
+    opacity: 0.75;
+}
+
+.input:focus {
+    border-color: var(--accent-red);
+    box-shadow: 0 0 16px var(--accent-glow);
+}
+
+.passwordInput {
+    position: relative;
+}
+
+.passwordInput .input {
+    padding-right: 3rem;
+}
+
+.passwordToggle {
+    position: absolute;
+    top: 50%;
+    right: 0.65rem;
+    display: grid;
+    place-items: center;
+    padding: 0.35rem;
+    border: 0;
+    background: transparent;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transform: translateY(-50%);
+    transition: color var(--transition);
+    -webkit-tap-highlight-color: transparent;
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .passwordToggle:hover {
+        color: var(--text-primary);
+    }
+}
+
+.passwordToggle:active {
+    color: var(--text-primary);
+}
+
+.passwordToggle:focus-visible {
+    border-radius: var(--radius-sm);
+    outline: 2px solid var(--accent-red);
+    outline-offset: 2px;
+}
+
+.passwordToggle:disabled {
+    cursor: wait;
+}
+
+.passwordToggle svg {
+    width: 1.25rem;
+    height: 1.25rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.75;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.submit {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: 2.85rem;
+    margin-top: 0.85rem;
+    padding: 0.7rem 1rem;
+    border: 0;
+    border-radius: var(--radius-full);
+    background: var(--accent-red);
+    color: #fff;
+    font-family: var(--font-heading);
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-decoration: none;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background-color var(--transition), transform var(--transition);
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .submit:hover {
+        background: var(--accent-red-hover);
+        color: #fff;
+        transform: translateY(-2px);
+    }
+}
+
+.submit:active {
+    background: var(--accent-red-hover);
+    color: #fff;
+    transform: translateY(-2px);
+    transition-duration: 0.2s;
+}
+
+.submit:focus-visible,
+.loginLink:focus-visible {
+    outline: 2px solid var(--text-primary);
+    outline-offset: 3px;
+}
+
+.submit:disabled,
+.submit:disabled:hover,
+.submit:disabled:active {
+    opacity: 0.65;
+    cursor: wait;
+    transform: none;
+}
+
+.footerText {
+    margin: 1.15rem 0 0;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    text-align: center;
+}
+
+.loginLink {
+    color: var(--accent-red);
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+    -webkit-tap-highlight-color: transparent;
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .loginLink:hover {
+        color: var(--accent-red-hover);
+    }
+}
+
+.loginLink:active {
+    color: var(--accent-red-hover);
+}
+
+@media (max-width: 600px) {
+    .page {
+        min-height: 0;
+        align-content: start;
+        padding-top: clamp(2rem, 6vh, 3rem);
+        padding-bottom: 1.5rem;
+    }
+}
+
+@media (max-width: 350px) {
+    .nameFields {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 0.95rem;
+    }
+}

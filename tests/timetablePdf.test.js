@@ -13,7 +13,7 @@ test('requires a preview tab instead of falling back to a download', async () =>
 
   try {
     const { openTimetablePdf } = await vite.ssrLoadModule(
-      '/src/components/pages/timetable/timetablePdf.js',
+      '/src/pages/timetable/timetablePdf.js',
     );
 
     assert.throws(
@@ -49,19 +49,19 @@ test('opens the generated PDF in the supplied preview tab', async () => {
 
   try {
     const { openTimetablePdf } = await vite.ssrLoadModule(
-      '/src/components/pages/timetable/timetablePdf.js',
+      '/src/pages/timetable/timetablePdf.js',
     );
     URL.createObjectURL = (blob) => {
       createdBlob = blob;
       return 'blob:timetable';
     };
-    URL.revokeObjectURL = () => {};
+    URL.revokeObjectURL = () => { };
     globalThis.window = {
       setInterval(callback) {
         intervalCallback = callback;
         return 1;
       },
-      clearInterval() {},
+      clearInterval() { },
     };
     globalThis.document = {
       createElement() {

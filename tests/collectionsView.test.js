@@ -16,7 +16,7 @@ test('shows collections unless they are explicitly inactive', async () => {
 
   try {
     const { CollectionsView } = await vite.ssrLoadModule(
-      '/src/components/pages/collections/Collections.jsx',
+      '/src/pages/collections/Collections.jsx',
     );
     const collection = (collectionId, name, isActive) => ({
       collectionId,
@@ -34,7 +34,7 @@ test('shows collections unless they are explicitly inactive', async () => {
       ],
       loading: false,
       error: null,
-      onRetry: () => {},
+      onRetry: () => { },
     })));
 
     assert.match(markup, /Active Collection/);
@@ -45,7 +45,7 @@ test('shows collections unless they are explicitly inactive', async () => {
       collections: [collection('4', 'Only Inactive Collection', false)],
       loading: false,
       error: null,
-      onRetry: () => {},
+      onRetry: () => { },
     })));
     assert.match(emptyMarkup, /No collections are available right now/);
     assert.doesNotMatch(emptyMarkup, /Only Inactive Collection/);

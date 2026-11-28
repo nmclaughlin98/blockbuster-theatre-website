@@ -25,7 +25,7 @@ const vite = await createServer({
   logLevel: 'silent',
 });
 const { GuestDetails } = await vite.ssrLoadModule(
-  '/src/components/pages/booking/GuestDetails.jsx',
+  '/src/pages/booking/GuestDetails.jsx',
 );
 after(() => vite.close());
 
@@ -39,9 +39,9 @@ async function renderGuestDetails(authClient, initialData = {}) {
     root.render(createElement(GuestDetails, {
       authClient,
       initialData,
-      onBack: () => {},
+      onBack: () => { },
       onNext: (customer) => { submittedCustomer = customer; },
-      onToast: () => {},
+      onToast: () => { },
     }));
     await new Promise((resolve) => setTimeout(resolve, 0));
   });
