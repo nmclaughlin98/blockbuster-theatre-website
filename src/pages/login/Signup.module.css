@@ -55,16 +55,37 @@
     text-transform: uppercase;
 }
 
-.input {
+input {
+    max-width: 100%;
     width: 100%;
-    padding: 0.85rem 1rem;
+    padding: 14px 18px;
+    background: var(--bg-surface-elevated);
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-md);
-    background: var(--bg-surface-elevated);
-    color: var(--text-primary);
-    font: inherit;
-    font-weight: 400;
+    color: #fff;
+    font-size: clamp(0.9rem, 2vw, 1rem);
+    outline: none;
+    transition: all var(--transition);
+    touch-action: manipulation;
+    max-height: 300px;
 }
+
+textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+input:not([type="checkbox"]):not([type="radio"]):not([type="button"]):not([type="submit"]):not([type="reset"]):not([type="image"]):not([type="hidden"]):not([type="range"]):not([type="color"]),
+select,
+textarea {
+    font-size: max(16px, 1rem);
+}
+
+select:focus,
+input:focus,
+textarea:focus {
+    border-color: var(--accent-red);
+    box-shadow: 0 0 16px var(--accent-
 
 .input:focus-visible {
     border-color: var(--accent-red);
