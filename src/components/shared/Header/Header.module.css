@@ -1,4 +1,4 @@
-header {
+Header {
     background: var(--glass-bg);
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
     position: fixed;
@@ -23,6 +23,7 @@ header {
     gap: clamp(0.5rem, 2vw, 0.7rem);
     text-decoration: none;
     transition: all var(--transition-slow);
+    -webkit-tap-highlight-color: transparent;
 }
 
 .header-box div {
@@ -39,11 +40,21 @@ header {
     transition: transform var(--transition-smooth), filter var(--transition-smooth);
 }
 
-.header-box:hover .logo {
+@media (hover: hover) and (pointer: fine) {
+    .header-box:hover .logo {
+        transform: scale(1.1) rotate(-6deg);
+    }
+
+    .header-box:hover .header-text::after {
+        opacity: 1;
+    }
+}
+
+.header-box:active .logo {
     transform: scale(1.1) rotate(-6deg);
 }
 
-.header-box:hover .header-text::after {
+.header-box:active .header-text::after {
     opacity: 1;
 }
 
@@ -101,9 +112,22 @@ header {
     border-radius: var(--radius-full);
     transition: all var(--transition);
     position: relative;
+    -webkit-tap-highlight-color: transparent;
 }
 
-.primary-nav .menu>li>a:hover {
+@media (hover: hover) and (pointer: fine) {
+    .primary-nav .menu>li>a:hover {
+        color: var(--text-primary);
+        background: var(--accent-hover-grey);
+        transform: translateY(-2px) !important;
+    }
+
+    .primary-nav .menu>li>a.current:hover {
+        background: var(--accent-red-hover);
+    }
+}
+
+.primary-nav .menu>li>a:active {
     color: var(--text-primary);
     background: var(--accent-hover-grey);
     transform: translateY(-2px) !important;
@@ -116,7 +140,7 @@ header {
     transition: all var(--transition-smooth);
 }
 
-.primary-nav .menu>li>a.current:hover {
+.primary-nav .menu>li>a.current:active {
     background: var(--accent-red-hover);
 }
 
@@ -135,6 +159,7 @@ header {
     text-decoration: none;
     transition: all var(--transition);
     touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
 }
 
 .primary-nav .menu>li .nav-account-icon {
@@ -157,7 +182,15 @@ header {
     stroke-linejoin: round;
 }
 
-.primary-nav .menu>li>.nav-account-cta-btn:hover {
+@media (hover: hover) and (pointer: fine) {
+    .primary-nav .menu>li>.nav-account-cta-btn:hover {
+        background: var(--accent-red-hover-transparent);
+        color: #fff;
+        transform: translateY(-2px);
+    }
+}
+
+.primary-nav .menu>li>.nav-account-cta-btn:active {
     background: var(--accent-red-hover-transparent);
     color: #fff;
     transform: translateY(-2px);
@@ -187,9 +220,16 @@ header {
     z-index: 1001;
     transition: background var(--transition-smooth);
     touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
 }
 
-.hamburger:hover {
+@media (hover: hover) and (pointer: fine) {
+    .hamburger:hover {
+        background: rgba(255, 255, 255, 0.1);
+    }
+}
+
+.hamburger:active {
     background: rgba(255, 255, 255, 0.1);
 }
 
@@ -356,6 +396,7 @@ header {
         letter-spacing: 0.04em;
         text-align: center;
         text-decoration: none;
+        -webkit-tap-highlight-color: transparent;
     }
 
     .nav-mobile-profile {
@@ -366,6 +407,7 @@ header {
         max-width: 100%;
         color: var(--text-primary);
         text-decoration: none;
+        -webkit-tap-highlight-color: transparent;
     }
 
     .nav-mobile-profile-text {
